@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="./src/assets/LOGO1.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MunchkinKittie.com | Premium Munchkin Kittens</title>
+    
+    <style>
+      /* 1. BRAND VARIABLES */
+      :root {
+        --brand-green: #34A853; /* Healthy green like PuppySpot */
+        --brand-dark: #202124;
+        --bg-white: #ffffff;
+      }
+ 
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: var(--bg-white);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* 2. CLEAN PRELOADER */
+      #preloader {  
+        position: fixed;
+        inset: 0;
+        background: var(--bg-white);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.4s ease-out, visibility 0.4s;
+      }
+
+      .loader-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .ring {
+        width: 50px;
+        height: 50px;
+        border: 3px solid #f0f0f0;
+        border-top: 3px solid var(--brand-green);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      /* 3. THE LOGO & TITLE (FLEX LAYOUT) */
+      /* This container keeps the Icon and Title perfectly aligned on one line */
+      .brand-header {
+        display: flex;
+        align-items: center; 
+        justify-content: center; 
+        gap: 12px; /* Tight gap like PuppySpot */
+        padding: 30px 20px;
+        background: var(--bg-white);
+      }
+
+ .logo-icon {
+  height: 50px;
+  width: auto;
+  display: block;
+  background: #fff;        /* adds white background */
+  padding: 6px;            /* breathing room like PuppySpot */
+  border-radius: 10px;     /* soft modern look */
+}
+
+      .website-title {
+        font-size: clamp(28px, 6vw, 40px); 
+        font-weight: 800;
+        color: var(--brand-dark);
+        margin: 0;
+        letter-spacing: -1.5px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+      }
+
+      .website-title span {
+        color: var(--brand-green);
+      }
+
+      .tld-ext {
+        font-size: 0.5em;
+        color: #999;
+        font-weight: 400;
+        margin-left: 2px;
+        align-self: flex-end;
+        padding-bottom: 4px;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      .loader-hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="preloader">
+      <div class="loader-content">
+        <div class="ring"></div>
+        <p style="color: var(--brand-green); font-weight: 700; font-size: 14px; letter-spacing: 1px;">MUNCHKINKITTIE.COM</p>
+      </div>
+    </div>
+
+
+
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.jsx"></script>
+
+    <script>
+      window.addEventListener('load', () => {
+        const loader = document.getElementById('preloader');
+        setTimeout(() => {
+          loader.classList.add('loader-hidden');
+        }, 600); 
+      });
+    </script>
+  </body>
+</html>
