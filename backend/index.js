@@ -22,24 +22,27 @@ const app = express();
 connectDB();
 
 
-// 🌍 CORS CONFIG (IMPORTANT)
+// 🌍 CORS CONFIG (FIXED + CLEAN)
 const allowedOrigins = [
-  process.env.FRONTEhttpND_URL, // production frontend
-  "www.munchkinkittie.com",  // dev (CRA)
-  "munchkinkittie.com",  // dev (Vite)
+  process.env.FRONTEND_URL, // from .env (Vercel frontend)
+  "https://www.munchkinkittie.com",
+  "https://munchkinkittie.com",
+  "http://localhost:5173"
 ];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like Postman)
+    origin: (origin, callback) => {
+      // Allow Postman / server-to-server
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      // Match allowed origins
+      if (allowedOrigins.some((o) => origin === o)) {
         return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
       }
+
+      console.log("❌ Blocked by CORS:", origin);
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
@@ -51,9 +54,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-// 🔥 GLOBAL LOGGER
+// 🔥 GLOBAL LOGGER (helps debugging on Railway)
 app.use((req, res, next) => {
-  console.log("➡️", req.method, req.url);
+  console.log(`➡️ ${req.method} ${req.url}`);
   next();
 });
 
@@ -71,13 +74,13 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/notifications", notificationRoutes);
 
 
-// 🧪 Test route
+// 🧪 Health Check Route (IMPORTANT for Railway)
 app.get("/", (req, res) => {
   res.send("API running...");
 });
 
 
-// ❌ GLOBAL ERROR HANDLER (VERY IMPORTANT)
+// ❌ GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error("❌ ERROR:", err.message);
 
