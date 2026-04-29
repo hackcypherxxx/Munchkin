@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
-import { getNotifications } from '../features/notification/notificationSlice'; // Adjust path if needed
+import { getNotifications } from '../features/notification/notificationSlice'; 
 import LogoImg from '../assets/LOGO1.png'; 
 
 import { 
@@ -32,14 +32,17 @@ function cn(...inputs) {
 }
 
 const springTransition = { type: 'spring', damping: 25, stiffness: 200, mass: 0.5 };
+
+// Updated slide animation for the new full-height side drawer
 const menuSlide = {
   initial: { x: "100%" },
   animate: { x: 0, transition: { type: 'spring', damping: 30, stiffness: 300 } },
-  exit: { x: "100%", transition: { type: 'spring', damping: 30, stiffness: 300, delay: 0.2 } }
+  exit: { x: "100%", transition: { type: 'spring', damping: 30, stiffness: 300 } }
 };
 
 const Navbar = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -70,9 +73,21 @@ const Navbar = () => {
 
   // Prevent scroll when mobile menu is open
   useEffect(() => {
-    if (mobileMenuOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = 'unset';
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [mobileMenuOpen]);
+
+  // Close mobile menu automatically on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const navData = [
     { 
@@ -82,7 +97,7 @@ const Navbar = () => {
       dropdown: [
         { name: 'Available Kittens', path: '/available-kittens', desc: 'Ready for forever homes', icon: <Medal /> },
         { name: 'Retired Adults', path: '/retired-adults', desc: 'Legacy cats for adoption', icon: <Heart /> },
-        { name: 'Upcoming Litters', path: '/upcoming-litters', desc: 'Reserve your spot', icon: <CalendarDays /> }
+        { name: 'Upcoming Litters', path: '/upcoming', desc: 'Reserve your spot', icon: <CalendarDays /> }
       ]
     },
     { 
@@ -109,14 +124,15 @@ const Navbar = () => {
 
  return (
   <LayoutGroup>
+    {/* --- DESKTOP & MOBILE TOP BAR --- */}
     <nav className={cn(
       "fixed top-0 w-full z-[100] transition-all duration-500",
-      isScrolled ? "py-2 bg-white/80 backdrop-blur-2xl border-b border-zinc-200/50 shadow-sm" : "py-4 bg-white"
+      isScrolled ? "py-3 bg-white/90 backdrop-blur-2xl border-b border-zinc-200/50 shadow-sm" : "py-5 bg-white"
     )}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         
         {/* BRAND IDENTITY */}
-       <Link to="/" className="flex items-center gap-2 group cursor-pointer">
+       <Link to="/" className="flex items-center gap-2 group cursor-pointer z-50">
           <motion.div 
             whileHover={{ scale: 1.1, rotate: -5 }}
             transition={springTransition}
@@ -189,39 +205,41 @@ const Navbar = () => {
 
           {/* UTILITY ACTIONS */}
           <div className="flex items-center gap-3 relative" ref={notificationRef}>
+            
+            {/* Notification Bell */}
             <motion.button 
               whileHover={{ scale: 1.1 }} 
               onClick={() => setShowNotifications(!showNotifications)}
               className={cn(
-                "relative p-2.5 transition-all rounded-full",
-                showNotifications ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-900"
+                "relative p-3 transition-all rounded-full",
+                showNotifications ? "bg-zinc-900 text-white" : "bg-zinc-50 md:bg-transparent text-zinc-500 hover:text-zinc-900"
               )}
             >
               <Bell size={20} />
-              {notifications.length > 0 && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-green-500 rounded-full border-2 border-white animate-pulse" />
+              {notifications?.length > 0 && (
+                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white animate-pulse" />
               )}
             </motion.button>
 
-            {/* NOTIFICATION PANEL */}
+            {/* NOTIFICATION PANEL (Desktop & Mobile Dropdown) */}
             <AnimatePresence>
               {showNotifications && (
                 <motion.div
                   initial={{ opacity: 0, y: 20, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-4 w-[350px] bg-white border border-zinc-100 shadow-[0_30px_60px_rgba(0,0,0,0.12)] rounded-[35px] overflow-hidden z-[110]"
+                  className="absolute top-[120%] right-0 w-[calc(100vw-32px)] sm:w-[380px] bg-white border border-zinc-100 shadow-[0_30px_60px_rgba(0,0,0,0.12)] rounded-[35px] overflow-hidden z-[110]"
                 >
                   <div className="p-6 border-b border-zinc-50 flex justify-between items-center bg-zinc-50/50">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Broadcasts</p>
                       <h4 className="text-lg font-black italic uppercase tracking-tighter">Activity Feed</h4>
                     </div>
-                    <span className="bg-zinc-900 text-white text-[9px] font-black px-3 py-1 rounded-full">{notifications.length} NEW</span>
+                    <span className="bg-zinc-900 text-white text-[9px] font-black px-3 py-1 rounded-full">{notifications?.length || 0} NEW</span>
                   </div>
 
                   <div className="max-h-[400px] overflow-y-auto p-2 space-y-1">
-                    {notifications.length > 0 ? (
+                    {notifications?.length > 0 ? (
                       notifications.map((n) => (
                         <div key={n._id} className="group flex gap-4 p-4 hover:bg-zinc-50 rounded-[24px] transition-all cursor-default">
                           <div className="w-12 h-12 rounded-2xl overflow-hidden bg-zinc-100 flex-shrink-0">
@@ -232,7 +250,7 @@ const Navbar = () => {
                             <p className="text-[10px] font-bold text-zinc-400 leading-snug line-clamp-2 mb-2">{n.description}</p>
                             <div className="flex items-center gap-2 text-zinc-300">
                                <Clock size={10} />
-                               <span className="text-[8px] font-black uppercase tracking-widest">Just Now</span>
+                               <span className="text-[8px] font-black uppercase tracking-widest">System Alert</span>
                             </div>
                           </div>
                         </div>
@@ -247,10 +265,10 @@ const Navbar = () => {
                     )}
                   </div>
                   
-                  {notifications.length > 0 && (
+                  {notifications?.length > 0 && (
                     <div className="p-4 bg-zinc-50/50 border-t border-zinc-50">
                       <button onClick={() => setShowNotifications(false)} className="w-full py-3 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 transition-colors">
-                        Clear Broadcasts
+                        Close Broadcasts
                       </button>
                     </div>
                   )}
@@ -258,76 +276,116 @@ const Navbar = () => {
               )}
             </AnimatePresence>
             
-            <Link to="/available-kittens" className="hidden lg:flex bg-zinc-950 text-white px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-all active:scale-95">
+            {/* Desktop Action Button */}
+            <Link to="/available-kittens" className="hidden lg:flex bg-zinc-950 text-white px-8 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-all active:scale-95">
               Find My Kitten
             </Link>
 
-            <button onClick={() => setMobileMenuOpen(true)} className="md:hidden p-2 text-zinc-900">
-              <Menu size={28} />
+            {/* Mobile Hamburger Trigger */}
+            <button 
+              onClick={() => setMobileMenuOpen(true)} 
+              className="md:hidden p-3 bg-zinc-50 rounded-full text-zinc-900 hover:bg-zinc-100 transition-colors"
+            >
+              <Menu size={20} />
             </button>
           </div>
         </div>
-
-        {/* MOBILE MENU */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-zinc-950/40 backdrop-blur-md z-[150]" onClick={() => setMobileMenuOpen(false)} />
-              <motion.div variants={menuSlide} initial="initial" animate="animate" exit="exit" className="fixed top-4 right-4 bottom-4 w-[92%] max-w-[400px] bg-white rounded-[40px] z-[200] shadow-3xl overflow-hidden flex flex-col">
-                
-                <div className="p-8 flex justify-between items-center border-b border-zinc-50">
-                  <div className="flex items-center gap-2">
-                    <img src={LogoImg} alt="Logo" className="w-8 h-8 object-contain mix-blend-multiply" />
-                    <span className="font-black text-xl tracking-tighter uppercase">Menu</span>
-                  </div>
-                  <button onClick={() => setMobileMenuOpen(false)} className="p-3 bg-zinc-50 rounded-full text-zinc-400"><X size={20} /></button>
-                </div>
-
-                <div className="flex-1 p-6 overflow-y-auto space-y-6">
-                  {/* Featured Mobile Action */}
-                  <Link to="/available-kittens" onClick={() => setMobileMenuOpen(false)} className="block bg-green-600 p-8 rounded-[32px] text-white shadow-xl shadow-green-100">
-                      <Cat size={32} className="mb-4 text-white/50" />
-                      <p className="text-2xl font-black tracking-tighter leading-none mb-1">Browse Nursery</p>
-                      <p className="text-green-100 text-[10px] font-black uppercase tracking-widest opacity-80">Find Your Soulmate</p>
-                  </Link>
-                  
-                  {/* Nav List */}
-                  <div className="space-y-1">
-                    {navData.map((link) => (
-                      <div key={link.name} className="space-y-1">
-                        <NavLink 
-                          to={link.path} 
-                          onClick={() => !link.dropdown && setMobileMenuOpen(false)}
-                          className="flex items-center justify-between p-5 hover:bg-zinc-50 rounded-2xl group transition-all"
-                        >
-                          <span className="font-black uppercase tracking-widest text-xs text-zinc-900">{link.name}</span>
-                          <ChevronRight size={16} className="text-zinc-300" />
-                        </NavLink>
-                        
-                        {link.dropdown && (
-                            <div className="pl-6 space-y-1 border-l-2 border-zinc-50 ml-5">
-                                {link.dropdown.map(sub => (
-                                    <Link key={sub.name} to={sub.path} onClick={() => setMobileMenuOpen(false)} className="block p-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:text-green-600">
-                                        {sub.name}
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="p-8 mt-auto">
-                  <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="w-full bg-zinc-950 text-white py-5 rounded-[24px] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3">
-                    Contact Concierge <ArrowRight size={18} />
-                  </Link>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </nav>
+
+      {/* --- MOBILE MENU (PORTALED OUTSIDE NAV HIERARCHY) --- */}
+      {/* FIX: Placed completely outside the <nav> element so it isn't affected 
+        by scroll transforms, padding changes, or CSS clipping bugs on mobile.
+      */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-[9999] isolate">
+            
+            {/* BACKDROP BLUR */}
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md" 
+              onClick={() => setMobileMenuOpen(false)} 
+            />
+            
+            {/* SIDE DRAWER PANEL */}
+            <motion.div 
+              variants={menuSlide} 
+              initial="initial" 
+              animate="animate" 
+              exit="exit" 
+              className="absolute top-0 right-0 h-[100dvh] w-[88%] max-w-[400px] bg-white shadow-2xl flex flex-col"
+            >
+              {/* Drawer Header */}
+              <div className="p-6 md:p-8 flex justify-between items-center border-b border-zinc-100">
+                <div className="flex items-center gap-3">
+                  <img src={LogoImg} alt="Logo" className="w-8 h-8 object-contain mix-blend-multiply" />
+                  <span className="font-black text-xl tracking-tighter uppercase">Menu</span>
+                </div>
+                <button 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="p-3 bg-zinc-50 rounded-full text-zinc-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Drawer Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-32">
+                
+                {/* Featured Mobile Action */}
+                <Link to="/available-kittens" onClick={() => setMobileMenuOpen(false)} className="block bg-green-600 p-8 rounded-[32px] text-white shadow-xl shadow-green-100/50">
+                    <Cat size={32} className="mb-4 text-white/50" />
+                    <p className="text-2xl font-black tracking-tighter leading-none mb-2">Browse Nursery</p>
+                    <p className="text-green-100 text-[10px] font-black uppercase tracking-widest opacity-90">Find Your Soulmate</p>
+                </Link>
+                
+                {/* Nav List */}
+                <div className="space-y-2">
+                  {navData.map((link) => (
+                    <div key={link.name} className="space-y-1">
+                      <NavLink 
+                        to={link.path} 
+                        onClick={() => !link.dropdown && setMobileMenuOpen(false)}
+                        className="flex items-center justify-between p-5 hover:bg-zinc-50 rounded-2xl group transition-all"
+                      >
+                        <span className="font-black uppercase tracking-widest text-xs text-zinc-900 flex items-center gap-3">
+                          <span className="text-zinc-300">{link.icon}</span>
+                          {link.name}
+                        </span>
+                        <ChevronRight size={16} className="text-zinc-300" />
+                      </NavLink>
+                      
+                      {link.dropdown && (
+                          <div className="pl-[52px] space-y-1 border-l-2 border-zinc-50 ml-7 mb-4">
+                              {link.dropdown.map(sub => (
+                                  <Link 
+                                    key={sub.name} 
+                                    to={sub.path} 
+                                    onClick={() => setMobileMenuOpen(false)} 
+                                    className="block p-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest hover:text-green-600 transition-colors"
+                                  >
+                                      {sub.name}
+                                  </Link>
+                              ))}
+                          </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Drawer Sticky Footer */}
+              <div className="absolute bottom-0 inset-x-0 p-6 bg-white border-t border-zinc-100 z-10 pb-[max(env(safe-area-inset-bottom),24px)]">
+                <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="w-full bg-zinc-950 text-white py-6 rounded-[24px] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-transform">
+                  Contact Concierge <ArrowRight size={18} />
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </LayoutGroup>
   );
 };
