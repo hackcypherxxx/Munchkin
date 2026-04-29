@@ -24,9 +24,9 @@ connectDB();
 
 // 🌍 CORS CONFIG (IMPORTANT)
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // production frontend
-  "http://localhost:3000",  // dev (CRA)
-  "http://localhost:5173",  // dev (Vite)
+  process.env.FRONTEhttpND_URL, // production frontend
+  "www.munchkinkittie.com",  // dev (CRA)
+  "munchkinkittie.com",  // dev (Vite)
 ];
 
 app.use(
