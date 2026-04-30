@@ -7,7 +7,7 @@ export const sendAdminMessage = createAsyncThunk(
   "adminContact/send",
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await api.post("/admin-contact/send", formData);
+      const res = await api.post("/admin/contact/send", formData);
       return res.data;
     } catch (error) {
       return rejectWithValue(

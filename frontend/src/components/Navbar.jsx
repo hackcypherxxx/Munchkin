@@ -2,17 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
-import { getNotifications } from '../features/notification/notificationSlice'; 
-import LogoImg from '../assets/LOGO1.png'; 
+import { getNotifications } from '../features/notification/notificationSlice';
+import LogoImg from '../assets/LOGO1.png';
 
-import { 
-  ChevronRight, 
-  Menu, 
-  X, 
-  Bell, 
-  Cat, 
-  Sparkles, 
-  Heart, 
+import {
+  ChevronRight,
+  Menu,
+  X,
+  Bell,
+  Cat,
+  Sparkles,
+  Heart,
   BookOpenCheck,
   Package,
   CalendarDays,
@@ -22,7 +22,7 @@ import {
   Info,
   Mail,
   Zap,
-  Clock
+  Clock,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -33,11 +33,10 @@ function cn(...inputs) {
 
 const springTransition = { type: 'spring', damping: 25, stiffness: 200, mass: 0.5 };
 
-// Updated slide animation for the new full-height side drawer
 const menuSlide = {
-  initial: { x: "100%" },
+  initial: { x: '100%' },
   animate: { x: 0, transition: { type: 'spring', damping: 30, stiffness: 300 } },
-  exit: { x: "100%", transition: { type: 'spring', damping: 30, stiffness: 300 } }
+  exit: { x: '100%', transition: { type: 'spring', damping: 30, stiffness: 300 } },
 };
 
 const Navbar = () => {
@@ -48,16 +47,14 @@ const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef(null);
-  
-  // REDUX DATA
+
   const { notifications } = useSelector((state) => state.notification);
 
   useEffect(() => {
     dispatch(getNotifications());
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
-    
-    // Close notifications on click outside
+
     const handleClickOutside = (e) => {
       if (notificationRef.current && !notificationRef.current.contains(e.target)) {
         setShowNotifications(false);
@@ -71,117 +68,132 @@ const Navbar = () => {
     };
   }, [dispatch]);
 
-  // Prevent scroll when mobile menu is open
+  // Prevent background scroll when mobile menu open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [mobileMenuOpen]);
 
-  // Close mobile menu automatically on route change
+  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
   const navData = [
-    { 
-      name: 'Nursery', 
+    {
+      name: 'Nursery',
       path: '/available-kittens',
-      icon: <Cat size={18} />, 
+      icon: <Cat size={18} />,
       dropdown: [
         { name: 'Available Kittens', path: '/available-kittens', desc: 'Ready for forever homes', icon: <Medal /> },
         { name: 'Retired Adults', path: '/retired-adults', desc: 'Legacy cats for adoption', icon: <Heart /> },
-        { name: 'Upcoming Litters', path: '/upcoming', desc: 'Reserve your spot', icon: <CalendarDays /> }
-      ]
+        { name: 'Upcoming Litters', path: '/upcoming', desc: 'Reserve your spot', icon: <CalendarDays /> },
+      ],
     },
-    { 
-        name: 'Process', 
-        path: '/vetting-process',
-        icon: <BookOpenCheck size={18} />,
-        dropdown: [
-            { name: 'The Vetting Process', path: '/vetting-process', desc: 'How we ensure health', icon: <ShieldCheck /> },
-            { name: 'Health Guarantee', path: '/health', desc: 'Our 2-year warranty', icon: <ShieldCheck /> },
-            { name: 'Pricing & Deposit', path: '/pricing-deposit', desc: 'Investment & Terms', icon: <Info /> }
-        ]
-    },
-    { 
-      name: 'Resources', 
-      path: '/care-guide',
-      icon: <Sparkles size={18} />, 
+    {
+      name: 'Process',
+      path: '/vetting-process',
+      icon: <BookOpenCheck size={18} />,
       dropdown: [
+        { name: 'The Vetting Process', path: '/vetting-process', desc: 'How we ensure health', icon: <ShieldCheck /> },
+        { name: 'Health Guarantee', path: '/health', desc: 'Our 2-year warranty', icon: <ShieldCheck /> },
+        { name: 'Pricing & Deposit', path: '/pricing-deposit', desc: 'Investment & Terms', icon: <Info /> },
+      ],
+    },
+    {
+      name: 'Resources',
+      path: '/care-guide',
+      icon: <Sparkles size={18} />,
+      dropdown: [
+        {name:'Client Testimonials', path:'/reviews', desc:'Hear from happy adopters', icon:<Info />},
         { name: 'Care Guide', path: '/care-guide', desc: 'Munchkin health 101', icon: <Cat /> },
-        { name: 'Shipping & Delivery', path: '/shipping', desc: 'Safe travel info', icon: <Package /> }
-      ]
+        { name: 'Shipping & Delivery', path: '/shipping', desc: 'Safe travel info', icon: <Package /> },
+      ],
     },
     { name: 'Contact', path: '/contact', icon: <Mail size={18} /> },
   ];
 
- return (
-  <LayoutGroup>
-    {/* --- DESKTOP & MOBILE TOP BAR --- */}
-    <nav className={cn(
-      "fixed top-0 w-full z-[100] transition-all duration-500",
-      isScrolled ? "py-3 bg-white/90 backdrop-blur-2xl border-b border-zinc-200/50 shadow-sm" : "py-5 bg-white"
-    )}>
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        
-        {/* BRAND IDENTITY */}
-       <Link to="/" className="flex items-center gap-2 group cursor-pointer z-50">
-          <motion.div 
-            whileHover={{ scale: 1.1, rotate: -5 }}
-            transition={springTransition}
-            className="relative flex items-center justify-center w-12 h-12 overflow-hidden"
-          >
-              <img 
-                src={LogoImg} 
-                alt="MunchkinKittie" 
-                className="w-full h-full scale-150 object-contain mix-blend-multiply" 
+  return (
+    <LayoutGroup>
+      {/* --- DESKTOP & MOBILE TOP BAR --- */}
+      <nav
+        className={cn(
+          'fixed top-0 w-full z-[100] transition-all duration-500',
+          isScrolled
+            ? 'py-3 bg-white/90 backdrop-blur-2xl border-b border-zinc-200/50 shadow-sm'
+            : 'py-5 bg-white'
+        )}
+      >
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          {/* BRAND */}
+          <Link to="/" className="flex items-center gap-2 group cursor-pointer z-50">
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: -5 }}
+              transition={springTransition}
+              className="relative flex items-center justify-center w-12 h-12 overflow-hidden"
+            >
+              <img
+                src={LogoImg}
+                alt="MunchkinKittie"
+                className="w-full h-full scale-150 object-contain mix-blend-multiply"
               />
-          </motion.div>
-          <h1 className="text-2xl font-black tracking-tighter text-zinc-900 flex items-center">
-            Munchkin<span className="text-green-600">Kittie</span>
-          </h1>
-        </Link>
+            </motion.div>
+            <h1 className="text-2xl font-black tracking-tighter text-zinc-900 flex items-center">
+              Munchkin<span className="text-green-600">Kittie</span>
+            </h1>
+          </Link>
 
           {/* DESKTOP LINKS */}
           <div className="hidden md:flex items-center gap-1 px-2 py-1 bg-zinc-50/50 rounded-full border border-zinc-200/20">
             {navData.map((link) => (
-              <div 
-                key={link.name} 
-                className="relative" 
-                onMouseEnter={() => setActiveDropdown(link.name)} 
+              <div
+                key={link.name}
+                className="relative"
+                onMouseEnter={() => setActiveDropdown(link.name)}
                 onMouseLeave={() => setActiveDropdown(null)}
               >
-                <NavLink 
+                <NavLink
                   to={link.path}
-                  className={({ isActive }) => cn(
-                    "px-5 py-2 text-[13px] font-black uppercase tracking-widest transition-all rounded-full flex items-center gap-1",
-                    isActive ? "bg-white text-green-600 shadow-sm" : "text-zinc-500 hover:text-zinc-900",
-                    activeDropdown === link.name && "text-green-600"
-                  )}
+                  className={({ isActive }) =>
+                    cn(
+                      'px-5 py-2 text-[13px] font-black uppercase tracking-widest transition-all rounded-full flex items-center gap-1',
+                      isActive
+                        ? 'bg-white text-green-600 shadow-sm'
+                        : 'text-zinc-500 hover:text-zinc-900',
+                      activeDropdown === link.name && 'text-green-600'
+                    )
+                  }
                 >
                   {link.name}
-                  {link.dropdown && <ChevronRight size={12} className={cn("transition-transform duration-300 opacity-50", activeDropdown === link.name && "rotate-90 opacity-100")} />}
+                  {link.dropdown && (
+                    <ChevronRight
+                      size={12}
+                      className={cn(
+                        'transition-transform duration-300 opacity-50',
+                        activeDropdown === link.name && 'rotate-90 opacity-100'
+                      )}
+                    />
+                  )}
                 </NavLink>
 
                 <AnimatePresence>
                   {link.dropdown && activeDropdown === link.name && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 10 }} 
-                        animate={{ opacity: 1, y: 0 }} 
-                        exit={{ opacity: 0, y: 10 }} 
-                        className="absolute top-full left-0 pt-4"
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute top-full left-0 pt-4"
                     >
                       <div className="bg-white border border-zinc-100 shadow-2xl rounded-[32px] p-2 min-w-[300px]">
                         {link.dropdown.map((item) => (
-                          <Link 
-                            key={item.name} 
+                          <Link
+                            key={item.name}
                             to={item.path}
                             onClick={() => setActiveDropdown(null)}
                             className="flex items-center gap-4 p-3 hover:bg-zinc-50 rounded-2xl transition-colors group/item"
@@ -190,8 +202,12 @@ const Navbar = () => {
                               {React.cloneElement(item.icon, { size: 16 })}
                             </div>
                             <div>
-                              <p className="text-[11px] font-black uppercase tracking-tight text-zinc-900">{item.name}</p>
-                              <p className="text-[10px] text-zinc-400 font-bold leading-tight">{item.desc}</p>
+                              <p className="text-[11px] font-black uppercase tracking-tight text-zinc-900">
+                                {item.name}
+                              </p>
+                              <p className="text-[10px] text-zinc-400 font-bold leading-tight">
+                                {item.desc}
+                              </p>
                             </div>
                           </Link>
                         ))}
@@ -205,14 +221,15 @@ const Navbar = () => {
 
           {/* UTILITY ACTIONS */}
           <div className="flex items-center gap-3 relative" ref={notificationRef}>
-            
-            {/* Notification Bell */}
-            <motion.button 
-              whileHover={{ scale: 1.1 }} 
+            {/* NOTIFICATION BELL */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
               onClick={() => setShowNotifications(!showNotifications)}
               className={cn(
-                "relative p-3 transition-all rounded-full",
-                showNotifications ? "bg-zinc-900 text-white" : "bg-zinc-50 md:bg-transparent text-zinc-500 hover:text-zinc-900"
+                'relative p-3 transition-all rounded-full',
+                showNotifications
+                  ? 'bg-zinc-900 text-white'
+                  : 'bg-zinc-50 md:bg-transparent text-zinc-500 hover:text-zinc-900'
               )}
             >
               <Bell size={20} />
@@ -221,36 +238,56 @@ const Navbar = () => {
               )}
             </motion.button>
 
-            {/* NOTIFICATION PANEL (Desktop & Mobile Dropdown) */}
+            {/* NOTIFICATION PANEL – NOW WITH FULL TEXT */}
             <AnimatePresence>
               {showNotifications && (
                 <motion.div
                   initial={{ opacity: 0, y: 20, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                  className="absolute top-[120%] right-0 w-[calc(100vw-32px)] sm:w-[380px] bg-white border border-zinc-100 shadow-[0_30px_60px_rgba(0,0,0,0.12)] rounded-[35px] overflow-hidden z-[110]"
+                  className="absolute top-[120%] right-0 w-[calc(100vw-32px)] sm:w-[420px] bg-white border border-zinc-100 shadow-[0_30px_60px_rgba(0,0,0,0.12)] rounded-[35px] overflow-hidden z-[110]"
                 >
                   <div className="p-6 border-b border-zinc-50 flex justify-between items-center bg-zinc-50/50">
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Broadcasts</p>
-                      <h4 className="text-lg font-black italic uppercase tracking-tighter">Activity Feed</h4>
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+                        Broadcasts
+                      </p>
+                      <h4 className="text-lg font-black italic uppercase tracking-tighter">
+                        Activity Feed
+                      </h4>
                     </div>
-                    <span className="bg-zinc-900 text-white text-[9px] font-black px-3 py-1 rounded-full">{notifications?.length || 0} NEW</span>
+                    <span className="bg-zinc-900 text-white text-[9px] font-black px-3 py-1 rounded-full">
+                      {notifications?.length || 0} NEW
+                    </span>
                   </div>
 
-                  <div className="max-h-[400px] overflow-y-auto p-2 space-y-1">
+                  <div className="max-h-[400px] overflow-y-auto p-4 space-y-2">
                     {notifications?.length > 0 ? (
                       notifications.map((n) => (
-                        <div key={n._id} className="group flex gap-4 p-4 hover:bg-zinc-50 rounded-[24px] transition-all cursor-default">
+                        <div
+                          key={n._id}
+                          className="flex gap-4 p-4 hover:bg-zinc-50 rounded-[24px] transition-all"
+                        >
                           <div className="w-12 h-12 rounded-2xl overflow-hidden bg-zinc-100 flex-shrink-0">
-                            <img src={n.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt="" />
+                            <img
+                              src={n.image}
+                              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                              alt=""
+                            />
                           </div>
-                          <div className="flex-1">
-                            <h5 className="text-[11px] font-black uppercase tracking-tight text-zinc-900 leading-tight mb-1">{n.title}</h5>
-                            <p className="text-[10px] font-bold text-zinc-400 leading-snug line-clamp-2 mb-2">{n.description}</p>
-                            <div className="flex items-center gap-2 text-zinc-300">
-                               <Clock size={10} />
-                               <span className="text-[8px] font-black uppercase tracking-widest">System Alert</span>
+                          <div className="flex-1 min-w-0">
+                            <h5 className="text-[11px] font-black uppercase tracking-tight text-zinc-900 leading-tight mb-1 break-words">
+                              {n.title}
+                            </h5>
+                            {/* Description now shows full text without ellipsis */}
+                            <p className="text-[10px] font-bold text-zinc-400 leading-relaxed whitespace-pre-wrap break-words">
+                              {n.description}
+                            </p>
+                            <div className="flex items-center gap-2 text-zinc-300 mt-2">
+                              <Clock size={10} />
+                              <span className="text-[8px] font-black uppercase tracking-widest">
+                                System Alert
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -258,16 +295,21 @@ const Navbar = () => {
                     ) : (
                       <div className="p-12 text-center">
                         <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-200">
-                           <Zap size={24} />
+                          <Zap size={24} />
                         </div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">All caught up</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                          All caught up
+                        </p>
                       </div>
                     )}
                   </div>
-                  
+
                   {notifications?.length > 0 && (
                     <div className="p-4 bg-zinc-50/50 border-t border-zinc-50">
-                      <button onClick={() => setShowNotifications(false)} className="w-full py-3 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 transition-colors">
+                      <button
+                        onClick={() => setShowNotifications(false)}
+                        className="w-full py-3 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 transition-colors"
+                      >
                         Close Broadcasts
                       </button>
                     </div>
@@ -275,15 +317,18 @@ const Navbar = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-            
-            {/* Desktop Action Button */}
-            <Link to="/available-kittens" className="hidden lg:flex bg-zinc-950 text-white px-8 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-all active:scale-95">
+
+            {/* DESKTOP CTA */}
+            <Link
+              to="/available-kittens"
+              className="hidden lg:flex bg-zinc-950 text-white px-8 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-all active:scale-95"
+            >
               Find My Kitten
             </Link>
 
-            {/* Mobile Hamburger Trigger */}
-            <button 
-              onClick={() => setMobileMenuOpen(true)} 
+            {/* MOBILE HAMBURGER */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
               className="md:hidden p-3 bg-zinc-50 rounded-full text-zinc-900 hover:bg-zinc-100 transition-colors"
             >
               <Menu size={20} />
@@ -292,61 +337,61 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* --- MOBILE MENU (PORTALED OUTSIDE NAV HIERARCHY) --- */}
-      {/* FIX: Placed completely outside the <nav> element so it isn't affected 
-        by scroll transforms, padding changes, or CSS clipping bugs on mobile.
-      */}
+      {/* MOBILE MENU (outside nav for isolation) */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-[9999] isolate">
-            
-            {/* BACKDROP BLUR */}
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md" 
-              onClick={() => setMobileMenuOpen(false)} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md"
+              onClick={() => setMobileMenuOpen(false)}
             />
-            
-            {/* SIDE DRAWER PANEL */}
-            <motion.div 
-              variants={menuSlide} 
-              initial="initial" 
-              animate="animate" 
-              exit="exit" 
+            <motion.div
+              variants={menuSlide}
+              initial="initial"
+              animate="animate"
+              exit="exit"
               className="absolute top-0 right-0 h-[100dvh] w-[88%] max-w-[400px] bg-white shadow-2xl flex flex-col"
             >
-              {/* Drawer Header */}
               <div className="p-6 md:p-8 flex justify-between items-center border-b border-zinc-100">
                 <div className="flex items-center gap-3">
-                  <img src={LogoImg} alt="Logo" className="w-8 h-8 object-contain mix-blend-multiply" />
+                  <img
+                    src={LogoImg}
+                    alt="Logo"
+                    className="w-8 h-8 object-contain mix-blend-multiply"
+                  />
                   <span className="font-black text-xl tracking-tighter uppercase">Menu</span>
                 </div>
-                <button 
-                  onClick={() => setMobileMenuOpen(false)} 
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
                   className="p-3 bg-zinc-50 rounded-full text-zinc-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              {/* Drawer Scrollable Content */}
               <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-32">
-                
-                {/* Featured Mobile Action */}
-                <Link to="/available-kittens" onClick={() => setMobileMenuOpen(false)} className="block bg-green-600 p-8 rounded-[32px] text-white shadow-xl shadow-green-100/50">
-                    <Cat size={32} className="mb-4 text-white/50" />
-                    <p className="text-2xl font-black tracking-tighter leading-none mb-2">Browse Nursery</p>
-                    <p className="text-green-100 text-[10px] font-black uppercase tracking-widest opacity-90">Find Your Soulmate</p>
+                <Link
+                  to="/available-kittens"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block bg-green-600 p-8 rounded-[32px] text-white shadow-xl shadow-green-100/50"
+                >
+                  <Cat size={32} className="mb-4 text-white/50" />
+                  <p className="text-2xl font-black tracking-tighter leading-none mb-2">
+                    Browse Nursery
+                  </p>
+                  <p className="text-green-100 text-[10px] font-black uppercase tracking-widest opacity-90">
+                    Find Your Soulmate
+                  </p>
                 </Link>
-                
-                {/* Nav List */}
+
                 <div className="space-y-2">
                   {navData.map((link) => (
                     <div key={link.name} className="space-y-1">
-                      <NavLink 
-                        to={link.path} 
+                      <NavLink
+                        to={link.path}
                         onClick={() => !link.dropdown && setMobileMenuOpen(false)}
                         className="flex items-center justify-between p-5 hover:bg-zinc-50 rounded-2xl group transition-all"
                       >
@@ -356,29 +401,31 @@ const Navbar = () => {
                         </span>
                         <ChevronRight size={16} className="text-zinc-300" />
                       </NavLink>
-                      
                       {link.dropdown && (
-                          <div className="pl-[52px] space-y-1 border-l-2 border-zinc-50 ml-7 mb-4">
-                              {link.dropdown.map(sub => (
-                                  <Link 
-                                    key={sub.name} 
-                                    to={sub.path} 
-                                    onClick={() => setMobileMenuOpen(false)} 
-                                    className="block p-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest hover:text-green-600 transition-colors"
-                                  >
-                                      {sub.name}
-                                  </Link>
-                              ))}
-                          </div>
+                        <div className="pl-[52px] space-y-1 border-l-2 border-zinc-50 ml-7 mb-4">
+                          {link.dropdown.map((sub) => (
+                            <Link
+                              key={sub.name}
+                              to={sub.path}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className="block p-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest hover:text-green-600 transition-colors"
+                            >
+                              {sub.name}
+                            </Link>
+                          ))}
+                        </div>
                       )}
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Drawer Sticky Footer */}
               <div className="absolute bottom-0 inset-x-0 p-6 bg-white border-t border-zinc-100 z-10 pb-[max(env(safe-area-inset-bottom),24px)]">
-                <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="w-full bg-zinc-950 text-white py-6 rounded-[24px] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-transform">
+                <Link
+                  to="/contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full bg-zinc-950 text-white py-6 rounded-[24px] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-transform"
+                >
                   Contact Concierge <ArrowRight size={18} />
                 </Link>
               </div>
