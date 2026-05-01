@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom'; // ✅ already imported
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Heart, 
@@ -173,9 +174,13 @@ const RetiredAdults = () => {
 
                   {/* ACTIONS */}
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <button className="flex-[2] bg-zinc-950 text-white py-7 rounded-[30px] font-black text-[10px] uppercase tracking-[0.3em] hover:bg-green-600 transition-all shadow-2xl flex items-center justify-center gap-3 active:scale-[0.98]">
+                    {/* ✅ Updated “Initiate Adoption” button */}
+                    <Link
+                      to={`/apply?id=${cat._id}&type=retired&name=${encodeURIComponent(cat.name)}`}
+                      className="flex-[2] bg-zinc-950 text-white py-7 rounded-[30px] font-black text-[10px] uppercase tracking-[0.3em] hover:bg-green-600 transition-all shadow-2xl flex items-center justify-center gap-3 active:scale-[0.98]"
+                    >
                       Initiate Adoption <ArrowUpRight size={16} />
-                    </button>
+                    </Link>
 
                     <button className="flex-1 px-8 py-7 rounded-[30px] border border-zinc-200 text-zinc-950 font-black text-[10px] uppercase tracking-[0.3em] hover:bg-zinc-50 transition-all flex items-center justify-center gap-2">
                       <Camera size={16} /> Gallery
@@ -207,9 +212,13 @@ const RetiredAdults = () => {
                 Our retired adults provide a calm, established presence. Join the private waiting list for future legacies.
               </p>
               
-              <button className="px-16 py-7 bg-white text-zinc-950 rounded-[30px] font-black text-[11px] uppercase tracking-[0.4em] hover:bg-green-500 hover:text-white transition-all shadow-2xl active:scale-95">
+              {/* ✅ Link to application form with type=retired */}
+              <Link
+                to="/apply?type=retired"
+                className="inline-block px-16 py-7 bg-white text-zinc-950 rounded-[30px] font-black text-[11px] uppercase tracking-[0.4em] hover:bg-green-500 hover:text-white transition-all shadow-2xl active:scale-95"
+              >
                 Join The Mature Circle
-              </button>
+              </Link>
             </div>
 
             {/* Background elements */}

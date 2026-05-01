@@ -84,7 +84,7 @@ const UpcomingLitters = () => {
                     />
                   </div>
 
-                  {/* Status Badge (static since not in model) */}
+                  {/* Status Badge */}
                   <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 shadow-xl">
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-950 flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -126,8 +126,9 @@ const UpcomingLitters = () => {
 
                   {/* Actions */}
                   <div className="flex flex-wrap gap-6">
+                    {/* ✅ Updated link – passes upcoming litter's ID, type, and name */}
                     <Link 
-                      to="/contact"
+                      to={`/apply?id=${litter._id}&type=upcoming&name=${encodeURIComponent(litter.title)}`}
                       className="px-10 py-5 bg-zinc-950 text-white rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-green-600 transition-all shadow-xl shadow-zinc-200"
                     >
                       Join the Waitlist

@@ -1,20 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useParams, Link } from 'react-router-dom';
-import { useDispatch, useSelector } from "react-redux";
-import { getKittenById } from "../features/kitten/kittenSlice";
+import { useDispatch, useSelector } from 'react-redux';
+import { getKittenById } from '../features/kitten/kittenSlice';
 
-import { 
-  Heart, 
-  ChevronLeft, 
+import {
+  Heart,
+  ChevronLeft,
   Dna,
   Sparkles,
   Stethoscope,
   ShieldCheck,
-  Activity,
   ArrowUpRight,
   Info,
-  MapPin,
   CheckCircle2
 } from 'lucide-react';
 
@@ -43,12 +41,12 @@ const KittenDetail = () => {
     }
   };
 
-  // ✅ LOADING STATE (Brutalist style)
+  // ✅ LOADING STATE
   if (loading) {
     return (
       <div className="min-h-screen bg-[#fcfcfc] flex items-center justify-center">
-        <motion.div 
-          animate={{ opacity: [0.5, 1, 0.5] }} 
+        <motion.div
+          animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ repeat: Infinity, duration: 1.5 }}
           className="text-center"
         >
@@ -75,9 +73,35 @@ const KittenDetail = () => {
   // ⚠️ NO DATA
   if (!kitten) return null;
 
+  // 🚫 STATUS GUARD – block page for reserved/adopted kittens
+  const isAvailable = kitten.status?.toLowerCase() === 'available';
+
+  if (!isAvailable) {
+    return (
+      <div className="min-h-screen bg-[#fcfcfc] flex items-center justify-center p-6">
+        <div className="bg-amber-50 p-12 rounded-[48px] text-center max-w-md w-full shadow-sm">
+          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-8">
+            <Info size={32} className="text-amber-600" />
+          </div>
+          <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-4">No Longer Available</h2>
+          <p className="text-zinc-500 font-medium mb-8">
+            <span className="font-bold">{kitten.name}</span> has already found a loving home.
+            Please explore our other Munchkin companions.
+          </p>
+          <Link
+            to="/available-kittens"
+            className="inline-block px-8 py-4 bg-zinc-950 text-white rounded-[30px] font-black text-[11px] uppercase tracking-[0.3em] hover:bg-green-600 transition-all"
+          >
+            Back to Nursery
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ AVAILABLE – render full detail page
   return (
     <div className="bg-[#fcfcfc] min-h-screen text-zinc-950 font-sans selection:bg-zinc-950 selection:text-white pb-32 md:pb-40">
-
       {/* --- MOBILE TOP NAV --- */}
       <nav className="md:hidden fixed top-0 inset-x-0 z-50 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-2xl border-b border-zinc-100">
         <Link to="/available-kittens" className="w-10 h-10 bg-zinc-50 rounded-full flex items-center justify-center text-zinc-950 active:scale-90 transition-transform">
@@ -111,7 +135,7 @@ const KittenDetail = () => {
           </div>
         </motion.div>
 
-        {/* --- MOBILE HEADER (Visible only on small screens) --- */}
+        {/* --- MOBILE HEADER --- */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="md:hidden mb-8 mt-4 text-center">
            <div className="flex justify-center gap-2 mb-4">
               <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${kitten.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-zinc-100 text-zinc-400'}`}>
@@ -169,13 +193,16 @@ const KittenDetail = () => {
           {/* --- RIGHT: DATA & DETAILS --- */}
           <div className="w-full lg:w-1/2 space-y-16">
 
-            {/* Price & CTA (Desktop Only - Mobile has sticky bottom bar) */}
+            {/* Price & CTA (Desktop) */}
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="hidden md:block p-12 bg-zinc-950 text-white rounded-[50px] shadow-2xl relative overflow-hidden">
               <Sparkles size={120} className="absolute -right-10 -top-10 opacity-5" />
               <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-50 mb-3">Adoption Investment</p>
               <p className="text-7xl font-black italic tracking-tighter leading-none mb-8">${kitten.price}</p>
               <div className="flex gap-4">
-                 <Link to="/apply" className="flex-1 py-6 bg-white text-zinc-950 text-center rounded-[30px] font-black text-[11px] uppercase tracking-[0.4em] hover:scale-105 active:scale-95 transition-all">
+                 <Link 
+                   to={`/apply?id=${kitten._id}&type=kitten`}
+                   className="flex-1 py-6 bg-white text-zinc-950 text-center rounded-[30px] font-black text-[11px] uppercase tracking-[0.4em] hover:scale-105 active:scale-95 transition-all"
+                 >
                    Submit Application
                  </Link>
                  <Link to="/contact" className="w-20 h-20 bg-zinc-800 rounded-[30px] flex items-center justify-center text-white hover:bg-zinc-700 transition-colors">
@@ -258,20 +285,21 @@ const KittenDetail = () => {
                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Total Fee</p>
                <p className="text-3xl font-black italic tracking-tighter">${kitten.price}</p>
             </div>
-            <Link to="/apply" className="flex-1 py-5 bg-zinc-950 text-white text-center rounded-[25px] font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-transform shadow-xl">
+            <Link 
+              to={`/apply?id=${kitten._id}&type=kitten`}
+              className="flex-1 py-5 bg-zinc-950 text-white text-center rounded-[25px] font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-transform shadow-xl"
+            >
                Apply Now
             </Link>
          </div>
       </div>
       
-      {/* Spacer for mobile bottom nav */}
       <div className="h-32 md:hidden"></div>
-
     </div>
   );
 };
 
-// --- SUB COMPONENTS ---
+// --- SUB COMPONENTS (unchanged) ---
 
 const SectionLabel = ({ text, icon: Icon }) => (
   <div className="flex items-center gap-3 mb-8">

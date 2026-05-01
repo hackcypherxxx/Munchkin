@@ -64,7 +64,7 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { Icon: FiFacebook, href: activeSettings?.facebook || "https://facebook.com", isExternal: true },
+    { Icon: FiFacebook, href: activeSettings?.facebook || "https://www.facebook.com/profile.php?id=61589228033999", isExternal: true },
     { Icon: Mail, href: `mailto:${activeSettings?.email || "info@munchkinkittie.com"}`, isExternal: true }
   ];
 
