@@ -11,7 +11,7 @@ const TEXT_MUTED = "#6b7280";
 const BORDER_RADIUS = "24px";
 const ACCENT_GREEN = "#10b981";
 
-// Unified base template with a warmer header, softer details, and a rich footer
+// Unified base template
 const baseTemplate = (content, previewText = "") => `
   <!DOCTYPE html>
   <html lang="en">
@@ -51,7 +51,7 @@ const baseTemplate = (content, previewText = "") => `
         <!-- BODY -->
         ${content}
 
-        <!-- FOOTER – rich details about Munchkin Kittie -->
+        <!-- FOOTER -->
         <div style="margin-top:64px; padding-top:32px; border-top:1px solid #e5e7eb;">
           <p style="font-size:13px; line-height:1.7; color:${TEXT_MUTED}; margin:0 0 24px;">
             Munchkin Kittie is a trusted network connecting families with healthy, ethically bred Munchkin cats. Every kitten comes from a verified breeder who meets our strict health and care standards. We believe in transparency, love for every short‑legged soul, and matching the right companion with the right home.
@@ -60,7 +60,6 @@ const baseTemplate = (content, previewText = "") => `
             <strong>Munchkin Kittie HQ</strong>
           </p>
           <p style="font-size:11px; color:${TEXT_MUTED}; margin:0 0 24px; line-height:1.6;">
-            123 Feline Way, Purr City, CA 90210<br/>
             <a href="https://munchkinkittie.com" style="color:${BRAND_COLOR}; text-decoration:underline;">Visit our website</a> &nbsp;|&nbsp;
             <a href="https://munchkinkittie.com/contact" style="color:${BRAND_COLOR}; text-decoration:underline;">Contact us</a>
           </p>
@@ -127,7 +126,7 @@ export const sendContactEmail = async (data) => {
       <p style="margin:0; line-height:1.7; font-size:15px; color:#1e293b;">${message}</p>
     </div>
     <p style="font-size:13px; color:${TEXT_MUTED}; margin-top:24px;">
-      <a href="https://munchkinkittie.com/admin" style="color:${BRAND_COLOR}; font-weight:700;">Reply in admin panel</a>
+      <a href="https://munchkinkittie.com/admin-dashboard" style="color:${BRAND_COLOR}; font-weight:700;">Reply in admin dashboard</a>
     </p>
   `;
   await resend.emails.send({
@@ -163,7 +162,7 @@ export const sendAdminEmail = async ({ to, subject, message }) => {
   });
 };
 
-// 4. APPLICATION RECEIVED – NOW INCLUDES PAYMENT METHOD AND KITTEN NAME
+// 4. APPLICATION RECEIVED
 export const sendApplicationReceived = async ({ 
   email, 
   name, 
@@ -259,13 +258,12 @@ export const sendApplicationRejected = async (email, name) => {
   });
 };
 
-// 7. ADMIN NOTIFICATION – NOW INCLUDES KITTEN NAME
+// 7. ADMIN NOTIFICATION – LOCATION REMOVED, DASHBOARD LINK UPDATED
 export const sendApplicationAdminNotification = async (applicationData) => {
   const {
     fullName,
     email,
     phone,
-    location,
     paymentMethod,
     paymentMethodOther,
     applicationType,
@@ -284,9 +282,6 @@ export const sendApplicationAdminNotification = async (applicationData) => {
     <div style="background:#f8fafc; padding:32px; border-radius:16px; border:1px solid #e2e8f0;">
       <p style="margin:0 0 12px; font-size:10px; text-transform:uppercase; font-weight:900; color:${TEXT_MUTED}; letter-spacing:1.5px;">Applicant</p>
       <p style="margin:0 0 24px; font-weight:700; font-size:15px;">${fullName} (${email}) ${phone ? `– ${phone}` : ""}</p>
-      
-      <p style="margin:0 0 12px; font-size:10px; text-transform:uppercase; font-weight:900; color:${TEXT_MUTED}; letter-spacing:1.5px;">Location</p>
-      <p style="margin:0 0 24px; font-weight:700; font-size:15px;">${location || "Not provided"}</p>
       
       <p style="margin:0 0 12px; font-size:10px; text-transform:uppercase; font-weight:900; color:${TEXT_MUTED}; letter-spacing:1.5px;">Application Type</p>
       <p style="margin:0 0 24px; font-weight:700; font-size:15px;">${applicationType}</p>
@@ -307,7 +302,7 @@ export const sendApplicationAdminNotification = async (applicationData) => {
       <p style="margin:0 0 24px; font-weight:700; font-size:15px;">${experience || "None given"}</p>
     </div>
     <p style="font-size:13px; color:${TEXT_MUTED}; margin-top:24px;">
-      <a href="https://munchkinkittie.com/admin/applications" style="color:${BRAND_COLOR}; font-weight:700;">Review in admin dashboard</a>
+      <a href="https://munchkinkittie.com/admin-dashboard" style="color:${BRAND_COLOR}; font-weight:700;">Review in admin dashboard</a>
     </p>
   `;
   
