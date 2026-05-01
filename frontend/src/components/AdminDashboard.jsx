@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
@@ -6,13 +6,13 @@ import {
   LayoutDashboard, PlusCircle, Star, Bell, LogOut,
   Settings, PawPrint, X, Trash2, Calendar,
   User, MapPin, Sparkles, Zap, Info, Camera,
-  Plus, Minus, ArrowUpRight, ShieldCheck, Activity,
-  ChevronRight, Layers, Heart, Shield, Award, CheckCircle2,
+  Plus, Minus, ArrowUpRight, Shield, Activity,
+  ChevronRight, Layers, Heart, Award, CheckCircle2,
   AlertCircle, RefreshCw, Eye, Image as ImageIcon,
-  Stethoscope, Mail, MessageSquare, FileText, Edit3
+  Stethoscope, Mail, MessageSquare, FileText, Edit3,
+  ShieldCheck
 } from 'lucide-react';
 
-// Import actions exactly as defined in your slices
 import { createKitten, getKittens, deleteKitten, updateKitten } from '../features/kitten/kittenSlice';
 import { createNotification, getAllNotificationsAdmin, deleteNotification, updateNotification } from '../features/notification/notificationSlice';
 import { createRetired, getRetired, deleteRetired, updateRetired } from '../features/retired/retiredSlice';
@@ -20,7 +20,121 @@ import { createUpcoming, getUpcoming, deleteUpcoming, updateUpcoming } from '../
 import { getAllReviewsAdmin, approveReview, deleteReview, createReview } from '../features/review/reviewSlice';
 import { getSettings, updateLocation } from '../features/settings/settingsSlice';
 import { getApplications, approveApplication, rejectApplication, deleteApplication } from '../features/application/applicationSlice';
-import { sendAdminMessage } from '../features/adminContact/adminContactSlice'; // note: file is adminContactSlice.js
+import { sendAdminMessage } from '../features/adminContact/adminContactSlice';
+
+// -------------------------------------------------------
+// REUSABLE COMPONENTS – placed outside to prevent re‑mounting
+// -------------------------------------------------------
+
+const SectionHeader = ({ title, subtitle, onAdd, onAddLabel }) => (
+  <div className="flex justify-between items-end mb-16 px-2">
+    <div>
+      <p className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-400 mb-3">{subtitle}</p>
+      <h2 className="text-7xl font-black tracking-tighter italic uppercase leading-[0.8]">{title}</h2>
+    </div>
+    {onAdd && (
+      <button onClick={onAdd} className="bg-zinc-950 text-white px-6 py-4 rounded-[20px] font-black text-[10px] uppercase tracking-[0.3em] flex items-center gap-3 shadow-2xl active:scale-95 transition-all">
+        {onAddLabel || <Plus size={24} strokeWidth={3} />}
+      </button>
+    )}
+  </div>
+);
+
+const FormLabel = ({ text, icon: Icon }) => (
+  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-300 flex items-center gap-2 mb-6">
+    {Icon && <Icon size={14} />} {text}
+  </p>
+);
+
+const NavBtn = ({ active, onClick, icon, label }) => (
+  <button onClick={onClick} className={`relative flex flex-col items-center gap-1 transition-all duration-700 px-2 ${active ? 'scale-125 -translate-y-3' : 'opacity-30 hover:opacity-100'}`}>
+    <div className={`p-3 rounded-[22px] transition-all ${active ? 'bg-white text-zinc-950 shadow-2xl shadow-white/20' : 'text-white'}`}>
+      {icon}
+    </div>
+    {active && (
+      <motion.span layoutId="navLabel" className="text-[7px] font-black uppercase tracking-[0.3em] text-white absolute -bottom-5 whitespace-nowrap">
+        {label}
+      </motion.span>
+    )}
+  </button>
+);
+
+// Stable FormOverlay – now a separate component, never re‑creates while internal state changes
+const FormOverlay = ({ title, onClose, children, onSubmit, editMode }) => (
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-white z-[100] overflow-y-auto pt-20 pb-40">
+    <div className="max-w-2xl mx-auto px-6">
+      <div className="flex justify-between items-center mb-16 sticky top-0 bg-white/95 backdrop-blur-md py-6 z-10 border-b border-zinc-100">
+        <h2 className="text-4xl font-black italic tracking-tighter uppercase">
+          {editMode ? `Edit ${title}` : `New ${title}`}
+        </h2>
+        <button type="button" onClick={onClose} className="p-4 bg-zinc-100 rounded-full hover:bg-red-50 hover:text-red-500 transition-all"><X size={24} /></button>
+      </div>
+      <form onSubmit={onSubmit} className="space-y-16">
+        {children}
+        <button type="submit" className="w-full py-9 bg-zinc-950 text-white rounded-[45px] font-black text-xs uppercase tracking-[0.5em] shadow-2xl hover:bg-zinc-800 transition-all">
+          {editMode ? 'Update Records' : 'Commit Records'}
+        </button>
+      </form>
+    </div>
+  </motion.div>
+);
+
+// HomeView separated to avoid deep nesting
+const HomeView = ({ kittens, retiredList, adminReviews, applications, setActiveTab, setShowForm }) => (
+  <div className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
+    <SectionHeader title="HQ" subtitle="System Control" />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="p-10 bg-zinc-950 text-white rounded-[50px] shadow-2xl relative overflow-hidden group">
+        <Zap size={80} className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform" />
+        <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Network Capacity</p>
+        <p className="text-8xl font-black italic tracking-tighter leading-none">{kittens.length + retiredList.length}</p>
+      </div>
+      <div className="p-10 bg-white border-2 border-zinc-100 rounded-[50px] flex flex-col justify-between group hover:border-zinc-950 transition-all">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">Approval Queue</p>
+          <p className="text-8xl font-black italic tracking-tighter text-zinc-950 leading-none">{adminReviews.filter(r => !r.isApproved).length}</p>
+        </div>
+        <button onClick={() => setActiveTab('reviews')} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-950 mt-6 group-hover:underline">
+          Manage Vouches <ArrowUpRight size={14} />
+        </button>
+      </div>
+      <div className="p-10 bg-white border-2 border-zinc-100 rounded-[50px] flex flex-col justify-between group hover:border-zinc-950 transition-all">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">Pending Apps</p>
+          <p className="text-8xl font-black italic tracking-tighter text-zinc-950 leading-none">
+            {applications?.filter(a => a.status === 'Pending' || !a.status).length || 0}
+          </p>
+        </div>
+        <button onClick={() => setActiveTab('applications')} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-950 mt-6 group-hover:underline">
+          Review Apps <ArrowUpRight size={14} />
+        </button>
+      </div>
+    </div>
+    <div className="space-y-4">
+      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-300 px-4">Fast Access</p>
+      <div className="grid grid-cols-1 gap-4">
+        <button onClick={() => setShowForm('notify')} className="p-10 bg-zinc-50 rounded-[40px] flex justify-between items-center group hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200">
+          <div className="flex items-center gap-6">
+            <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-zinc-950 shadow-sm"><Bell size={24} /></div>
+            <span className="font-black uppercase tracking-[0.2em] text-sm">Create System Alert</span>
+          </div>
+          <Plus size={24} className="text-zinc-300 group-hover:text-zinc-950" />
+        </button>
+        <button onClick={() => setActiveTab('message')} className="p-10 bg-zinc-50 rounded-[40px] flex justify-between items-center group hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200">
+          <div className="flex items-center gap-6">
+            <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-zinc-950 shadow-sm"><Mail size={24} /></div>
+            <span className="font-black uppercase tracking-[0.2em] text-sm">Send Message to User</span>
+          </div>
+          <ArrowUpRight size={24} className="text-zinc-300 group-hover:text-zinc-950" />
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+// -------------------------------------------------------
+// MAIN ADMIN DASHBOARD COMPONENT
+// -------------------------------------------------------
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -36,7 +150,7 @@ const AdminDashboard = () => {
   const [features, setFeatures] = useState(['']);
   const [highlights, setHighlights] = useState(['']);
 
-  // Redux data
+  // Redux selectors
   const { kittens } = useSelector(state => state.kitten);
   const { adminNotifications } = useSelector(state => state.notification);
   const { retiredList } = useSelector(state => state.retired);
@@ -55,12 +169,12 @@ const AdminDashboard = () => {
     dispatch(getApplications());
   }, [dispatch]);
 
-  // Helpers for dynamic arrays
-  const addToArray = (setter) => setter(prev => [...prev, {}]);
-  const removeFromArray = (setter, idx) => setter(prev => prev.filter((_, i) => i !== idx));
+  // Stable array helpers
+  const addToArray = useCallback((setter) => setter(prev => [...prev, {}]), []);
+  const removeFromArray = useCallback((setter, idx) => setter(prev => prev.filter((_, i) => i !== idx)), []);
 
-  // Open edit form and prefill dynamic arrays
-  const openEditForm = (entity, data) => {
+  // Pre‑fill dynamic fields when editing
+  const openEditForm = useCallback((entity, data) => {
     setEditItem(data);
     if (entity === 'kitten') {
       setSpecs(data.specs?.length ? data.specs : [{ label: '', value: '' }]);
@@ -70,9 +184,10 @@ const AdminDashboard = () => {
     if (entity === 'upcoming') setFeatures(data.features?.length ? data.features : ['']);
     if (entity === 'retired') setHighlights(data.highlights?.length ? data.highlights : ['']);
     setShowForm(entity);
-  };
+  }, []);
 
-  const closeForm = () => {
+  // Reset all form state on close
+  const closeForm = useCallback(() => {
     setShowForm(null);
     setEditItem(null);
     setSpecs([{ label: '', value: '' }]);
@@ -80,9 +195,10 @@ const AdminDashboard = () => {
     setLineage([{ relation: '', name: '', title: '' }]);
     setFeatures(['']);
     setHighlights(['']);
-  };
+  }, []);
 
-  // ================= SUBMIT HANDLERS =================
+  // ========== SUBMISSION HANDLERS ==========
+
   const handleKittenSubmit = async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
@@ -95,14 +211,16 @@ const AdminDashboard = () => {
     fd.set('medical', JSON.stringify(validMedical));
     fd.set('lineage', JSON.stringify(validLineage));
 
-    if (editItem) {
-      await dispatch(updateKitten({ id: editItem._id, formData: fd })).unwrap()
-        .then(() => toast.success('Kitten updated'))
-        .catch(err => toast.error(err));
-    } else {
-      await dispatch(createKitten(fd)).unwrap()
-        .then(() => toast.success('Kitten created'))
-        .catch(err => toast.error(err));
+    try {
+      if (editItem) {
+        await dispatch(updateKitten({ id: editItem._id, formData: fd })).unwrap();
+        toast.success('Kitten updated');
+      } else {
+        await dispatch(createKitten(fd)).unwrap();
+        toast.success('Kitten created');
+      }
+    } catch (err) {
+      toast.error(err);
     }
     closeForm();
   };
@@ -111,47 +229,51 @@ const AdminDashboard = () => {
     e.preventDefault();
     const fd = new FormData(e.target);
     fd.set('features', JSON.stringify(features.filter(f => f)));
-    if (editItem) {
-      await dispatch(updateUpcoming({ id: editItem._id, formData: fd })).unwrap()
-        .then(() => toast.success('Litter updated'))
-        .catch(err => toast.error(err));
-    } else {
-      await dispatch(createUpcoming(fd)).unwrap()
-        .then(() => toast.success('Litter created'))
-        .catch(err => toast.error(err));
+    try {
+      if (editItem) {
+        await dispatch(updateUpcoming({ id: editItem._id, formData: fd })).unwrap();
+        toast.success('Litter updated');
+      } else {
+        await dispatch(createUpcoming(fd)).unwrap();
+        toast.success('Litter created');
+      }
+    } catch (err) {
+      toast.error(err);
     }
     closeForm();
-    setFeatures(['']);
   };
 
   const handleRetiredSubmit = async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
     fd.set('highlights', JSON.stringify(highlights.filter(h => h)));
-    if (editItem) {
-      await dispatch(updateRetired({ id: editItem._id, formData: fd })).unwrap()
-        .then(() => toast.success('Adult updated'))
-        .catch(err => toast.error(err));
-    } else {
-      await dispatch(createRetired(fd)).unwrap()
-        .then(() => toast.success('Adult created'))
-        .catch(err => toast.error(err));
+    try {
+      if (editItem) {
+        await dispatch(updateRetired({ id: editItem._id, formData: fd })).unwrap();
+        toast.success('Adult updated');
+      } else {
+        await dispatch(createRetired(fd)).unwrap();
+        toast.success('Adult created');
+      }
+    } catch (err) {
+      toast.error(err);
     }
     closeForm();
-    setHighlights(['']);
   };
 
   const handleNotificationSubmit = async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
-    if (editItem) {
-      await dispatch(updateNotification({ id: editItem._id, formData: fd })).unwrap()
-        .then(() => toast.success('Alert updated'))
-        .catch(err => toast.error(err));
-    } else {
-      await dispatch(createNotification(fd)).unwrap()
-        .then(() => toast.success('Alert created'))
-        .catch(err => toast.error(err));
+    try {
+      if (editItem) {
+        await dispatch(updateNotification({ id: editItem._id, formData: fd })).unwrap();
+        toast.success('Alert updated');
+      } else {
+        await dispatch(createNotification(fd)).unwrap();
+        toast.success('Alert created');
+      }
+    } catch (err) {
+      toast.error(err);
     }
     closeForm();
   };
@@ -161,7 +283,6 @@ const AdminDashboard = () => {
     const fd = new FormData(e.target);
     fd.set('isApproved', editItem ? (editItem.isApproved ?? true).toString() : 'true');
     if (editItem) {
-      // No updateReview slice action – using direct fetch as fallback
       try {
         const token = localStorage.getItem('token');
         const res = await fetch(`/api/reviews/${editItem._id}`, {
@@ -176,9 +297,8 @@ const AdminDashboard = () => {
         toast.error('Failed to update review');
       }
     } else {
-      await dispatch(createReview(fd)).unwrap()
-        .then(() => toast.success('Review added'))
-        .catch(err => toast.error(err));
+      await dispatch(createReview(fd)).unwrap();
+      toast.success('Review added');
     }
     closeForm();
   };
@@ -190,117 +310,28 @@ const AdminDashboard = () => {
       subject: e.target.subject.value,
       message: e.target.message.value,
     };
-    await dispatch(sendAdminMessage(payload)).unwrap()
-      .then(() => toast.success('Email sent'))
-      .catch(err => toast.error(err));
-    e.target.reset();
+    try {
+      await dispatch(sendAdminMessage(payload)).unwrap();
+      toast.success('Email sent');
+      e.target.reset();
+    } catch (err) {
+      toast.error(err);
+    }
   };
 
   const handleUpdateLocation = (e) => {
     e.preventDefault();
     const loc = e.target.mainLocation.value;
-    dispatch(updateLocation({ mainLocation: loc })).unwrap()
+    dispatch(updateLocation({ mainLocation: loc }))
+      .unwrap()
       .then(() => toast.success('Location updated'))
       .catch(err => toast.error(err));
   };
 
-  // ================= UI COMPONENTS =================
-  const SectionHeader = ({ title, subtitle, onAdd, onAddLabel }) => (
-    <div className="flex justify-between items-end mb-16 px-2">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-400 mb-3">{subtitle}</p>
-        <h2 className="text-7xl font-black tracking-tighter italic uppercase leading-[0.8]">{title}</h2>
-      </div>
-      {onAdd && (
-        <button onClick={onAdd} className="bg-zinc-950 text-white px-6 py-4 rounded-[20px] font-black text-[10px] uppercase tracking-[0.3em] flex items-center gap-3 shadow-2xl active:scale-95 transition-all">
-          {onAddLabel || <Plus size={24} strokeWidth={3} />}
-        </button>
-      )}
-    </div>
-  );
-
-  const FormOverlay = ({ title, onClose, children, onSubmit, editMode }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-white z-[100] overflow-y-auto pt-20 pb-40">
-      <div className="max-w-2xl mx-auto px-6">
-        <div className="flex justify-between items-center mb-16 sticky top-0 bg-white/95 backdrop-blur-md py-6 z-10 border-b border-zinc-100">
-          <h2 className="text-4xl font-black italic tracking-tighter uppercase">
-            {editMode ? `Edit ${title}` : `New ${title}`}
-          </h2>
-          <button type="button" onClick={onClose} className="p-4 bg-zinc-100 rounded-full hover:bg-red-50 hover:text-red-500 transition-all"><X size={24}/></button>
-        </div>
-        <form onSubmit={onSubmit} className="space-y-16">
-          {children}
-          <button type="submit" className="w-full py-9 bg-zinc-950 text-white rounded-[45px] font-black text-xs uppercase tracking-[0.5em] shadow-2xl hover:bg-zinc-800 transition-all">
-            {editMode ? 'Update Records' : 'Commit Records'}
-          </button>
-        </form>
-      </div>
-    </motion.div>
-  );
-
-  const FormLabel = ({ text, icon: Icon }) => (
-    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-300 flex items-center gap-2 mb-6">
-      {Icon && <Icon size={14}/>} {text}
-    </p>
-  );
-
-  // ================= VIEWS =================
-  const HomeView = () => (
-    <div className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
-      <SectionHeader title="HQ" subtitle="System Control" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-10 bg-zinc-950 text-white rounded-[50px] shadow-2xl relative overflow-hidden group">
-          <Zap size={80} className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform" />
-          <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Network Capacity</p>
-          <p className="text-8xl font-black italic tracking-tighter leading-none">{kittens.length + retiredList.length}</p>
-        </div>
-        <div className="p-10 bg-white border-2 border-zinc-100 rounded-[50px] flex flex-col justify-between group hover:border-zinc-950 transition-all">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">Approval Queue</p>
-            <p className="text-8xl font-black italic tracking-tighter text-zinc-950 leading-none">{adminReviews.filter(r => !r.isApproved).length}</p>
-          </div>
-          <button onClick={() => setActiveTab('reviews')} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-950 mt-6 group-hover:underline">
-            Manage Vouches <ArrowUpRight size={14}/>
-          </button>
-        </div>
-        <div className="p-10 bg-white border-2 border-zinc-100 rounded-[50px] flex flex-col justify-between group hover:border-zinc-950 transition-all">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">Pending Apps</p>
-            <p className="text-8xl font-black italic tracking-tighter text-zinc-950 leading-none">
-              {applications?.filter(a => a.status === 'Pending' || !a.status).length || 0}
-            </p>
-          </div>
-          <button onClick={() => setActiveTab('applications')} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-950 mt-6 group-hover:underline">
-            Review Apps <ArrowUpRight size={14}/>
-          </button>
-        </div>
-      </div>
-      <div className="space-y-4">
-        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-300 px-4">Fast Access</p>
-        <div className="grid grid-cols-1 gap-4">
-          <button onClick={() => setShowForm('notify')} className="p-10 bg-zinc-50 rounded-[40px] flex justify-between items-center group hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200">
-            <div className="flex items-center gap-6">
-              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-zinc-950 shadow-sm"><Bell size={24}/></div>
-              <span className="font-black uppercase tracking-[0.2em] text-sm">Create System Alert</span>
-            </div>
-            <Plus size={24} className="text-zinc-300 group-hover:text-zinc-950" />
-          </button>
-          <button onClick={() => setActiveTab('message')} className="p-10 bg-zinc-50 rounded-[40px] flex justify-between items-center group hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200">
-            <div className="flex items-center gap-6">
-              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-zinc-950 shadow-sm"><Mail size={24}/></div>
-              <span className="font-black uppercase tracking-[0.2em] text-sm">Send Message to User</span>
-            </div>
-            <ArrowUpRight size={24} className="text-zinc-300 group-hover:text-zinc-950" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="bg-[#fcfcfc] min-h-screen text-zinc-950 font-sans selection:bg-zinc-900 selection:text-white pb-64">
       <Toaster position="top-right" toastOptions={{ style: { background: '#09090b', color: '#fff', fontSize: '12px', fontWeight: 'bold', borderRadius: '100px', padding: '16px 24px' }}} />
-      
+
       {/* Header */}
       <header className="px-8 py-10 flex justify-between items-center sticky top-0 bg-white/70 backdrop-blur-2xl z-[90] border-b border-zinc-50">
         <div className="flex items-center gap-4">
@@ -315,11 +346,11 @@ const AdminDashboard = () => {
         </button>
       </header>
 
-      {/* Content */}
+      {/* Main content */}
       <main className="max-w-2xl mx-auto px-6 pt-16">
         <AnimatePresence mode="wait">
-          {activeTab === 'home' && <HomeView key="home" />}
-          
+          {activeTab === 'home' && <HomeView key="home" kittens={kittens} retiredList={retiredList} adminReviews={adminReviews} applications={applications} setActiveTab={setActiveTab} setShowForm={setShowForm} />}
+
           {/* KITTENS */}
           {activeTab === 'kittens' && (
             <div key="kittens" className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
@@ -567,7 +598,7 @@ const AdminDashboard = () => {
         </AnimatePresence>
       </main>
 
-      {/* ================= ALL FORMS ================= */}
+      {/* ================= ALL FORMS (now stable) ================= */}
       <AnimatePresence>
         {/* KITTEN FORM */}
         {showForm === 'kitten' && (
@@ -799,18 +830,5 @@ const AdminDashboard = () => {
     </div>
   );
 };
-
-const NavBtn = ({ active, onClick, icon, label }) => (
-  <button onClick={onClick} className={`relative flex flex-col items-center gap-1 transition-all duration-700 px-2 ${active ? 'scale-125 -translate-y-3' : 'opacity-30 hover:opacity-100'}`}>
-    <div className={`p-3 rounded-[22px] transition-all ${active ? 'bg-white text-zinc-950 shadow-2xl shadow-white/20' : 'text-white'}`}>
-      {icon}
-    </div>
-    {active && (
-      <motion.span layoutId="navLabel" className="text-[7px] font-black uppercase tracking-[0.3em] text-white absolute -bottom-5 whitespace-nowrap">
-        {label}
-      </motion.span>
-    )}
-  </button>
-);
 
 export default AdminDashboard;
