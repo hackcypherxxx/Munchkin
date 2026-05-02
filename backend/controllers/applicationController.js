@@ -1,3 +1,4 @@
+import mongoose from "mongoose"; // 🔧 NEW: for ObjectId validation
 import Application from "../models/Application.js";
 import {
   sendApplicationReceived,
@@ -17,7 +18,7 @@ export const createApplication = async (req, res) => {
       paymentMethod,
       paymentMethodOther,
       applicationType,
-      itemId,
+      itemId,               // may be "", null, or valid
       homeDescription,
       hasPets,
       experience,
@@ -37,6 +38,12 @@ export const createApplication = async (req, res) => {
     email = email.toLowerCase().trim();
     const cleanedPaymentMethod = paymentMethod.toLowerCase();
 
+    // 🔧 SANITISE itemId – turn anything invalid into null
+    const safeItemId =
+      itemId && mongoose.Types.ObjectId.isValid(String(itemId))
+        ? String(itemId)
+        : null;
+
     let modelMap = {
       kitten: "Kitten",
       retired: "RetiredKitten",
@@ -52,39 +59,37 @@ export const createApplication = async (req, res) => {
       paymentMethodOther:
         cleanedPaymentMethod === "other" ? paymentMethodOther : undefined,
       applicationType,
-      itemId,
+      itemId: safeItemId,   // ✅ safe now
       applicationTypeModel: modelMap[applicationType],
       homeDescription,
       hasPets,
       experience,
     });
 
-    // 🔍 Populate the referenced item (Kitten, RetiredKitten, or Upcoming)
-    await application.populate("itemId");
+    // Populate only if a valid itemId exists (avoids error on null)
+    let kittenName = "your selected companion";
+    if (application.itemId) {
+      await application.populate("itemId");
+      kittenName =
+        application.itemId?.name ||
+        application.itemId?.title ||
+        application.itemId?.breed ||
+        "your selected companion";
+    }
 
-    // Extract kitten name - adjust field name to match your models
-    // Common fields: name, title, or breed. Use optional chaining.
-    const kittenName =
-      application.itemId?.name ||
-      application.itemId?.title ||
-      application.itemId?.breed ||
-      "your selected companion";
-
-    // 📧 Applicant confirmation – now includes kitten info
+    // 📧 Emails – wrapped in .catch() so they don’t crash the server
     sendApplicationReceived({
       email,
       name: fullName,
       paymentMethod: cleanedPaymentMethod,
       paymentMethodOther: paymentMethodOther || null,
       kittenName,
-    });
+    }).catch((err) => console.error("Applicant email failed:", err));
 
-    // 📧 Admin notification – now includes kitten info
     sendApplicationAdminNotification({
       fullName,
       email,
       phone,
-      location,
       paymentMethod: cleanedPaymentMethod,
       paymentMethodOther,
       applicationType,
@@ -92,22 +97,27 @@ export const createApplication = async (req, res) => {
       hasPets,
       experience,
       kittenName,
-    });
+    }).catch((err) => console.error("Admin notification failed:", err));
 
     res.status(201).json({
       message: "Application submitted successfully",
     });
   } catch (error) {
-    console.error(error);
+    console.error("❌ CREATE APPLICATION ERROR:", error);
+
+    // Catches invalid ObjectId values explicitly
+    if (error.name === "CastError") {
+      return res.status(400).json({ error: "Invalid reference ID" });
+    }
+
     if (error.name === "ValidationError") {
       const messages = Object.values(error.errors).map((e) => e.message);
       return res.status(400).json({ error: messages.join(". ") });
     }
+
     res.status(500).json({ error: "Failed to submit application" });
   }
 };
-
-// ... rest of the controller (unchanged) ...
 
 // 🌍 ADMIN: GET ALL
 export const getApplications = async (req, res) => {
