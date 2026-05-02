@@ -82,12 +82,11 @@ const applicationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 🛡️ Custom validation: if paymentMethod is "other", then paymentMethodOther must be provided
-applicationSchema.pre("validate", function (next) {
+// ✅ FIXED: Mongoose 6+ – no 'next' callback in pre('validate')
+applicationSchema.pre("validate", function () {
   if (this.paymentMethod === "other" && !this.paymentMethodOther) {
     this.invalidate("paymentMethodOther", "Please describe your payment method");
   }
-  next();
 });
 
 export default mongoose.model("Application", applicationSchema);
