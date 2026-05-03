@@ -170,7 +170,7 @@ const Footer = () => {
               <li className="flex gap-4">
                 <div className="text-green-600 pt-1"><Phone size={18} /></div>
                 <p className="text-zinc-600 font-bold leading-tight">
-                  {activeSettings?.phone || "(555) 123-4567"}<br />
+                  {activeSettings?.phone || "(854) 910 0148"}<br />
                   <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest">
                     {activeSettings?.weekdayHours || "Mon - Fri: 9am - 5pm"}
                   </span>
