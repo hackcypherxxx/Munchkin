@@ -109,7 +109,7 @@ const ContactUs = () => {
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-0.5">Concierge Line</p>
                   <p className="text-sm font-black text-zinc-950 tracking-tight">
-                    {activeSettings?.phone || "+1 (854) 910-0148"}
+                    {activeSettings?.phone || "+1 (404) 410-5223"}
                   </p>
                 </div>
               </div>
