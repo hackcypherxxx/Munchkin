@@ -187,6 +187,9 @@ export const createKitten = async (req, res) => {
 
     const kitten = await Kitten.create({
       name: req.body.name,
+      ...(req.body.registryId && String(req.body.registryId).trim()
+        ? { registryId: String(req.body.registryId).trim() }
+        : {}),
       breed: req.body.breed,
       gender: req.body.gender || "Female",
       ageWeeks: Number(req.body.ageWeeks) || 10,
@@ -213,6 +216,39 @@ export const createKitten = async (req, res) => {
     res.status(201).json(kitten);
   } catch (error) {
     console.error("🔥 CREATE KITTEN ERROR:", error);
+
+    // 🛡️ Automatic Recovery: If a duplicate key error occurs on legacy registryId_1, retry with a fresh unique registryId
+    if (
+      error.code === 11000 &&
+      (error.keyPattern?.registryId || String(error.message).includes("registryId"))
+    ) {
+      try {
+        const freshRegId = `MK-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        const retryKitten = await Kitten.create({
+          name: req.body.name,
+          registryId: freshRegId,
+          breed: req.body.breed,
+          gender: req.body.gender || "Female",
+          ageWeeks: Number(req.body.ageWeeks) || 10,
+          dob: req.body.dob || "",
+          coat: req.body.coat,
+          status: req.body.status || "Available",
+          price: Number(req.body.price) || 1800,
+          Shipping: req.body.Shipping !== undefined ? Number(req.body.Shipping) : 0,
+          trait: req.body.trait || "",
+          shortDescription: req.body.shortDescription || "",
+          description: req.body.description,
+          primaryImage: req.body.primaryImage || (req.files?.[0]?.path) || "",
+          images: Array.isArray(req.files) ? req.files.map((f) => f.path) : [],
+          seoTitle: req.body.seoTitle || "",
+          seoDescription: req.body.seoDescription || "",
+        });
+        return res.status(201).json(retryKitten);
+      } catch (retryErr) {
+        console.error("Retry kitten creation failed:", retryErr);
+      }
+    }
+
     res.status(500).json({
       error: error.message || "Failed to create kitten",
     });
@@ -275,6 +311,7 @@ export const updateKitten = async (req, res) => {
 
     const scalarFields = [
       "name",
+      "registryId",
       "breed",
       "gender",
       "dob",

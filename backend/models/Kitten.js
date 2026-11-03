@@ -20,6 +20,11 @@ const kittenSchema = new mongoose.Schema(
       trim: true,
     },
 
+    registryId: {
+      type: String,
+      trim: true,
+    },
+
     breed: {
       type: String,
       required: true,
@@ -171,6 +176,15 @@ const kittenSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+kittenSchema.pre("validate", function () {
+  if (!this.registryId || typeof this.registryId !== "string" || !this.registryId.trim()) {
+    const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const year = new Date().getFullYear();
+    this.registryId = `MK-${year}-${randomPart}`;
+  }
+});
+
+kittenSchema.index({ registryId: 1 }, { unique: true, sparse: true });
 kittenSchema.index({ status: 1, createdAt: -1 });
 kittenSchema.index({ breed: 1, gender: 1 });
 

@@ -217,6 +217,7 @@ export default function AdminDashboard() {
     sire: "",
     dam: "",
     registry: "",
+    registryId: "",
     seoTitle: "",
     seoDescription: "",
   });
@@ -252,6 +253,7 @@ export default function AdminDashboard() {
       sire: "",
       dam: "",
       registry: "",
+      registryId: "",
       seoTitle: "",
       seoDescription: "",
     });
@@ -289,6 +291,7 @@ export default function AdminDashboard() {
       sire: k.lineage?.sire || "",
       dam: k.lineage?.dam || "",
       registry: k.lineage?.registry || "",
+      registryId: k.registryId || "",
       seoTitle: k.seoTitle || "",
       seoDescription: k.seoDescription || "",
     });
@@ -356,6 +359,9 @@ export default function AdminDashboard() {
       fd.append("trait", kittenForm.trait);
       fd.append("shortDescription", kittenForm.shortDescription);
       fd.append("description", kittenForm.description);
+      if (kittenForm.registryId) {
+        fd.append("registryId", kittenForm.registryId);
+      }
       fd.append("seoTitle", kittenForm.seoTitle);
       fd.append("seoDescription", kittenForm.seoDescription);
       fd.append(
@@ -3885,6 +3891,21 @@ export default function AdminDashboard() {
                     className="w-full px-3.5 py-2 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold block mb-1">
+                  Registry ID <span className="text-[#8c837a] font-normal">(Optional — auto-generated if left blank)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. MK-2026-000123 or TICA #..."
+                  value={kittenForm.registryId || ""}
+                  onChange={(e) =>
+                    setKittenForm({ ...kittenForm, registryId: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm"
+                />
               </div>
 
               <div>
