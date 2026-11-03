@@ -97,6 +97,12 @@ export function wrapEditorialEmail({
           <!-- Luxury Header Banner -->
           <tr>
             <td style="background-color:#181615;padding:32px 36px;border-bottom:3px solid #9E5A3C;">
+              <!-- Professional Clean Text Wordmark Logo -->
+              <div style="margin-bottom:18px;">
+                <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;letter-spacing:-0.5px;color:#FAF8F5;text-decoration:none;display:inline-block;">
+                  Munchkin<span style="color:#D9B88F;">Kittie</span>
+                </span>
+              </div>
               <p style="margin:0 0 8px 0;font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:#D9B88F;font-weight:600;">
                 ${escapeHtml(eyebrow)}
               </p>
@@ -135,8 +141,11 @@ export function wrapEditorialEmail({
           <!-- Trust & Contact Footer -->
           <tr>
             <td style="background-color:#F3EFEA;padding:26px 36px;border-top:1px solid #E6E0D6;font-size:12px;line-height:1.6;color:#5C554E;">
-              <p style="margin:0 0 6px 0;font-weight:600;color:#181615;">
-                MunchkinKittie — Ethical Home-Raised Feline Companions
+              <p style="margin:0 0 4px 0;font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:700;color:#181615;letter-spacing:-0.3px;">
+                Munchkin<span style="color:#9E5A3C;">Kittie</span>
+              </p>
+              <p style="margin:0 0 6px 0;font-weight:600;color:#5C554E;font-size:11px;text-transform:uppercase;letter-spacing:1px;">
+                Ethical Home-Raised Feline Companions
               </p>
               <p style="margin:0 0 6px 0;">
                 Direct Concierge Desk: <a href="mailto:info@munchkinkittie.com" style="color:#9E5A3C;text-decoration:none;font-weight:600;">info@munchkinkittie.com</a> &bull; <a href="https://www.munchkinkittie.com" style="color:#263B30;text-decoration:none;">www.munchkinkittie.com</a>

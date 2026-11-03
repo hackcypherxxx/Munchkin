@@ -89,7 +89,7 @@ export default function RetiredAdults() {
             <div className="lg:col-span-5 h-full min-h-[280px] bg-[#f3efea]">
               <img
                 src={CATTERY_PHOTOS.editorialWhite}
-                alt="Munchkin cat in Owego, NY"
+                alt={`Munchkin cat in ${catteryLocation}`}
                 className="h-full w-full object-cover max-h-[380px]"
               />
             </div>

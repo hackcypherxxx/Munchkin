@@ -4,7 +4,7 @@ const settingsSchema = new mongoose.Schema(
   {
     mainLocation: {
       type: String,
-      default: "Beverly Hills & Concierge Cattery, CA",
+      default: "Owego, NY",
       trim: true,
     },
 
@@ -12,6 +12,13 @@ const settingsSchema = new mongoose.Schema(
       type: String,
       default: "+1 (607) 223-4177",
       trim: true,
+    },
+
+    contactEmail: {
+      type: String,
+      default: "info@munchkinkittie.com",
+      trim: true,
+      lowercase: true,
     },
 
     adminTestEmail: {

@@ -82,6 +82,10 @@ import {
   ExternalLink,
   Loader2,
   Check,
+  Menu,
+  X,
+  ChevronRight,
+  MoreHorizontal,
 } from "lucide-react";
 
 const DYNAMIC_VARIABLES = [
@@ -154,6 +158,7 @@ export default function AdminDashboard() {
 
   const [activeSection, setActiveSection] = useState("overview");
   const [contentSubTab, setContentSubTab] = useState("upcoming");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
   const showToast = (message, type = "success") => {
@@ -836,6 +841,9 @@ export default function AdminDashboard() {
   const [bulletinMsg, setBulletinMsg] = useState("");
   const [locationInput, setLocationInput] = useState("");
   const [phoneInput, setPhoneInput] = useState("");
+  const [contactEmailInput, setContactEmailInput] = useState(
+    "info@munchkinkittie.com"
+  );
   const [adminTestEmailInput, setAdminTestEmailInput] = useState(
     "info@munchkinkittie.com"
   );
@@ -849,6 +857,9 @@ export default function AdminDashboard() {
     }
     if (activeSettings?.phoneNumber !== undefined) {
       setPhoneInput(activeSettings.phoneNumber || "");
+    }
+    if (activeSettings?.contactEmail) {
+      setContactEmailInput(activeSettings.contactEmail);
     }
     if (activeSettings?.adminTestEmail) {
       setAdminTestEmailInput(activeSettings.adminTestEmail);
@@ -1012,8 +1023,8 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Left Executive Sidebar */}
-      <aside className="w-full lg:w-72 bg-[#181615] text-[#faf8f5] shrink-0 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/10">
+      {/* Left Executive Sidebar (Desktop: Sticky Left Nav; Mobile: Hidden in favor of responsive mobile bar) */}
+      <aside className="hidden lg:flex lg:w-72 bg-[#181615] text-[#faf8f5] shrink-0 flex-col justify-between border-r border-white/10 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -1026,7 +1037,9 @@ export default function AdminDashboard() {
             </div>
             <Link
               to="/"
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-xs text-white/80"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-xs text-white/80 transition-colors"
             >
               Live Site <ExternalLink size={12} />
             </Link>
@@ -1093,8 +1106,205 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
+      {/* Mobile Sticky Executive Top Bar + Fast Horizontal Rail (Mobile only) */}
+      <div className="lg:hidden sticky top-0 z-40 bg-[#181615] text-[#faf8f5] border-b border-white/10 shadow-md">
+        <div className="px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="h-9 w-9 rounded-xl bg-white/10 hover:bg-white/15 flex items-center justify-center shrink-0 text-white relative transition-colors"
+              aria-label="Open Sanctuary Menu"
+            >
+              <Menu size={18} />
+              {((applications?.filter((a) =>
+                ["New", "Pending", "Under Review"].includes(a.status)
+              ).length || 0) +
+                (contacts?.filter((c) => c.status === "New").length || 0)) >
+                0 && (
+                <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-[#9e5a3c] ring-2 ring-[#181615]" />
+              )}
+            </button>
+            <div className="min-w-0">
+              <span className="block font-serif text-lg font-semibold tracking-tight text-white truncate leading-none">
+                Munchkin<span className="text-[#e8b496]">Kittie</span>
+              </span>
+              <span className="text-[10px] uppercase tracking-wider text-[#d9b88f] font-semibold block mt-0.5 truncate">
+                Executive Suite
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => {
+                setActiveSection("ai-assistant");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#263b30] hover:bg-[#1e2f26] text-white text-[11px] font-semibold transition-colors"
+            >
+              <Sparkles size={12} className="text-[#84b59f]" /> AI
+            </button>
+            <button
+              onClick={openCreateKittenModal}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#9e5a3c] hover:bg-[#b87354] text-white text-[11px] font-semibold transition-colors"
+            >
+              <Plus size={13} /> Listing
+            </button>
+            <Link
+              to="/"
+              target="_blank"
+              rel="noreferrer"
+              className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/15 flex items-center justify-center text-white/80 transition-colors"
+              title="Live Site"
+            >
+              <ExternalLink size={13} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Fast Horizontal Touch Navigation Rail */}
+        <div className="px-3 py-2 bg-[#201d1c] border-t border-white/5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveSection(item.id);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  isActive
+                    ? "bg-[#9e5a3c] text-white shadow-xs"
+                    : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <Icon size={12} />
+                <span>{item.label}</span>
+                {item.badge !== undefined && item.badge !== 0 && (
+                  <span
+                    className={`ml-0.5 px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                      isActive
+                        ? "bg-white text-[#9e5a3c]"
+                        : "bg-white/15 text-white"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Mobile Full Navigation Slide-Out Drawer */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          <div className="relative w-4/5 max-w-xs bg-[#181615] text-[#faf8f5] h-full flex flex-col justify-between z-10 shadow-2xl border-r border-white/10 overflow-y-auto">
+            <div className="p-5">
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <div>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[#d9b88f] font-semibold block">
+                    MunchkinKittie
+                  </span>
+                  <h2 className="font-serif text-xl font-semibold text-white">
+                    Executive Suite
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center text-white/80 hover:text-white"
+                  aria-label="Close menu"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <nav className="mt-5 space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeSection === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveSection(item.id);
+                        setMobileMenuOpen(false);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-medium transition-all ${
+                        isActive
+                          ? "bg-[#9e5a3c] text-white font-semibold shadow-xs"
+                          : "text-white/75 hover:bg-white/8 hover:text-white"
+                      }`}
+                    >
+                      <span className="flex items-center gap-3">
+                        <Icon size={16} />
+                        {item.label}
+                      </span>
+                      {item.badge !== undefined && item.badge !== 0 && (
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            isActive
+                              ? "bg-white text-[#9e5a3c]"
+                              : "bg-white/15 text-white/90"
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+
+            <div className="p-5 border-t border-white/10 space-y-3 bg-[#131110]">
+              <div className="px-3 py-2 rounded-xl bg-white/5 text-[11px] text-white/70">
+                <div className="flex items-center justify-between">
+                  <span className="text-white/50">Gemini Engine</span>
+                  <span className="inline-flex items-center gap-1 text-[10px] text-[#84b59f] font-semibold">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#84b59f]" /> Active
+                  </span>
+                </div>
+                <p className="font-mono text-[11px] text-white mt-0.5 truncate">
+                  {aiHealth?.config?.primaryModel || "gemini-3.8-flash"}
+                </p>
+              </div>
+
+              <Link
+                to="/"
+                target="_blank"
+                rel="noreferrer"
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold"
+              >
+                <ExternalLink size={13} /> View Public Website
+              </Link>
+
+              <button
+                onClick={() => {
+                  dispatch(logout());
+                  navigate("/admin-only-login");
+                }}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-[#9e2a2b]/80 hover:bg-[#9e2a2b] text-white text-xs font-semibold transition-colors"
+              >
+                <LogOut size={13} /> Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
-      <main className="flex-1 p-6 sm:p-10 overflow-y-auto">
+      <main className="flex-1 p-3.5 sm:p-6 lg:p-10 pb-28 lg:pb-10 overflow-y-auto min-w-0">
         {/* ======================================================
             SECTION 1: OVERVIEW
            ====================================================== */}
@@ -1126,58 +1336,57 @@ export default function AdminDashboard() {
             </div>
 
             {/* KPI Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-              <div className="rounded-2xl bg-white border border-[#181615]/10 p-6">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#8c837a]">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+              <div className="rounded-2xl bg-white border border-[#181615]/10 p-4 sm:p-6">
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#8c837a]">
                   Kitten Catalogue
                 </span>
-                <p className="font-serif text-4xl font-semibold text-[#181615] mt-2">
+                <p className="font-serif text-2xl sm:text-4xl font-semibold text-[#181615] mt-1 sm:mt-2">
                   {kittens?.filter((k) => k.status === "Available").length || 0}
                 </p>
-                <p className="text-xs text-[#5c554e] mt-1">
+                <p className="text-[11px] sm:text-xs text-[#5c554e] mt-1 leading-snug">
                   Available now &bull;{" "}
                   {kittens?.filter((k) => k.status === "Draft").length || 0}{" "}
                   Drafts &bull; {kittens?.length || 0} Total
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-white border border-[#181615]/10 p-6">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#8c837a]">
-                  Adoption Applications
+              <div className="rounded-2xl bg-white border border-[#181615]/10 p-4 sm:p-6">
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#8c837a]">
+                  Applications
                 </span>
-                <p className="font-serif text-4xl font-semibold text-[#181615] mt-2">
+                <p className="font-serif text-2xl sm:text-4xl font-semibold text-[#181615] mt-1 sm:mt-2">
                   {applications?.length || 0}
                 </p>
-                <p className="text-xs text-[#5c554e] mt-1">
+                <p className="text-[11px] sm:text-xs text-[#5c554e] mt-1 leading-snug">
                   {applications?.filter((a) =>
                     ["New", "Pending", "Under Review"].includes(a.status)
                   ).length || 0}{" "}
-                  awaiting placement decision
+                  pending review
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-white border border-[#181615]/10 p-6">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#8c837a]">
-                  Email Correspondence
+              <div className="rounded-2xl bg-white border border-[#181615]/10 p-4 sm:p-6">
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#8c837a]">
+                  Dispatched Logs
                 </span>
-                <p className="font-serif text-4xl font-semibold text-[#181615] mt-2">
+                <p className="font-serif text-2xl sm:text-4xl font-semibold text-[#181615] mt-1 sm:mt-2">
                   {emailLogs?.length || 0}
                 </p>
-                <p className="text-xs text-[#5c554e] mt-1">
-                  {emailTemplates?.length || 12} active templates &bull; Resend
-                  verified
+                <p className="text-[11px] sm:text-xs text-[#5c554e] mt-1 leading-snug">
+                  {emailTemplates?.length || 12} templates &bull; Resend
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-white border border-[#181615]/10 p-6">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#8c837a]">
-                  Gemini Multimodal Router
+              <div className="rounded-2xl bg-white border border-[#181615]/10 p-4 sm:p-6">
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#8c837a]">
+                  Gemini Router
                 </span>
-                <p className="font-mono text-lg font-bold text-[#263b30] mt-3 truncate">
+                <p className="font-mono text-xs sm:text-base font-bold text-[#263b30] mt-1 sm:mt-3 truncate">
                   {aiHealth?.config?.primaryModel || "gemini-3.8-flash"}
                 </p>
-                <p className="text-xs text-[#5c554e] mt-1">
-                  Auto-fallback chain active (
+                <p className="text-[11px] sm:text-xs text-[#5c554e] mt-1 leading-snug">
+                  Auto-fallback (
                   {aiHealth?.config?.fallbackModels?.length || 6} models)
                 </p>
               </div>
@@ -1334,7 +1543,7 @@ export default function AdminDashboard() {
                   className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#faf8f5] border border-[#181615]/10 text-xs sm:text-sm"
                 />
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 max-w-full">
                 {["All", ...KITTEN_STATUSES].map((st) => (
                   <button
                     key={st}
@@ -1458,18 +1667,18 @@ export default function AdminDashboard() {
             </div>
 
             {/* 5-Step Progress Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:grid sm:grid-cols-5">
               {[
-                { step: 1, title: "1. Upload Photos (Max 10)" },
-                { step: 2, title: "2. Breeder Description" },
-                { step: 3, title: "3. Multimodal Analysis" },
-                { step: 4, title: "4. Provenance Audit" },
-                { step: 5, title: "5. Review & Publish" },
+                { step: 1, title: "1. Photos (10 Max)" },
+                { step: 2, title: "2. Description" },
+                { step: 3, title: "3. Multimodal AI" },
+                { step: 4, title: "4. Audit Checklist" },
+                { step: 5, title: "5. Review & Save" },
               ].map((s) => (
                 <button
                   key={s.step}
                   onClick={() => setAiStep(s.step)}
-                  className={`p-3 rounded-xl border text-left transition-all ${
+                  className={`p-2.5 sm:p-3 rounded-xl border text-left shrink-0 min-w-[135px] sm:min-w-0 transition-all ${
                     aiStep === s.step
                       ? "bg-[#181615] text-white border-[#181615]"
                       : aiStep > s.step
@@ -1477,7 +1686,9 @@ export default function AdminDashboard() {
                       : "bg-white text-[#5c554e] border-[#181615]/10"
                   }`}
                 >
-                  <span className="text-xs font-semibold block">{s.title}</span>
+                  <span className="text-xs font-semibold block whitespace-nowrap sm:whitespace-normal">
+                    {s.title}
+                  </span>
                 </button>
               ))}
             </div>
@@ -2175,7 +2386,7 @@ export default function AdminDashboard() {
                   className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#faf8f5] border border-[#181615]/10 text-xs sm:text-sm"
                 />
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 max-w-full">
                 {["All", ...APPLICATION_STATUSES].map((st) => (
                   <button
                     key={st}
@@ -2287,8 +2498,8 @@ export default function AdminDashboard() {
 
             {/* Application Detail & Status Update Modal */}
             {selectedApp && (
-              <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-                <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto">
+              <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3 sm:p-4">
+                <div className="bg-white rounded-2xl sm:rounded-3xl max-w-xl w-full p-4 sm:p-7 space-y-5 max-h-[92vh] overflow-y-auto">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="font-mono text-xs text-[#9e5a3c] font-semibold">
@@ -2444,7 +2655,7 @@ export default function AdminDashboard() {
                   Customer Enquiries ({filteredContacts.length})
                 </h2>
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 max-w-full">
                 {["All", ...ENQUIRY_STATUSES].map((st) => (
                   <button
                     key={st}
@@ -2590,7 +2801,7 @@ export default function AdminDashboard() {
                   placeholder="Search 12+ templates..."
                   className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#181615]/10 text-xs"
                 />
-                <div className="flex flex-wrap gap-1">
+                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1 max-w-full">
                   {[
                     "All",
                     "Enquiry",
@@ -2933,7 +3144,7 @@ export default function AdminDashboard() {
               </h2>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 max-w-full">
               {[
                 {
                   id: "upcoming",
@@ -3469,6 +3680,22 @@ export default function AdminDashboard() {
 
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-[#181615]">
+                  Public Cattery Contact Email (Displayed Across Public Pages &amp; Footer)
+                </label>
+                <input
+                  type="email"
+                  value={contactEmailInput}
+                  onChange={(e) => setContactEmailInput(e.target.value)}
+                  placeholder="e.g. info@munchkinkittie.com"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm"
+                />
+                <p className="text-[11px] text-[#8c837a]">
+                  This official email address feeds dynamically into your public footer, contact page, and direct mailto links.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#181615]">
                   Designated Administrator Test Email Address (For Safe Template
                   Testing)
                 </label>
@@ -3499,6 +3726,7 @@ export default function AdminDashboard() {
                       updateLocation({
                         mainLocation: locationInput,
                         phoneNumber: phoneInput,
+                        contactEmail: contactEmailInput,
                       })
                     );
                     await handleUpdateAiConfig({
@@ -3521,8 +3749,8 @@ export default function AdminDashboard() {
           MODAL 1: CREATE / EDIT KITTEN (Up to 10 Photos + Reorder)
          ====================================================== */}
       {showKittenModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-3xl w-full p-4 sm:p-7 space-y-6 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#181615]/10 pb-4">
               <h3 className="font-serif text-2xl font-semibold text-[#181615]">
                 {editingKitten
@@ -3783,8 +4011,8 @@ export default function AdminDashboard() {
           MODAL 2: ONE-CLICK TEMPLATE EMAIL COMPOSER
          ====================================================== */}
       {composerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-2xl w-full p-4 sm:p-7 space-y-5 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#181615]/10 pb-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wider text-[#9e5a3c]">
@@ -3917,6 +4145,93 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+      {/* Fixed Mobile Bottom App Dock */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#181615]/95 backdrop-blur-md border-t border-white/10 px-3 py-2 flex items-center justify-around shadow-[0_-8px_25px_rgba(0,0,0,0.35)] pb-[calc(env(safe-area-inset-bottom)+0.5rem)]">
+        <button
+          onClick={() => {
+            setActiveSection("overview");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className={`flex flex-col items-center gap-1 p-1 text-[10px] font-medium transition-colors ${
+            activeSection === "overview"
+              ? "text-[#e8b496]"
+              : "text-white/60 hover:text-white"
+          }`}
+        >
+          <LayoutDashboard size={18} />
+          <span>Overview</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveSection("kittens");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className={`flex flex-col items-center gap-1 p-1 text-[10px] font-medium relative transition-colors ${
+            activeSection === "kittens"
+              ? "text-[#e8b496]"
+              : "text-white/60 hover:text-white"
+          }`}
+        >
+          <Cat size={18} />
+          <span>Kittens</span>
+          {kittens?.length > 0 && (
+            <span className="absolute top-0 right-1.5 h-3 min-w-[12px] px-0.5 rounded-full bg-[#9e5a3c] text-white text-[8px] font-bold flex items-center justify-center">
+              {kittens.length}
+            </span>
+          )}
+        </button>
+
+        {/* Central AI Studio Pill Button */}
+        <button
+          onClick={() => {
+            setActiveSection("ai-assistant");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className={`-mt-3 flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl border transition-all ${
+            activeSection === "ai-assistant"
+              ? "bg-[#9e5a3c] text-white border-[#e8b496]/40 shadow-lg scale-105"
+              : "bg-[#263b30] text-white border-white/10 hover:bg-[#1e2f26]"
+          }`}
+        >
+          <Sparkles size={16} className="text-[#e8b496]" />
+          <span className="text-[10px] font-bold tracking-tight">AI Studio</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveSection("applications");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className={`flex flex-col items-center gap-1 p-1 text-[10px] font-medium relative transition-colors ${
+            activeSection === "applications"
+              ? "text-[#e8b496]"
+              : "text-white/60 hover:text-white"
+          }`}
+        >
+          <FileText size={18} />
+          <span>Apps</span>
+          {applications?.filter((a) =>
+            ["New", "Pending", "Under Review"].includes(a.status)
+          ).length > 0 && (
+            <span className="absolute top-0 right-1.5 h-3 min-w-[12px] px-0.5 rounded-full bg-[#9e5a3c] text-white text-[8px] font-bold flex items-center justify-center">
+              {
+                applications.filter((a) =>
+                  ["New", "Pending", "Under Review"].includes(a.status)
+                ).length
+              }
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          className="flex flex-col items-center gap-1 p-1 text-[10px] font-medium text-white/60 hover:text-white transition-colors"
+        >
+          <MoreHorizontal size={18} />
+          <span>More</span>
+        </button>
+      </div>
     </div>
   );
 }

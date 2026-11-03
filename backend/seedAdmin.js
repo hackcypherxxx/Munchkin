@@ -17,7 +17,7 @@ const hashedPassword = await bcrypt.hash(plainPassword, 10);
 console.log("NEW HASH:", hashedPassword);
 
 await Admin.create({
-  email: "cherodriguez555@gmail.com",
+  email: process.env.ADMIN_EMAIL || "info@munchkinkittie.com",
   password: hashedPassword,
 });
 

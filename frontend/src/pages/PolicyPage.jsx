@@ -1,9 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import PageMeta from '../components/PageMeta';
 import { ShieldCheck, FileText, Lock, Heart } from 'lucide-react';
 
 export default function PolicyPage() {
+  const { settings } = useSelector((state) => state.settings);
+  const activeSettings = Array.isArray(settings) ? settings[0] : settings;
+  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+
   return (
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
@@ -53,7 +58,7 @@ export default function PolicyPage() {
             Every kitten is covered by a 72-hour general health guarantee and a 2-year genetic
             warranty against life-threatening congenital defects. Furthermore, a MunchkinKittie cat
             must never be surrendered to a shelter or humane society; if an adopter can no longer
-            care for their cat at any point in the cat’s life, our Owego, NY cattery will assist in
+            care for their cat at any point in the cat’s life, our {catteryLocation} cattery will assist in
             receiving or safely rehoming the cat.
           </p>
         </div>

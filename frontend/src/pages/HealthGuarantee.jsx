@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import PageMeta from '../components/PageMeta';
 import {
   ShieldCheck,
@@ -13,6 +14,10 @@ import {
 import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 
 export default function HealthGuarantee() {
+  const { settings } = useSelector((state) => state.settings);
+  const activeSettings = Array.isArray(settings) ? settings[0] : settings;
+  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+
   return (
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
@@ -31,7 +36,7 @@ export default function HealthGuarantee() {
               Our Comprehensive Health Guarantee
             </h1>
             <p className="text-base sm:text-lg text-[#575049] leading-relaxed max-w-2xl">
-              Every kitten leaving our Owego, NY nursery is examined by a licensed veterinarian,
+              Every kitten leaving our {catteryLocation} nursery is examined by a licensed veterinarian,
               vaccinated, dewormed, microchipped, and backed by our written 3-part health commitment.
             </p>
           </div>
@@ -39,7 +44,7 @@ export default function HealthGuarantee() {
             <div className="aspect-[16/11] rounded-[28px] overflow-hidden bg-white border border-[#181615]/10 editorial-shadow">
               <img
                 src={CATTERY_PHOTOS.editorialPortrait}
-                alt="Healthy Munchkin kitten in Owego, NY"
+                alt={`Healthy Munchkin kitten in ${catteryLocation}`}
                 className="h-full w-full object-cover"
               />
             </div>

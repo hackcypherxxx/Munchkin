@@ -20,7 +20,13 @@ export const getSettings = async (req, res) => {
 // UPDATE location & settings (admin only)
 export const updateLocation = async (req, res) => {
   try {
-    const { mainLocation, phoneNumber, adminTestEmail, autoSendStatusEmails } = req.body;
+    const {
+      mainLocation,
+      phoneNumber,
+      contactEmail,
+      adminTestEmail,
+      autoSendStatusEmails,
+    } = req.body;
 
     let settings = await Settings.findOne();
 
@@ -33,6 +39,9 @@ export const updateLocation = async (req, res) => {
     }
     if (phoneNumber !== undefined) {
       settings.phoneNumber = String(phoneNumber).trim();
+    }
+    if (contactEmail !== undefined) {
+      settings.contactEmail = String(contactEmail).trim().toLowerCase();
     }
     if (adminTestEmail !== undefined) {
       settings.adminTestEmail = String(adminTestEmail).trim();

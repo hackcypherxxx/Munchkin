@@ -23,6 +23,7 @@ export default function ContactUs() {
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
   const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
+  const catteryEmail = activeSettings?.contactEmail || 'info@munchkinkittie.com';
 
   const [formData, setFormData] = useState({
     name: '',
@@ -108,7 +109,7 @@ export default function ContactUs() {
                 )}
 
                 <a
-                  href="mailto:kittiemunchkin@gmail.com"
+                  href={`mailto:${catteryEmail}`}
                   className="flex items-start gap-4 p-4 rounded-2xl bg-[#faf8f5] border border-[#181615]/8 hover:border-[#9e5a3c] transition-colors"
                 >
                   <div className="h-10 w-10 rounded-xl bg-[#181615] text-[#e8b496] flex items-center justify-center shrink-0">
@@ -119,7 +120,7 @@ export default function ContactUs() {
                       Direct Email
                     </span>
                     <span className="text-sm font-semibold text-[#181615]">
-                      kittiemunchkin@gmail.com
+                      {catteryEmail}
                     </span>
                   </div>
                 </a>
@@ -246,7 +247,7 @@ export default function ContactUs() {
                       <option value="New Kitten Interest">Available Kitten Question</option>
                       <option value="Upcoming Litter Waitlist">Upcoming Litter Waitlist</option>
                       <option value="Shipping & Delivery">
-                        Flight Nanny / Owego Pickup Question
+                        Flight Nanny / {catteryLocation} Pickup Question
                       </option>
                       <option value="General Inquiry">General Question</option>
                     </select>

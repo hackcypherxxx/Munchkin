@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, Eye, EyeOff, ArrowRight, ShieldCheck, Loader2, ArrowLeft } from 'lucide-react';
 import { loginAdmin } from '../features/auth/authSlice';
 import PageMeta from '../components/PageMeta';
-import logoImg from '../assets/LOGO1.png';
 import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 
 export default function LoginPage() {
@@ -12,6 +11,9 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const { admin, token, loading, error } = useSelector((state) => state.auth);
+  const { settings } = useSelector((state) => state.settings);
+  const activeSettings = Array.isArray(settings) ? settings[0] : settings;
+  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -49,23 +51,18 @@ export default function LoginPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#181615] via-[#181615]/60 to-[#181615]/40" />
 
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="h-11 w-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
-            <img src={logoImg} alt="MunchkinKittie" className="h-8 w-8 object-contain" />
-          </div>
-          <div>
-            <span className="block font-serif text-2xl font-semibold leading-none">
-              MunchkinKittie
-            </span>
-            <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e8b496] mt-1">
-              Nursery Management Suite
-            </span>
-          </div>
+        <div className="relative z-10">
+          <span className="font-serif text-3xl font-semibold tracking-[-0.02em] text-white leading-none">
+            Munchkin<span className="text-[#e8b496]">Kittie</span>
+          </span>
+          <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e8b496] mt-1.5">
+            Nursery Management Suite
+          </span>
         </div>
 
         <div className="relative z-10 space-y-4 max-w-md">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[#e8b496] text-xs font-semibold">
-            <ShieldCheck size={14} /> Owego, NY Operations
+            <ShieldCheck size={14} /> {catteryLocation} Operations
           </span>
           <h2 className="font-serif text-4xl font-medium leading-tight">
             Manage available kittens, adoption applications, and family reviews in one place.

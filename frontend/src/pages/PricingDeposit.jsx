@@ -24,7 +24,7 @@ export default function PricingDeposit() {
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
         title="Pricing & Reservation Policy ($350–$500)"
-        description="Transparent adoption fees ($350–$500) for home-raised Munchkin kittens in Owego, NY. Learn what is included with every adoption."
+        description={`Transparent adoption fees ($350–$500) for home-raised Munchkin kittens in ${catteryLocation}. Learn what is included with every adoption.`}
       />
 
       {/* Editorial Hero */}

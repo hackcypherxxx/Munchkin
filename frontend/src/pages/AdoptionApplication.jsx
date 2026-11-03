@@ -133,7 +133,7 @@ export default function AdoptionApplication() {
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
         title={preSelectedName ? `Adopt ${preSelectedName} — Application` : 'Adoption Application'}
-        description="Submit your MunchkinKittie adoption application. Reviewed personally within 24 hours by our Owego, NY cattery team."
+        description={`Submit your MunchkinKittie adoption application. Reviewed personally within 24 hours by our ${catteryLocation} cattery team.`}
       />
 
       {/* Editorial Header */}
@@ -533,7 +533,7 @@ export default function AdoptionApplication() {
                           required
                           value={formData.paymentMethodOther}
                           onChange={handleChange}
-                          placeholder="e.g., Cash on Owego, NY local pickup"
+                          placeholder={`e.g., Cash on ${catteryLocation} local pickup`}
                           className="w-full px-4 py-3 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm text-[#181615]"
                         />
                       </div>

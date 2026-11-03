@@ -518,7 +518,7 @@ export default function KittenDetail() {
                   </li>
                   <li className="flex items-center gap-2.5">
                     <Plane size={16} className="text-[#9e5a3c] shrink-0" />
-                    <span>Free Owego, NY Pickup or Nationwide Flight Nanny Delivery</span>
+                    <span>Free {catteryLocation} Pickup or Nationwide Flight Nanny Delivery</span>
                   </li>
                 </ul>
               </div>

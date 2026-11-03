@@ -22,7 +22,6 @@ import {
   MapPin,
   Phone,
 } from 'lucide-react';
-import logoImg from '../assets/LOGO1.png';
 import { CATTERY_PHOTOS, formatKittenAge } from '../utils/kittenFormatters';
 
 export default function Navbar() {
@@ -149,23 +148,15 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-          {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-3 group shrink-0">
-            <div className="h-11 w-11 rounded-2xl bg-[#f3efea] border border-[#181615]/10 flex items-center justify-center overflow-hidden shadow-2xs group-hover:border-[#9e5a3c]/40 transition-colors">
-              <img
-                src={logoImg}
-                alt="MunchkinKittie logo"
-                className="h-8 w-8 object-contain"
-              />
-            </div>
-            <div>
-              <span className="block font-serif text-2xl sm:text-[26px] font-semibold tracking-tight text-[#181615] leading-none">
-                MunchkinKittie
-              </span>
-              <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8a8075] mt-1">
-                {catteryLocation}
-              </span>
-            </div>
+          {/* Brand Logo - Professional Clean Text Wordmark */}
+          <Link
+            to="/"
+            className="group shrink-0 inline-flex items-baseline py-1 transition-opacity hover:opacity-95"
+            aria-label="MunchkinKittie"
+          >
+            <span className="font-serif text-2xl sm:text-[27px] font-semibold tracking-[-0.02em] text-[#181615] group-hover:text-[#9e5a3c] transition-colors leading-none">
+              Munchkin<span className="text-[#9e5a3c]">Kittie</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -404,7 +395,7 @@ export default function Navbar() {
                           Delivery & Flight Nanny
                         </p>
                         <p className="text-xs text-[#575049] mt-0.5">
-                          In-cabin courier, VIP ground transport, or Owego pickup.
+                          In-cabin courier, VIP ground transport, or {catteryLocation} pickup.
                         </p>
                       </div>
                     </Link>

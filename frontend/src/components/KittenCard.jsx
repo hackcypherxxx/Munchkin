@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { ArrowUpRight, Camera, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
 import { getKittenPresentation } from '../utils/kittenFormatters';
 
@@ -9,6 +10,10 @@ import { getKittenPresentation } from '../utils/kittenFormatters';
  */
 export default function KittenCard({ kitten, priority = false }) {
   if (!kitten || !kitten._id) return null;
+
+  const { settings } = useSelector((state) => state.settings);
+  const activeSettings = Array.isArray(settings) ? settings[0] : settings;
+  const catteryLocation = kitten.location || activeSettings?.mainLocation || 'Owego, NY';
 
   const {
     ageLabel,
@@ -33,7 +38,7 @@ export default function KittenCard({ kitten, priority = false }) {
       <div className="relative aspect-[4/4.7] w-full overflow-hidden bg-[#f3efea]">
         <img
           src={primaryImage}
-          alt={`${kitten.name} — ${kitten.gender || ''} Munchkin kitten in ${kitten.location || 'Owego, NY'}`}
+          alt={`${kitten.name} — ${kitten.gender || ''} Munchkin kitten in ${catteryLocation}`}
           className={`h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.04] ${
             secondaryImage ? 'group-hover:opacity-0' : ''
           }`}
@@ -91,7 +96,7 @@ export default function KittenCard({ kitten, priority = false }) {
         <div className="absolute bottom-3 inset-x-3.5 flex items-center justify-between text-white/95 text-[11px] font-medium">
           <span className="inline-flex items-center gap-1 bg-[#181615]/55 backdrop-blur-md px-2.5 py-1 rounded-full">
             <MapPin size={11} className="text-[#e8b496]" />
-            {kitten.location || 'Owego, NY'}
+            {catteryLocation}
           </span>
           {kitten.registryId && (
             <span className="font-mono text-[10px] tracking-wider bg-[#181615]/55 backdrop-blur-md px-2.5 py-1 rounded-full">

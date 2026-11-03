@@ -38,7 +38,7 @@ export default function ShippingDelivery() {
               Safe Delivery & {catteryLocation} Pickup
             </h1>
             <p className="text-base sm:text-lg text-[#575049] leading-relaxed max-w-2xl">
-              Whether you live nearby in New York or across the country, we make bringing your
+              Whether you live nearby in {catteryLocation} or across the country, we make bringing your
               kitten home calm, safe, and personal. Kittens never travel unattended in cargo.
             </p>
           </div>

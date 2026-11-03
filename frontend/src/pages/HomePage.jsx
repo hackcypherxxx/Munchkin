@@ -20,14 +20,14 @@ import {
 } from 'lucide-react';
 import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 
-const HOME_FAQS = [
+const getHomeFaqs = (location) => [
   {
     q: 'What is the adoption fee for a MunchkinKittie kitten and what does it include?',
     a: 'Our available Munchkin kittens are priced between $350 and $500 depending on coat variety, markings, and conformation. Every adoption includes a complete veterinary examination, age-appropriate FVRCP vaccinations, routine deworming, microchip identification, health certificate, and our written 72-hour general health & 2-year genetic guarantee.',
   },
   {
     q: 'Where is your cattery located, and can we pick up our kitten in person?',
-    a: 'We are a home-based cattery located in Owego, New York. Approved families are warmly welcome to pick up their kitten in person in Owego, NY at no delivery charge, or choose our in-cabin Flight Nanny or VIP ground transport options.',
+    a: `We are a home-based cattery located in ${location}. Approved families are warmly welcome to pick up their kitten in person in ${location} at no delivery charge, or choose our in-cabin Flight Nanny or VIP ground transport options.`,
   },
   {
     q: 'How does in-cabin Flight Nanny delivery work for out-of-state families?',
@@ -51,6 +51,7 @@ export default function HomePage() {
   const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
 
+  const homeFaqs = getHomeFaqs(catteryLocation);
   const [openFaq, setOpenFaq] = useState(0);
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-[#faf8f5]">
       <PageMeta
         title="Home-Raised Munchkin Kittens"
-        description="Explore affectionate, veterinary-checked Munchkin kittens raised indoors in Owego, NY. View multi-photo profiles, transparent pricing ($350–$500), and nationwide Flight Nanny delivery."
+        description={`Explore affectionate, veterinary-checked Munchkin kittens raised indoors in ${catteryLocation}. View multi-photo profiles, transparent pricing ($350–$500), and nationwide Flight Nanny delivery.`}
       />
 
       {/* 1. Editorial Hero Showcase */}
@@ -155,7 +156,7 @@ export default function HomePage() {
           </div>
 
           <div className="space-y-3.5">
-            {HOME_FAQS.map((item, idx) => {
+            {homeFaqs.map((item, idx) => {
               const isOpen = openFaq === idx;
               return (
                 <div
@@ -172,9 +173,8 @@ export default function HomePage() {
                       {item.q}
                     </span>
                     <span
-                      className={`h-8 w-8 rounded-full bg-[#f3efea] text-[#181615] flex items-center justify-center shrink-0 transition-transform duration-200 ${
-                        isOpen ? 'rotate-180 bg-[#181615] text-white' : ''
-                      }`}
+                      className={`h-8 w-8 rounded-full bg-[#f3efea] text-[#181615] flex items-center justify-center shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 bg-[#181615] text-white' : ''
+                        }`}
                     >
                       <ChevronDown size={16} />
                     </span>
@@ -234,7 +234,7 @@ export default function HomePage() {
             <div className="lg:col-span-5 relative h-full min-h-[300px] lg:min-h-[420px]">
               <img
                 src={CATTERY_PHOTOS.heroPrimary}
-                alt="Clover Munchkin kitten in Owego, NY"
+                alt={`Clover Munchkin kitten in ${catteryLocation}`}
                 className="h-full w-full object-cover"
               />
               <div className="hidden lg:block absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-[#181615] to-transparent" />

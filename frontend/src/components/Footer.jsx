@@ -11,13 +11,13 @@ import {
   Plane,
   Stethoscope,
 } from 'lucide-react';
-import logoImg from '../assets/LOGO1.png';
 
 export default function Footer() {
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
   const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
+  const catteryEmail = activeSettings?.contactEmail || 'info@munchkinkittie.com';
 
   return (
     <footer className="bg-[#181615] text-[#f3efea] border-t border-white/10">
@@ -55,22 +55,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
           {/* Column 1: Brand Identity */}
           <div className="lg:col-span-4 space-y-5">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
-                <img
-                  src={logoImg}
-                  alt="MunchkinKittie logo"
-                  className="h-8 w-8 object-contain brightness-110"
-                />
-              </div>
-              <div>
-                <span className="block font-serif text-2xl font-semibold text-white leading-none">
-                  MunchkinKittie
-                </span>
-                <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e8b496] mt-1">
-                  {catteryLocation}
-                </span>
-              </div>
+            <Link
+              to="/"
+              className="group inline-flex items-baseline py-1 transition-opacity hover:opacity-95"
+              aria-label="MunchkinKittie"
+            >
+              <span className="font-serif text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-white group-hover:text-[#e8b496] transition-colors leading-none">
+                Munchkin<span className="text-[#e8b496]">Kittie</span>
+              </span>
             </Link>
 
             <p className="text-sm text-white/70 leading-relaxed max-w-sm">
@@ -97,10 +89,10 @@ export default function Footer() {
               <div className="flex items-center gap-2.5">
                 <Mail size={14} className="text-[#e8b496] shrink-0" />
                 <a
-                  href="mailto:kittiemunchkin@gmail.com"
+                  href={`mailto:${catteryEmail}`}
                   className="hover:text-white transition-colors"
                 >
-                  kittiemunchkin@gmail.com
+                  {catteryEmail}
                 </a>
               </div>
             </div>

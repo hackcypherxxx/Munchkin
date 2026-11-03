@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   ShieldCheck,
   Heart,
@@ -11,21 +12,21 @@ import {
 } from 'lucide-react';
 import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 
-const BREED_TABS = [
+const getBreedTabs = (location) => [
   {
     id: 'temperament',
     label: 'Affectionate Temperament',
     eyebrow: 'People-Oriented Companions',
     title: 'Playful, curious, and deeply devoted to indoor family life.',
     description:
-      'Munchkin kittens are cherished for their outgoing, gentle nature. Raised directly in our living spaces in Owego, NY, our kittens are accustomed to normal household sounds, gentle handling, and interactive play from their earliest weeks.',
+      `Munchkin kittens are cherished for their outgoing, gentle nature. Raised directly in our living spaces in ${location}, our kittens are accustomed to normal household sounds, gentle handling, and interactive play from their earliest weeks.`,
     highlights: [
       'Raised underfoot in a calm indoor family environment',
       'Confident, socialized disposition with adults and children',
       'Fully litter-box trained and accustomed to scratching posts',
     ],
     image: CATTERY_PHOTOS.editorialCuddle,
-    caption: 'Clover — 8-week-old Shorthair Munchkin in Owego, NY',
+    caption: `Clover — 8-week-old Shorthair Munchkin in our nursery`,
   },
   {
     id: 'coat',
@@ -63,7 +64,7 @@ const BREED_TABS = [
     eyebrow: 'Documented Medical Care',
     title: 'Complete vaccination, deworming, and microchip records included.',
     description:
-      'Before leaving our Owego, NY nursery, every kitten completes a thorough physical examination with a licensed veterinarian. Families receive the signed health certificate, vaccination log, and our written 72-hour general & 2-year genetic guarantee.',
+      `Before leaving our ${location} nursery, every kitten completes a thorough physical examination with a licensed veterinarian. Families receive the signed health certificate, vaccination log, and our written 72-hour general & 2-year genetic guarantee.`,
     highlights: [
       'Age-appropriate core FVRCP vaccination series',
       'Routine preventative deworming & fecal screening',
@@ -75,8 +76,13 @@ const BREED_TABS = [
 ];
 
 export default function TrustPillars() {
-  const [activeTab, setActiveTab] = useState(BREED_TABS[0].id);
-  const currentTab = BREED_TABS.find((t) => t.id === activeTab) || BREED_TABS[0];
+  const { settings } = useSelector((state) => state.settings);
+  const activeSettings = Array.isArray(settings) ? settings[0] : settings;
+  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+
+  const tabs = getBreedTabs(catteryLocation);
+  const [activeTab, setActiveTab] = useState(tabs[0].id);
+  const currentTab = tabs.find((t) => t.id === activeTab) || tabs[0];
 
   return (
     <div className="bg-[#f3efea] border-b border-[#181615]/10">
@@ -84,7 +90,7 @@ export default function TrustPillars() {
       <section className="py-20 sm:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
           <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#9e5a3c]">
-            <Home size={13} /> Our Owego, NY Home Nursery
+            <Home size={13} /> Our {catteryLocation} Home Nursery
           </span>
           <h2 className="mt-4 font-serif text-3xl sm:text-5xl font-medium text-[#181615] tracking-tight leading-[1.12]">
             It’s not about high-volume breeding.{' '}
@@ -101,7 +107,7 @@ export default function TrustPillars() {
           <div className="lg:col-span-7 group relative rounded-[28px] overflow-hidden bg-[#181615] text-white min-h-[420px] flex flex-col justify-end p-7 sm:p-10">
             <img
               src={CATTERY_PHOTOS.editorialNursery}
-              alt="Munchkin kitten raised indoors in Owego, NY"
+              alt={`Munchkin kitten raised indoors in ${catteryLocation}`}
               className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#181615] via-[#181615]/45 to-transparent" />
@@ -170,7 +176,7 @@ export default function TrustPillars() {
                 />
               </div>
               <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
-                <span className="text-xs text-white/70">Local Owego Pickup or Flight Nanny</span>
+                <span className="text-xs text-white/70">Local {catteryLocation} Pickup or Flight Nanny</span>
                 <Link
                   to="/pricing-deposit"
                   className="inline-flex items-center gap-1 text-xs font-semibold text-[#e8b496] hover:text-white"
@@ -198,14 +204,14 @@ export default function TrustPillars() {
 
             {/* Interactive Tab Switcher */}
             <div className="flex flex-wrap gap-2">
-              {BREED_TABS.map((tab) => (
+              {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-4 py-2.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${activeTab === tab.id
-                      ? 'bg-[#181615] text-white shadow-xs'
-                      : 'bg-[#f3efea] text-[#575049] hover:bg-[#e8e1d5] hover:text-[#181615]'
+                    ? 'bg-[#181615] text-white shadow-xs'
+                    : 'bg-[#f3efea] text-[#575049] hover:bg-[#e8e1d5] hover:text-[#181615]'
                     }`}
                 >
                   {tab.label}

@@ -1,125 +1,432 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="./src/assets/LOGO1.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MunchkinKittie | Hand-Raised Munchkin Kittens</title>
-    <meta
-      name="description"
-      content="Discover home-raised, veterinary-certified Munchkin kittens in Owego, NY. Browse available kittens, view multi-photo profiles, and apply for adoption with nationwide delivery."
-    />
 
-    <!-- Google Fonts: Cormorant Garamond, Plus Jakarta Sans & JetBrains Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="./src/assets/LOGO1.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MunchkinKittie | Hand-Raised Munchkin Kittens</title>
+  <meta name="description"
+    content="Discover home-raised, veterinary-certified Munchkin kittens in Owego, NY. Browse available kittens, view multi-photo profiles, and apply for adoption with nationwide delivery." />
 
-    <style>
-      :root {
-        --bg-canvas: #faf8f5;
-        --bg-subtle: #f3efea;
-        --bg-stone: #e8e1d5;
-        --bg-surface: #ffffff;
-        --bg-dark: #181615;
-        --text-primary: #181615;
-        --text-secondary: #575049;
-        --text-muted: #8a8075;
-        --accent-bronze: #9e5a3c;
-        --accent-bronze-hover: #84472c;
-        --accent-sage: #263b30;
-        --border-subtle: rgba(24, 22, 21, 0.09);
+  <!-- Google Fonts: Cormorant Garamond, Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-canvas: #faf8f5;
+      --bg-subtle: #f3efea;
+      --bg-stone: #e8e1d5;
+      --bg-surface: #ffffff;
+      --bg-dark: #181615;
+      --text-primary: #181615;
+      --text-secondary: #575049;
+      --text-muted: #8a8075;
+      --accent-bronze: #9e5a3c;
+      --accent-bronze-hover: #84472c;
+      --accent-sage: #263b30;
+      --border-subtle: rgba(24, 22, 21, 0.09);
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Lock scroll while the intro is playing */
+    body.is-loading {
+      overflow: hidden;
+    }
+
+    /* Site content gently fades up as the curtains part */
+    #root {
+      transition: opacity 0.9s var(--ease-out-expo);
+    }
+
+    body.is-loading #root {
+      opacity: 0;
+    }
+
+    /* ============================================================
+         PRELOADER
+         ============================================================ */
+    .preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      pointer-events: auto;
+    }
+
+    .preloader.is-open {
+      pointer-events: none;
+    }
+
+    /* Two curtain panels that split apart on exit */
+    .preloader__panel {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 50.5%;
+      background: linear-gradient(180deg, #fbf9f7 0%, #f5f1eb 100%);
+      will-change: transform;
+      transition: transform 0.85s var(--ease-in-out-quart);
+    }
+
+    .preloader__panel--left {
+      left: 0;
+    }
+
+    .preloader__panel--right {
+      right: 0;
+    }
+
+    .preloader.is-open .preloader__panel--left {
+      transform: translate3d(-100%, 0, 0);
+    }
+
+    .preloader.is-open .preloader__panel--right {
+      transform: translate3d(100%, 0, 0);
+    }
+
+    /* Centre stack */
+    .preloader__inner {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 26px;
+      transition:
+        opacity 0.42s ease,
+        transform 0.42s var(--ease-out-expo),
+        filter 0.42s ease;
+    }
+
+    .preloader__inner.is-done {
+      opacity: 0;
+      transform: translateY(-14px) scale(0.97);
+      filter: blur(4px);
+    }
+
+    /* --- Paw mark --- */
+    .preloader__mark {
+      width: 96px;
+      height: 96px;
+    }
+
+    .preloader__mark svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .preloader__ring-track {
+      fill: none;
+      stroke: rgba(24, 22, 21, 0.08);
+      stroke-width: 1.4;
+    }
+
+    .preloader__ring {
+      fill: none;
+      stroke: var(--accent-bronze);
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-dasharray: 289;
+      stroke-dashoffset: 289;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      animation: ringDraw 1.15s var(--ease-out-expo) 0.1s forwards;
+    }
+
+    @keyframes ringDraw {
+      to {
+        stroke-dashoffset: 0;
       }
+    }
 
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background-color: var(--bg-canvas);
-        color: var(--text-primary);
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
+    .preloader__paw>* {
+      fill: var(--text-primary);
+      transform-box: fill-box;
+      transform-origin: 50% 50%;
+      transform: scale(0);
+      opacity: 0;
+      animation: pawPop 0.55s var(--ease-spring) forwards;
+    }
 
-      #preloader {
-        position: fixed;
-        inset: 0;
-        background: #faf8f5;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        transition: opacity 0.25s ease-out, visibility 0.25s;
-      }
+    .preloader__paw>*:nth-child(1) {
+      animation-delay: 0.72s;
+    }
 
-      .loader-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 14px;
-      }
+    .preloader__paw>*:nth-child(2) {
+      animation-delay: 0.79s;
+    }
 
-      .ring {
-        width: 34px;
-        height: 34px;
-        border: 2px solid rgba(24, 22, 21, 0.08);
-        border-top: 2px solid #181615;
-        border-right: 2px solid #9e5a3c;
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-      }
+    .preloader__paw>*:nth-child(3) {
+      animation-delay: 0.86s;
+    }
 
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
+    .preloader__paw>*:nth-child(4) {
+      animation-delay: 0.93s;
+    }
 
-      .loader-hidden {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        display: none !important;
+    .preloader__paw>*:nth-child(5) {
+      animation-delay: 1.02s;
+    }
+
+    @keyframes pawPop {
+      to {
+        transform: scale(1);
+        opacity: 1;
       }
-    </style>
-  </head>
-  <body>
-    <div id="preloader">
-      <div class="loader-content">
-        <div class="ring"></div>
-        <p
-          style="
-            color: #181615;
-            font-weight: 600;
-            font-size: 11px;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            margin: 0;
-          "
-        >
-          MunchkinKittie
-        </p>
+    }
+
+    /* --- Wordmark --- */
+    .preloader__word {
+      display: flex;
+      padding-left: 0.26em;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+
+    .preloader__word span {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(14px);
+      animation: riseIn 0.8s var(--ease-out-expo) forwards;
+      animation-delay: calc(0.9s + var(--i) * 0.035s);
+    }
+
+    @keyframes riseIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* --- Progress meter --- */
+    .preloader__meter {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      opacity: 0;
+      animation: fadeIn 0.7s ease 1.15s forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .preloader__track {
+      position: relative;
+      width: 128px;
+      height: 1px;
+      background: rgba(24, 22, 21, 0.12);
+      overflow: hidden;
+    }
+
+    .preloader__bar {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--accent-bronze), #c98a63);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.28s cubic-bezier(0.25, 0.8, 0.35, 1);
+    }
+
+    .preloader__pct {
+      min-width: 2.4ch;
+      text-align: right;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 9.5px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    /* Hard hide (fallback / after removal) */
+    .loader-hidden {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    /* Respect reduced-motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0s !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="preloader" class="preloader" role="status" aria-label="Loading MunchkinKittie">
+    <div class="preloader__panel preloader__panel--left"></div>
+    <div class="preloader__panel preloader__panel--right"></div>
+
+    <div class="preloader__inner">
+      <div class="preloader__mark" aria-hidden="true">
+        <svg viewBox="0 0 100 100" role="presentation" focusable="false">
+          <circle class="preloader__ring-track" cx="50" cy="50" r="46"></circle>
+          <circle class="preloader__ring" cx="50" cy="50" r="46"></circle>
+          <g class="preloader__paw">
+            <circle cx="32" cy="37" r="7"></circle>
+            <circle cx="43.5" cy="28" r="7.5"></circle>
+            <circle cx="56.5" cy="28" r="7.5"></circle>
+            <circle cx="68" cy="37" r="7"></circle>
+            <ellipse cx="50" cy="60" rx="17" ry="14"></ellipse>
+          </g>
+        </svg>
+      </div>
+
+      <div class="preloader__word" aria-hidden="true">
+        <span style="--i: 0">M</span>
+        <span style="--i: 1">u</span>
+        <span style="--i: 2">n</span>
+        <span style="--i: 3">c</span>
+        <span style="--i: 4">h</span>
+        <span style="--i: 5">k</span>
+        <span style="--i: 6">i</span>
+        <span style="--i: 7">n</span>
+        <span style="--i: 8">K</span>
+        <span style="--i: 9">i</span>
+        <span style="--i: 10">t</span>
+        <span style="--i: 11">t</span>
+        <span style="--i: 12">i</span>
+        <span style="--i: 13">e</span>
+      </div>
+
+      <div class="preloader__meter" aria-hidden="true">
+        <div class="preloader__track"><i class="preloader__bar"></i></div>
+        <div class="preloader__pct">00</div>
       </div>
     </div>
+  </div>
 
-    <div id="root"></div>
+  <div id="root"></div>
 
-    <script type="module" src="/src/main.jsx"></script>
+  <script type="module" src="/src/main.jsx"></script>
 
-    <script>
-      window.addEventListener('load', () => {
-        const loader = document.getElementById('preloader');
-        if (loader) {
-          setTimeout(() => {
-            loader.classList.add('loader-hidden');
-          }, 220);
-        }
+  <script>
+    (function () {
+      var preloader = document.getElementById('preloader');
+      if (!preloader) return;
+
+      var inner = preloader.querySelector('.preloader__inner');
+      var bar = preloader.querySelector('.preloader__bar');
+      var pct = preloader.querySelector('.preloader__pct');
+      var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      var MIN_VISIBLE = reduceMotion ? 300 : 1250; // ms the intro is guaranteed to stay up
+      var HARD_CAP = 6000; // ms before we stop waiting for the load event
+
+      document.body.classList.add('is-loading');
+
+      var startedAt = performance.now();
+      var isLoaded = document.readyState === 'complete';
+      var isFinished = false;
+      var progress = 0;
+
+      window.addEventListener('load', function () {
+        isLoaded = true;
       });
-    </script>
-  </body>
+
+      // If assets hang, don't trap the visitor behind the curtain.
+      window.setTimeout(function () {
+        isLoaded = true;
+      }, HARD_CAP);
+
+      function render() {
+        var rounded = Math.round(progress);
+        if (pct) pct.textContent = (rounded < 10 ? '0' : '') + rounded;
+        if (bar) bar.style.transform = 'scaleX(' + progress / 100 + ')';
+      }
+
+      function finish() {
+        if (isFinished) return;
+        isFinished = true;
+
+        progress = 100;
+        render();
+
+        if (inner) inner.classList.add('is-done');
+
+        var openDelay = reduceMotion ? 0 : 300;
+        var openDuration = reduceMotion ? 0 : 850;
+
+        // Curtains part + the page fades in underneath
+        window.setTimeout(function () {
+          preloader.classList.add('is-open');
+          document.body.classList.add('is-ready');
+          document.body.classList.remove('is-loading');
+        }, openDelay);
+
+        // Clean up completely
+        window.setTimeout(function () {
+          preloader.classList.add('loader-hidden');
+          preloader.setAttribute('aria-hidden', 'true');
+          window.setTimeout(function () {
+            if (preloader.parentNode) preloader.parentNode.removeChild(preloader);
+          }, 400);
+        }, openDelay + openDuration + 60);
+      }
+
+      function tick(now) {
+        var elapsed = now - startedAt;
+
+        if (isLoaded && elapsed >= MIN_VISIBLE) {
+          progress += (100 - progress) * 0.16;
+          if (progress >= 99.4) {
+            finish();
+            return;
+          }
+        } else {
+          // Ease toward 92% while waiting, never reaching 100 early
+          progress += (92 - progress) * 0.035;
+        }
+
+        render();
+        requestAnimationFrame(tick);
+      }
+
+      render();
+      requestAnimationFrame(tick);
+
+      // Safety net for background tabs / stalled rAF
+      window.setTimeout(function () {
+        if (!isFinished) finish();
+      }, HARD_CAP + 1500);
+    })();
+  </script>
+</body>
+
 </html>

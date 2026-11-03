@@ -99,7 +99,7 @@ export default function AvailableKittens() {
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
         title="Available Munchkin Kittens"
-        description="Browse available home-raised Munchkin kittens in Owego, NY. Filter by gender, coat length, and availability. Click any card for multi-photo profiles."
+        description={`Browse available home-raised Munchkin kittens in ${catteryLocation}. Filter by gender, coat length, and availability. Click any card for multi-photo profiles.`}
       />
 
       {/* Page Header */}
@@ -142,7 +142,7 @@ export default function AvailableKittens() {
                   Transport
                 </p>
                 <p className="mt-0.5 text-sm font-semibold text-[#181615]">
-                  Owego Pickup / Courier
+                  {catteryLocation} Pickup / Courier
                 </p>
               </div>
             </div>
