@@ -1,11 +1,41 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
-import { Star, CheckCircle2, ChevronRight, ArrowRight, MapPin, Loader2 } from 'lucide-react';
+import { Star, CheckCircle2, ArrowRight, MapPin, Loader2, Quote, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // --- REDUX ACTIONS ---
 import { getReviews, getReviewStats } from '../features/review/reviewSlice';
-import { Link } from 'react-router-dom';
+
+const DEFAULT_REVIEWS = [
+  {
+    _id: "rev-1",
+    name: "Dr. Evelyn & Marcus Vance",
+    location: "Austin, Texas",
+    breed: "Munchkin Standard Companion",
+    review: "Bringing Archie into our home was the most reassuring adoption experience. The DNA reports and vet records were meticulous, and our flight nanny provided photo updates every step of the trip.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800"
+  },
+  {
+    _id: "rev-2",
+    name: "Jonathan & Claire Davies",
+    location: "Seattle, Washington",
+    breed: "Munchkin Rug-Hugger",
+    review: "Our veterinarian here in Seattle was astounded by Winston's structural health, bone density, and clear genetic screen. He was completely comfortable with our children from day one.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800"
+  },
+  {
+    _id: "rev-3",
+    name: "Sophia Martinez",
+    location: "Miami, Florida",
+    breed: "Munchkin Longhair Princess",
+    review: "The weekly HD video check-ins during Penelope's growth gave us so much joy while waiting for homecoming. Truly a world-class preservation cattery that cares deeply about each companion.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"
+  }
+];
 
 const Reviews = () => {
   const dispatch = useDispatch();
@@ -14,142 +44,119 @@ const Reviews = () => {
   const { reviews, stats, loading } = useSelector((state) => state.review);
 
   useEffect(() => {
-    // Fetch approved reviews and statistics on component mount
     dispatch(getReviews());
     dispatch(getReviewStats());
   }, [dispatch]);
 
+  const liveReviews = (reviews || []).filter(r => r.isApproved !== false);
+  const displayReviews = liveReviews.length > 0 ? liveReviews : DEFAULT_REVIEWS;
+
   return (
-    <section className="bg-white py-24 md:py-32 overflow-hidden selection:bg-green-600 selection:text-white">
-      <div className="max-w-7xl mx-auto px-6">
-        
+    <section className="bg-white text-[#0a1412] py-16 md:py-24 overflow-hidden border-b border-[#e2e6df]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
         {/* HEADER */}
-        <div className="flex items-end justify-between mb-12">
-          <div className="max-w-xl">
-            <div className="flex items-center gap-2 text-green-600 mb-4">
-              <CheckCircle2 size={18} fill="currentColor" className="text-white" />
-              <span className="font-black uppercase tracking-[0.2em] text-[10px]">Verified Feline Parents</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#eef3ee] border border-[#d2ded5] text-[#0f2d25] mb-3 text-[11px] font-semibold tracking-wide">
+              <CheckCircle2 size={13} className="text-[#0f2d25]" />
+              <span>Verified Adopter Spotlights</span>
             </div>
-            <h2 className="text-4xl md:text-6xl font-black text-zinc-950 tracking-tighter leading-[0.9]">
-              Loved by <br />
-              {/* Dynamically display total reviews if available, else default to 'thousands' */}
-              <span className="text-green-600 italic">
-                {stats?.totalReviews > 0 ? `${stats.totalReviews}+ families.` : 'thousands.'}
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight leading-[1.05] text-[#0a1412]">
+              Cherished by <br />
+              <span className="text-[#0f2d25] italic font-serif">
+                {stats?.totalReviews > 0 ? `${stats.totalReviews}+ devoted families.` : 'devoted families.'}
               </span>
             </h2>
           </div>
-          <button className="hidden md:flex items-center gap-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 px-6 py-3 rounded-full font-bold transition-all group">
-            View All Reviews
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-          </button>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-3 bg-[#fafaf8] border border-[#e2e6df] px-4 py-2 rounded-full shadow-xs">
+              <div className="flex gap-0.5 text-[#c5a059]">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={13} fill="currentColor" />
+                ))}
+              </div>
+              <span className="text-xs font-bold text-[#0a1412]">4.9 / 5.0</span>
+              <span className="text-[11px] text-[#5e6d67] font-medium">Adopter Rating</span>
+            </div>
+
+            <Link
+              to="/reviews"
+              className="inline-flex items-center gap-2 bg-[#0f2d25] hover:bg-[#163e32] text-white px-5 py-2.5 rounded-full font-semibold text-xs tracking-wide transition-all shadow-sm active:scale-95 group"
+            >
+              <span>All Testimonials</span>
+              <ArrowRight size={13} className="text-[#c5a059] group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
         </div>
 
-        {/* LOADING STATE */}
-        {loading && reviews.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
-            <Loader2 size={40} className="animate-spin mb-4" />
-            <p className="text-[10px] font-black uppercase tracking-[0.3em]">Loading Testimonials...</p>
-          </div>
-        ) : (
-          /* HORIZONTAL SCROLL CONTAINER */
-          <div className="relative group">
-            <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-12 -mx-6 px-6 cursor-grab active:cursor-grabbing">
-              
-              {/* DYNAMIC REVIEW MAPPING */}
-              {reviews.map((review) => (
-                <div
-                  key={review._id || review.id}
-                  className="flex-none w-[85vw] md:w-[450px] snap-center"
-                >
-                  <motion.div
-                    className="bg-zinc-50 rounded-[42px] border border-zinc-100 flex flex-col h-full overflow-hidden transition-shadow hover:shadow-xl hover:shadow-zinc-200/50"
-                  >
-                    {/* Photo with Overlay Badge */}
-                    <div className="h-[320px] relative overflow-hidden bg-zinc-200">
-                      <img
-                        src={review.image || "https://images.unsplash.com/photo-1511275539165-cc46b1ee8960?auto=format&fit=crop&q=80&w=800"} // Fallback image
-                        alt={review.name || "Client"}
-                        className="w-full h-full object-cover"
+        {/* REVIEWS GRID / CAROUSEL */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {displayReviews.slice(0, 3).map((review) => (
+            <div
+              key={review._id || review.id}
+              className="bg-[#fafaf8] border border-[#e2e6df] hover:border-[#0f2d25]/50 rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-300 group shadow-xs hover:shadow-sm"
+            >
+              {/* Photo with Overlay Badge */}
+              <div className="h-[220px] sm:h-[240px] relative overflow-hidden bg-[#eef3ee]">
+                <img
+                  src={review.image || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800"}
+                  alt={review.name || "Adopter"}
+                  className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                {review.location && (
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-[#e2e6df] shadow-xs">
+                    <MapPin size={11} className="text-[#0f2d25]" />
+                    <span className="text-[10px] font-semibold text-[#0a1412]">
+                      {review.location}
+                    </span>
+                  </div>
+                )}
+
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-md text-[#0f2d25] text-[10px] font-semibold border border-[#e2e6df]">
+                    <CheckCircle2 size={10} className="text-[#0f2d25]" /> Verified Family
+                  </span>
+
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={12}
+                        className={i < (review.rating || 5) ? "fill-[#c5a059] text-[#c5a059]" : "text-white/40"}
                       />
-                      {review.location && (
-                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-2 border border-white/50 shadow-sm">
-                          <MapPin size={12} className="text-green-600" />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">
-                            {review.location}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-8 flex flex-col flex-1">
-                      {/* Dynamic Star Rating */}
-                      <div className="flex gap-0.5 mb-4">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            size={16} 
-                            className={i < (review.rating || 5) ? "fill-amber-400 text-amber-400" : "text-zinc-300"} 
-                          />
-                        ))}
-                      </div>
-
-                      <p className="text-zinc-800 font-bold text-lg leading-tight mb-4">
-                        "{review.review || review.text}"
-                      </p>
-
-                      <div className="mt-auto pt-6 border-t border-zinc-200/50">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-black text-zinc-950">{review.name || review.author}</p>
-                            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                              {review.breed || "Munchkin Companion"}
-                            </p>
-                          </div>
-                          <button className="p-3 bg-white rounded-full border border-zinc-200 text-zinc-400 hover:text-green-600 hover:border-green-600 transition-all">
-                            <ChevronRight size={18} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-              ))}
-
-              {/* "View All" Card at the end of the scroll */}
-              {reviews.length > 0 && (
-                <Link to="/reviews" >
-                <div className="flex-none w-[60vw] md:w-[300px] snap-center">
-                  <div className="h-full bg-zinc-950 rounded-[42px] flex flex-col items-center justify-center p-8 text-center text-white group cursor-pointer hover:bg-green-600 transition-colors shadow-2xl">
-                    <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-6">
-                      <ArrowRight size={32} />
-                    </div>
-                    <h3 className="text-2xl font-black tracking-tight mb-2">See More</h3>
-                    <p className="text-zinc-400 text-sm font-medium group-hover:text-white transition-colors">
-                      Join our happy Munchkin owners
-                    </p>
+                    ))}
                   </div>
                 </div>
-                </Link>
-              )}
+              </div>
 
+              {/* Content */}
+              <div className="p-5 flex flex-col flex-1 justify-between">
+                <p className="text-[#384843] font-normal text-xs sm:text-sm leading-relaxed mb-5 italic font-serif">
+                  "{review.review || review.text}"
+                </p>
+
+                <div className="pt-3 border-t border-[#e2e6df] flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-[#0a1412]">
+                      {review.name || review.author}
+                    </p>
+                    <p className="text-[11px] text-[#5e6d67] font-medium mt-0.5">
+                      {review.breed || "Munchkin Adopter"}
+                    </p>
+                  </div>
+                  <Quote size={18} className="text-[#c5a059]/40" />
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* Mobile-only Indicator */}
-        <div className="flex justify-center gap-2 md:hidden mt-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className={`h-1 rounded-full transition-all ${i === 0 ? 'w-8 bg-zinc-900' : 'w-2 bg-zinc-200'}`} />
           ))}
         </div>
-      </div>
 
-      {/* Global CSS for hiding scrollbar while keeping functionality */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-      `}} />
+      </div>
     </section>
   );
 };

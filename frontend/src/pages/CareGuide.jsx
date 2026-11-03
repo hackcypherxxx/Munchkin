@@ -1,177 +1,143 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Leaf, 
-  Wind, 
-  Droplets, 
-  Scissors, 
-  Home, 
-  Utensils, 
-  HeartPulse,
-  Sun,
-  Camera,
-  BookOpen
+import { Link } from 'react-router-dom';
+import PageMeta from '../components/PageMeta';
+import {
+  BookOpen,
+  Heart,
+  Utensils,
+  Home,
+  Scissors,
+  Stethoscope,
+  CheckCircle2,
+  ArrowUpRight,
 } from 'lucide-react';
+import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 
-const CareGuide = () => {
-  const categories = [
-    {
-      title: "Nutrition & Diet",
-      icon: <Utensils className="text-green-600" />,
-      items: ["Royal Canin Mother & Babycat", "Fresh Water (Fountain Preferred)", "Limit Treats to 10% Diet"],
-      color: "bg-zinc-50"
-    },
-    {
-      title: "Grooming Essentials",
-      icon: <Scissors className="text-green-600" />,
-      items: ["Soft Bristle Brushing (Weekly)", "Nail Trimming (Every 2 Weeks)", "Ear Cleaning (Monthly)"],
-      color: "bg-zinc-50"
-    },
-    {
-      title: "Environment",
-      icon: <Home className="text-green-600" />,
-      items: ["Vertical Climbing Spaces", "Low-entry Litter Boxes", "Safe 'Zen' Hiding Spots"],
-      color: "bg-zinc-50"
-    }
-  ];
+const CARE_SECTIONS = [
+  {
+    icon: Home,
+    title: 'First 72 Hours: Creating a Calm Sanctuary Room',
+    desc: 'Prepare a quiet, enclosed bedroom or study with your kitten’s litter box, fresh water, food bowls, and a soft bed before they arrive. Giving your kitten a smaller space for the first 2–3 days helps them build confidence before exploring the rest of your home.',
+    tips: [
+      'Use a low-entry litter box with unscented clumping or pine litter',
+      'Keep cords, small strings, and toxic houseplants out of reach',
+      'Let your kitten set the pace for exploration and cuddles',
+    ],
+  },
+  {
+    icon: Utensils,
+    title: 'Nutrition & Hydration Protocol',
+    desc: 'Growing Munchkin kittens thrive on a moisture-rich diet combining high-protein kitten wet food (pâté or shreds) with quality grain-free kitten kibble. Avoid sudden diet changes during the first week home.',
+    tips: [
+      'Feed wet kitten food 2–3 times daily alongside fresh water',
+      'Transition to any new food brand gradually over 7–10 days',
+      'Ceramic or stainless-steel shallow bowls prevent whisker fatigue',
+    ],
+  },
+  {
+    icon: Scissors,
+    title: 'Grooming, Nail Trims & Scratching Habits',
+    desc: 'Shorthair Munchkins require gentle weekly brushing, while Longhair kittens benefit from 2–3 combings per week to keep their plush coat tangle-free. Trim just the clear tips of their front claws every two weeks.',
+    tips: [
+      'Provide sturdy sisal scratching posts and horizontal scratch pads',
+      'Clean around eyes gently with a warm damp cloth if needed',
+      'Never declaw—regular nail trims and scratchers protect furniture',
+    ],
+  },
+  {
+    icon: Stethoscope,
+    title: 'Ongoing Veterinary Wellness',
+    desc: 'Schedule your new-kitten wellness check with your family veterinarian within 72 hours of arrival. Bring the medical folder we provide so your vet can log their next booster date.',
+    tips: [
+      'Complete remaining kitten booster shots on your vet’s schedule',
+      'Keep your Munchkin strictly indoors for safety and health',
+      'Reach out to us anytime for lifetime breeder guidance',
+    ],
+  },
+];
 
+export default function CareGuide() {
   return (
-    <div className="bg-white min-h-screen pt-24 pb-32">
-      <div className="max-w-7xl mx-auto px-6">
-        
-        {/* --- HEADER --- */}
-        <div className="max-w-3xl mb-24">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 mb-6"
-          >
-            <BookOpen size={14} className="text-zinc-400" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">The Owner's Handbook</span>
-          </motion.div>
-          <h1 className="text-6xl md:text-8xl font-black text-zinc-950 tracking-tighter leading-[0.9] mb-8">
-            Raising <br /><span className="text-green-600 italic">Excellence.</span>
-          </h1>
-          <p className="text-zinc-500 text-lg font-medium leading-relaxed">
-            Your Munchkin kitten is a masterpiece of breeding. Maintaining their health and happiness requires specific attention to their unique physical structure and energetic personality.
-          </p>
-        </div>
+    <main className="min-h-screen bg-[#faf8f5] pb-24">
+      <PageMeta
+        title="New Kitten Care & Preparation Guide"
+        description="Essential advice on preparing your home, nutrition, litter box setup, grooming, and first-week acclimation for your Munchkin kitten."
+      />
 
-        {/* --- CORE CARE BENTO GRID --- */}
-        <div className="grid md:grid-cols-3 gap-8 mb-32">
-          {categories.map((cat, i) => (
-            <motion.div 
-              key={i}
-              whileHover={{ y: -8 }}
-              className={`p-10 rounded-[48px] ${cat.color} border border-zinc-100 flex flex-col`}
-            >
-              <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-8 border border-zinc-50">
-                {cat.icon}
-              </div>
-              <h3 className="text-2xl font-black tracking-tight text-zinc-950 mb-6">{cat.title}</h3>
-              <ul className="space-y-4 flex-1">
-                {cat.items.map(item => (
-                  <li key={item} className="flex items-start gap-3 text-sm font-bold text-zinc-600 leading-tight">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* --- THE "FIRST 48 HOURS" (TIMELINE) --- */}
-        <div className="bg-zinc-950 rounded-[64px] p-10 md:p-20 text-white relative overflow-hidden mb-32">
-          <div className="relative z-10 max-w-4xl">
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-12">The Arrival <span className="text-zinc-500 italic">Protocol.</span></h2>
-            <div className="space-y-12">
-              {[
-                { time: "Hour 1", title: "The Sanctuary Room", desc: "Keep your kitten in one small, quiet room with their food, water, and litter. Let them explore this 'home base' first." },
-                { time: "Hour 12", title: "Scent Exchange", desc: "Rub a soft cloth on the kitten and place it in the common area. This introduces their scent to the home safely." },
-                { time: "Hour 24", title: "Quiet Play", desc: "Introduce interactive wand toys to build trust, but avoid loud noises or large groups of people." },
-                { time: "Hour 48", title: "The First Vet Visit", desc: "Complete your health guarantee requirement by visiting your vet for a baseline wellness check." }
-              ].map((step, idx) => (
-                <div key={idx} className="flex gap-8 group">
-                  <div className="flex flex-col items-center">
-                    <div className="w-4 h-4 rounded-full bg-green-600 group-hover:scale-125 transition-transform" />
-                    {idx !== 3 && <div className="w-0.5 h-20 bg-zinc-800" />}
-                  </div>
-                  <div>
-                    <p className="text-green-600 font-black text-xs uppercase tracking-widest mb-1">{step.time}</p>
-                    <h4 className="text-2xl font-black mb-2">{step.title}</h4>
-                    <p className="text-zinc-400 text-sm font-medium leading-relaxed">{step.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-green-600/10 to-transparent hidden lg:block" />
-        </div>
-
-        {/* --- HEALTH & WELLNESS (TWO COLUMN) --- */}
-        <div className="grid lg:grid-cols-2 gap-16 items-center mb-32">
-          <div className="relative aspect-square rounded-[64px] overflow-hidden bg-zinc-100">
-             <img 
-               src="https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&q=80&w=800" 
-               className="w-full h-full object-cover" 
-               alt="Healthy Kitten"
-             />
-             <div className="absolute bottom-8 left-8 right-8 p-6 bg-white/90 backdrop-blur-md rounded-[32px] border border-white/50">
-               <div className="flex items-center gap-3">
-                 <HeartPulse className="text-red-500" />
-                 <p className="text-[10px] font-black uppercase tracking-widest text-zinc-900 leading-tight">
-                   Munchkins live 12-15 years with proper spinal care.
-                 </p>
-               </div>
-             </div>
-          </div>
-
-          <div className="px-4">
-            <h2 className="text-4xl font-black tracking-tighter mb-8 text-zinc-950">Spinal Health <br /><span className="text-zinc-400">& Weight Control.</span></h2>
-            <p className="text-zinc-500 text-lg mb-10 leading-relaxed">
-              Because of their short legs, keeping your Munchkin at an ideal weight is critical. Excess weight puts unnecessary strain on their spine.
+      {/* Editorial Hero */}
+      <section className="bg-[#f3efea] border-b border-[#181615]/10 py-14 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-7 space-y-5">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#181615]/10 text-xs font-semibold text-[#9e5a3c]">
+              <BookOpen size={13} /> MunchkinKittie Owner’s Handbook
+            </span>
+            <h1 className="font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
+              New Kitten Care & Preparation Guide
+            </h1>
+            <p className="text-base sm:text-lg text-[#575049] leading-relaxed max-w-2xl">
+              Everything you need to prepare a warm, safe indoor environment for your new Munchkin
+              kitten’s arrival and first weeks at home.
             </p>
-            <div className="space-y-6">
-              {[
-                "Avoid high-impact jumps from tall furniture.",
-                "Provide stairs or ramps for bed/sofa access.",
-                "Schedule annual 'Senior' bloodwork starting at age 7.",
-                "Never allow your Munchkin to become obese."
-              ].map(item => (
-                <div key={item} className="flex gap-4 p-5 rounded-2xl bg-zinc-50 border border-zinc-100 hover:border-green-600 transition-colors">
-                  <Leaf size={20} className="text-green-600 flex-shrink-0" />
-                  <p className="text-sm font-bold text-zinc-700">{item}</p>
-                </div>
-              ))}
+          </div>
+          <div className="lg:col-span-5">
+            <div className="aspect-[16/11] rounded-[28px] overflow-hidden bg-white border border-[#181615]/10 editorial-shadow">
+              <img
+                src={CATTERY_PHOTOS.editorialPlayful}
+                alt="Playful Munchkin kitten"
+                className="h-full w-full object-cover"
+              />
             </div>
           </div>
         </div>
+      </section>
 
-        {/* --- PRO-TIP SECTION --- */}
-        <div className="p-8 md:p-12 rounded-[48px] border-4 border-zinc-50 flex flex-col md:flex-row gap-10 items-center">
-           <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center flex-shrink-0">
-             <Sun className="text-green-600" size={32} />
-           </div>
-           <div>
-             <h4 className="text-xl font-black text-zinc-950 mb-2 uppercase tracking-tight">The "Short-Leg" Advantage</h4>
-             <p className="text-zinc-500 text-sm font-medium leading-relaxed">
-               Munchkins are surprisingly fast and agile. However, they lack the "spring" of long-legged cats. Ensure their play environment focuses on speed and floor-level tunnels rather than vertical heights above 4 feet.
-             </p>
-           </div>
-           <button className="md:ml-auto px-8 py-5 bg-zinc-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all">
-             Contact Consultant
-           </button>
+      {/* Care Modules */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+          {CARE_SECTIONS.map((sec, idx) => {
+            const Icon = sec.icon;
+            return (
+              <div
+                key={idx}
+                className="rounded-[28px] bg-white border border-[#181615]/10 p-7 sm:p-9 space-y-5 editorial-shadow"
+              >
+                <div className="h-11 w-11 rounded-2xl bg-[#f5ebe6] text-[#9e5a3c] flex items-center justify-center">
+                  <Icon size={20} />
+                </div>
+                <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#181615]">
+                  {sec.title}
+                </h2>
+                <p className="text-sm text-[#575049] leading-relaxed">{sec.desc}</p>
+                <ul className="space-y-2.5 pt-2 border-t border-[#181615]/8">
+                  {sec.tips.map((tip, tIdx) => (
+                    <li key={tIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-[#181615]">
+                      <CheckCircle2 size={15} className="text-[#263b30] shrink-0 mt-0.5" />
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
 
-        {/* --- FOOTNOTE --- */}
-        <p className="mt-24 text-center text-[10px] font-black text-zinc-300 uppercase tracking-[0.5em]">
-          Evolving Care for an Extraordinary Breed
-        </p>
-
-      </div>
-    </div>
+        <div className="mt-12 rounded-[28px] bg-[#181615] text-white p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <h2 className="font-serif text-2xl sm:text-3xl font-medium">
+              Ready to meet our current kittens?
+            </h2>
+            <p className="mt-1 text-sm text-white/75">
+              All kittens leave our Owego, NY nursery litter-trained, socialized, and vet-certified.
+            </p>
+          </div>
+          <Link
+            to="/available-kittens"
+            className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#9e5a3c] hover:bg-[#b87354] text-white text-xs sm:text-sm font-semibold transition-colors"
+          >
+            Browse Available Kittens <ArrowUpRight size={15} />
+          </Link>
+        </div>
+      </section>
+    </main>
   );
-};
-
-export default CareGuide;
+}

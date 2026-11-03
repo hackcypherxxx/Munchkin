@@ -1,13 +1,21 @@
-import mongoose from "mongoose"; // 🔧 NEW: for ObjectId validation
+import mongoose from "mongoose";
 import Application from "../models/Application.js";
 import {
   sendApplicationReceived,
   sendApplicationApproved,
   sendApplicationRejected,
   sendApplicationAdminNotification,
+  sendApplicationStatusEmail,
 } from "../utils/sendEmail.js";
 
-// ➕ CREATE APPLICATION
+function generateApplicationReference() {
+  const year = new Date().getFullYear();
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const timePart = Date.now().toString(36).slice(-3).toUpperCase();
+  return `MK-APP-${year}-${rand}${timePart}`;
+}
+
+// ➕ CREATE APPLICATION (Public)
 export const createApplication = async (req, res) => {
   try {
     let {
@@ -18,13 +26,12 @@ export const createApplication = async (req, res) => {
       paymentMethod,
       paymentMethodOther,
       applicationType,
-      itemId,               // may be "", null, or valid
+      itemId,
       homeDescription,
       hasPets,
       experience,
     } = req.body;
 
-    // Basic validation
     if (
       !fullName ||
       !email ||
@@ -36,21 +43,41 @@ export const createApplication = async (req, res) => {
     }
 
     email = email.toLowerCase().trim();
-    const cleanedPaymentMethod = paymentMethod.toLowerCase();
+    const cleanedPaymentMethod = paymentMethod.toLowerCase().trim();
 
-    // 🔧 SANITISE itemId – turn anything invalid into null
     const safeItemId =
       itemId && mongoose.Types.ObjectId.isValid(String(itemId))
         ? String(itemId)
         : null;
 
-    let modelMap = {
+    // Duplicate submission protection (within 2 minutes for same email + itemId)
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+    const existingRecent = await Application.findOne({
+      email,
+      applicationType,
+      itemId: safeItemId,
+      createdAt: { $gte: twoMinutesAgo },
+    });
+
+    if (existingRecent) {
+      return res.status(200).json({
+        message: "Application already received",
+        duplicatePrevented: true,
+        applicationReference: existingRecent.applicationReference,
+        application: existingRecent,
+      });
+    }
+
+    const modelMap = {
       kitten: "Kitten",
       retired: "RetiredKitten",
       upcoming: "Upcoming",
     };
 
+    const applicationReference = generateApplicationReference();
+
     const application = await Application.create({
+      applicationReference,
       fullName,
       email,
       phone,
@@ -59,14 +86,21 @@ export const createApplication = async (req, res) => {
       paymentMethodOther:
         cleanedPaymentMethod === "other" ? paymentMethodOther : undefined,
       applicationType,
-      itemId: safeItemId,   // ✅ safe now
+      itemId: safeItemId,
       applicationTypeModel: modelMap[applicationType],
       homeDescription,
       hasPets,
       experience,
+      status: "New",
+      statusHistory: [
+        {
+          status: "New",
+          changedAt: new Date(),
+          note: "Application submitted via online concierge portal",
+        },
+      ],
     });
 
-    // Populate only if a valid itemId exists (avoids error on null)
     let kittenName = "your selected companion";
     if (application.itemId) {
       await application.populate("itemId");
@@ -75,21 +109,35 @@ export const createApplication = async (req, res) => {
         application.itemId?.title ||
         application.itemId?.breed ||
         "your selected companion";
+
+      application.kittenSnapshot = {
+        name: kittenName,
+        breed: application.itemId?.breed || "",
+        price: Number(application.itemId?.price) || 0,
+        image:
+          application.itemId?.images?.[0] ||
+          application.itemId?.image ||
+          "",
+      };
+      await application.save();
     }
 
-    // 📧 Emails – wrapped in .catch() so they don’t crash the server
+    // Non-blocking transactional emails (automatically logged in EmailLog)
     sendApplicationReceived({
       email,
       name: fullName,
       paymentMethod: cleanedPaymentMethod,
       paymentMethodOther: paymentMethodOther || null,
       kittenName,
+      applicationReference,
+      applicationId: application._id,
     }).catch((err) => console.error("Applicant email failed:", err));
 
     sendApplicationAdminNotification({
       fullName,
       email,
       phone,
+      location,
       paymentMethod: cleanedPaymentMethod,
       paymentMethodOther,
       applicationType,
@@ -97,15 +145,18 @@ export const createApplication = async (req, res) => {
       hasPets,
       experience,
       kittenName,
+      applicationReference,
+      applicationId: application._id,
     }).catch((err) => console.error("Admin notification failed:", err));
 
     res.status(201).json({
       message: "Application submitted successfully",
+      applicationReference,
+      application,
     });
   } catch (error) {
     console.error("❌ CREATE APPLICATION ERROR:", error);
 
-    // Catches invalid ObjectId values explicitly
     if (error.name === "CastError") {
       return res.status(400).json({ error: "Invalid reference ID" });
     }
@@ -119,20 +170,31 @@ export const createApplication = async (req, res) => {
   }
 };
 
-// 🌍 ADMIN: GET ALL
+// 👑 ADMIN: GET ALL APPLICATIONS
 export const getApplications = async (req, res) => {
   try {
     const apps = await Application.find()
       .populate("itemId")
       .sort({ createdAt: -1 });
 
-    res.json(apps);
+    // Ensure older records without applicationReference still display a deterministic reference
+    const enriched = apps.map((doc) => {
+      const obj = doc.toObject();
+      if (!obj.applicationReference) {
+        obj.applicationReference = `MK-APP-${String(obj._id)
+          .slice(-6)
+          .toUpperCase()}`;
+      }
+      return obj;
+    });
+
+    res.json(enriched);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch applications" });
   }
 };
 
-// 🔍 GET ONE
+// 🔍 GET ONE APPLICATION
 export const getApplicationById = async (req, res) => {
   try {
     const app = await Application.findById(req.params.id).populate("itemId");
@@ -147,51 +209,132 @@ export const getApplicationById = async (req, res) => {
   }
 };
 
-// ✅ APPROVE
+// 🔄 PUT /api/applications/:id/status (Admin Status & Notes Update)
+export const updateApplicationStatus = async (req, res) => {
+  try {
+    const app = await Application.findById(req.params.id).populate("itemId");
+    if (!app) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+
+    const {
+      status,
+      adminNotes,
+      note = "",
+      sendEmailNotification = true,
+    } = req.body;
+
+    const previousStatus = app.status;
+
+    if (adminNotes !== undefined) {
+      app.adminNotes = adminNotes;
+    }
+
+    if (status && status !== previousStatus) {
+      app.status = status;
+      app.statusHistory.push({
+        status,
+        changedAt: new Date(),
+        note: note || `Status updated from ${previousStatus} to ${status}`,
+      });
+    }
+
+    if (!app.applicationReference) {
+      app.applicationReference = `MK-APP-${String(app._id)
+        .slice(-6)
+        .toUpperCase()}`;
+    }
+
+    await app.save();
+
+    if (sendEmailNotification && status && status !== previousStatus) {
+      sendApplicationStatusEmail({
+        application: app,
+        newStatus: status,
+        customNote: note,
+      }).catch((err) =>
+        console.error("Application status email failed:", err)
+      );
+    }
+
+    res.json({
+      message: `Application updated (${app.status})`,
+      application: app,
+    });
+  } catch (error) {
+    console.error("🔥 UPDATE APPLICATION STATUS ERROR:", error);
+    res.status(500).json({ error: "Failed to update application" });
+  }
+};
+
+// ✅ APPROVE (Legacy + Direct Action)
 export const approveApplication = async (req, res) => {
   try {
-    const app = await Application.findById(req.params.id);
+    const app = await Application.findById(req.params.id).populate("itemId");
 
     if (!app) {
       return res.status(404).json({ error: "Not found" });
     }
 
     app.status = "Approved";
+    if (!app.applicationReference) {
+      app.applicationReference = `MK-APP-${String(app._id)
+        .slice(-6)
+        .toUpperCase()}`;
+    }
+    app.statusHistory.push({
+      status: "Approved",
+      changedAt: new Date(),
+      note: req.body?.note || "Approved by administrator",
+    });
     await app.save();
 
-    sendApplicationApproved(app.email, app.fullName);
+    sendApplicationApproved(app.email, app.fullName, app).catch((err) =>
+      console.error("Approval email failed:", err)
+    );
 
-    res.json({ message: "Application approved" });
+    res.json({ message: "Application approved", application: app });
   } catch (error) {
     res.status(500).json({ error: "Failed to approve" });
   }
 };
 
-// ❌ REJECT
+// ❌ REJECT (Legacy + Direct Action)
 export const rejectApplication = async (req, res) => {
   try {
-    const app = await Application.findById(req.params.id);
+    const app = await Application.findById(req.params.id).populate("itemId");
 
     if (!app) {
       return res.status(404).json({ error: "Not found" });
     }
 
     app.status = "Rejected";
+    if (!app.applicationReference) {
+      app.applicationReference = `MK-APP-${String(app._id)
+        .slice(-6)
+        .toUpperCase()}`;
+    }
+    app.statusHistory.push({
+      status: "Rejected",
+      changedAt: new Date(),
+      note: req.body?.note || "Declined by administrator",
+    });
     await app.save();
 
-    sendApplicationRejected(app.email, app.fullName);
+    sendApplicationRejected(app.email, app.fullName, app).catch((err) =>
+      console.error("Rejection email failed:", err)
+    );
 
-    res.json({ message: "Application rejected" });
+    res.json({ message: "Application rejected", application: app });
   } catch (error) {
     res.status(500).json({ error: "Failed to reject" });
   }
 };
 
-// ❌ DELETE
+// 🗑️ DELETE
 export const deleteApplication = async (req, res) => {
   try {
     await Application.findByIdAndDelete(req.params.id);
-
     res.json({ message: "Deleted" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete" });

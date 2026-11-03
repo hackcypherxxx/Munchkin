@@ -1,440 +1,681 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { useDispatch, useSelector } from 'react-redux';
+import { Link, useLocation } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { getNotifications } from '../features/notification/notificationSlice';
-import LogoImg from '../assets/LOGO1.png';
-
+import { getSettings } from '../features/settings/settingsSlice';
+import { getKittens } from '../features/kitten/kittenSlice';
 import {
-  ChevronRight,
   Menu,
   X,
+  ChevronDown,
   Bell,
-  Cat,
-  Sparkles,
-  Heart,
-  BookOpenCheck,
-  Package,
-  CalendarDays,
-  Medal,
-  ArrowRight,
   ShieldCheck,
-  Info,
-  Mail,
-  Zap,
-  Clock,
+  Sparkles,
+  ArrowUpRight,
+  Heart,
+  Plane,
+  Calendar,
+  BookOpen,
+  DollarSign,
+  Award,
+  Stethoscope,
+  MapPin,
+  Phone,
 } from 'lucide-react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import logoImg from '../assets/LOGO1.png';
+import { CATTERY_PHOTOS, formatKittenAge } from '../utils/kittenFormatters';
 
-function cn(...inputs) {
-  return twMerge(clsx(inputs));
-}
-
-const springTransition = { type: 'spring', damping: 25, stiffness: 200, mass: 0.5 };
-
-const menuSlide = {
-  initial: { x: '100%' },
-  animate: { x: 0, transition: { type: 'spring', damping: 30, stiffness: 300 } },
-  exit: { x: '100%', transition: { type: 'spring', damping: 30, stiffness: 300 } },
-};
-
-const Navbar = () => {
-  const dispatch = useDispatch();
-  const location = useLocation();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const notificationRef = useRef(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const navRef = useRef(null);
 
   const { notifications } = useSelector((state) => state.notification);
+  const { settings } = useSelector((state) => state.settings);
+  const { kittens } = useSelector((state) => state.kitten);
+
+  const activeSettings = Array.isArray(settings) ? settings[0] : settings;
+  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
+
+  const availableCount = Array.isArray(kittens)
+    ? kittens.filter((k) => k.status === 'Available').length
+    : 0;
+  const spotlightKitten = Array.isArray(kittens)
+    ? kittens.find((k) => k.status === 'Available') || kittens[0]
+    : null;
+  const activeNotifications = Array.isArray(notifications) ? notifications : [];
 
   useEffect(() => {
     dispatch(getNotifications());
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-
-    const handleClickOutside = (e) => {
-      if (notificationRef.current && !notificationRef.current.contains(e.target)) {
-        setShowNotifications(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    dispatch(getSettings());
+    if (!kittens || kittens.length === 0) {
+      dispatch(getKittens());
+    }
+    const interval = setInterval(() => {
+      dispatch(getNotifications());
+    }, 60000);
+    return () => clearInterval(interval);
   }, [dispatch]);
 
-  // Prevent background scroll when mobile menu open
   useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [mobileMenuOpen]);
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
-    setMobileMenuOpen(false);
+    setIsOpen(false);
+    setActiveDropdown(null);
+    setShowNotifications(false);
   }, [location.pathname]);
 
-  const navData = [
-    {
-      name: 'Nursery',
-      path: '/available-kittens',
-      icon: <Cat size={18} />,
-      dropdown: [
-        { name: 'Available Kittens', path: '/available-kittens', desc: 'Ready for forever homes', icon: <Medal /> },
-        { name: 'Retired Adults', path: '/retired-adults', desc: 'Legacy cats for adoption', icon: <Heart /> },
-        { name: 'Upcoming Litters', path: '/upcoming', desc: 'Reserve your spot', icon: <CalendarDays /> },
-      ],
-    },
-    {
-      name: 'Process',
-      path: '/vetting-process',
-      icon: <BookOpenCheck size={18} />,
-      dropdown: [
-        { name: 'The Vetting Process', path: '/vetting-process', desc: 'How we ensure health', icon: <ShieldCheck /> },
-        { name: 'Health Guarantee', path: '/health', desc: 'Our 2-year warranty', icon: <ShieldCheck /> },
-        { name: 'Pricing & Deposit', path: '/pricing-deposit', desc: 'Investment & Terms', icon: <Info /> },
-      ],
-    },
-    {
-      name: 'Resources',
-      path: '/care-guide',
-      icon: <Sparkles size={18} />,
-      dropdown: [
-        {name:'Client Testimonials', path:'/reviews', desc:'Hear from happy adopters', icon:<Info />},
-        { name: 'Care Guide', path: '/care-guide', desc: 'Munchkin health 101', icon: <Cat /> },
-        { name: 'Shipping & Delivery', path: '/shipping', desc: 'Safe travel info', icon: <Package /> },
-      ],
-    },
-    { name: 'Contact', path: '/contact', icon: <Mail size={18} /> },
-  ];
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setActiveDropdown(null);
+        setShowNotifications(false);
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  const handleToggleNotifications = () => {
+    setShowNotifications((prev) => !prev);
+    setActiveDropdown(null);
+  };
 
   return (
-    <LayoutGroup>
-      {/* --- DESKTOP & MOBILE TOP BAR --- */}
-      <nav
-        className={cn(
-          'fixed top-0 w-full z-[100] transition-all duration-500',
-          isScrolled
-            ? 'py-3 bg-white/90 backdrop-blur-2xl border-b border-zinc-200/50 shadow-sm'
-            : 'py-5 bg-white'
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          {/* BRAND */}
-          <Link to="/" className="flex items-center gap-2 group cursor-pointer z-50">
-            <motion.div
-              whileHover={{ scale: 1.1, rotate: -5 }}
-              transition={springTransition}
-              className="relative flex items-center justify-center w-12 h-12 overflow-hidden"
-            >
-              <img
-                src={LogoImg}
-                alt="MunchkinKittie"
-                className="w-full h-full scale-150 object-contain mix-blend-multiply"
-              />
-            </motion.div>
-            <h1 className="text-2xl font-black tracking-tighter text-zinc-900 flex items-center">
-              Munchkin<span className="text-green-600">Kittie</span>
-            </h1>
-          </Link>
-
-          {/* DESKTOP LINKS */}
-          <div className="hidden md:flex items-center gap-1 px-2 py-1 bg-zinc-50/50 rounded-full border border-zinc-200/20">
-            {navData.map((link) => (
-              <div
-                key={link.name}
-                className="relative"
-                onMouseEnter={() => setActiveDropdown(link.name)}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <NavLink
-                  to={link.path}
-                  className={({ isActive }) =>
-                    cn(
-                      'px-5 py-2 text-[13px] font-black uppercase tracking-widest transition-all rounded-full flex items-center gap-1',
-                      isActive
-                        ? 'bg-white text-green-600 shadow-sm'
-                        : 'text-zinc-500 hover:text-zinc-900',
-                      activeDropdown === link.name && 'text-green-600'
-                    )
-                  }
-                >
-                  {link.name}
-                  {link.dropdown && (
-                    <ChevronRight
-                      size={12}
-                      className={cn(
-                        'transition-transform duration-300 opacity-50',
-                        activeDropdown === link.name && 'rotate-90 opacity-100'
-                      )}
-                    />
-                  )}
-                </NavLink>
-
-                <AnimatePresence>
-                  {link.dropdown && activeDropdown === link.name && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full left-0 pt-4"
-                    >
-                      <div className="bg-white border border-zinc-100 shadow-2xl rounded-[32px] p-2 min-w-[300px]">
-                        {link.dropdown.map((item) => (
-                          <Link
-                            key={item.name}
-                            to={item.path}
-                            onClick={() => setActiveDropdown(null)}
-                            className="flex items-center gap-4 p-3 hover:bg-zinc-50 rounded-2xl transition-colors group/item"
-                          >
-                            <div className="bg-zinc-50 text-zinc-400 p-2.5 rounded-xl group-hover/item:bg-zinc-900 group-hover/item:text-white transition-all">
-                              {React.cloneElement(item.icon, { size: 16 })}
-                            </div>
-                            <div>
-                              <p className="text-[11px] font-black uppercase tracking-tight text-zinc-900">
-                                {item.name}
-                              </p>
-                              <p className="text-[10px] text-zinc-400 font-bold leading-tight">
-                                {item.desc}
-                              </p>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
+    <header ref={navRef} className="sticky top-0 z-50 w-full">
+      {/* Top Editorial Utility Ribbon */}
+      <div className="bg-[#181615] text-[#f3efea] border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between text-[11px] tracking-wide">
+          <div className="flex items-center gap-4 overflow-hidden">
+            <span className="inline-flex items-center gap-1.5 font-medium text-[#e8b496]">
+              <MapPin size={12} />
+              Home Cattery in {catteryLocation}
+            </span>
+            <span className="hidden md:inline text-white/25">|</span>
+            <span className="hidden md:inline-flex items-center gap-1.5 text-white/80">
+              <ShieldCheck size={12} className="text-[#8fc4a6]" />
+              Vet-Examined · 72-Hr Health & 2-Year Genetic Guarantee
+            </span>
           </div>
 
-          {/* UTILITY ACTIONS */}
-          <div className="flex items-center gap-3 relative" ref={notificationRef}>
-            {/* NOTIFICATION BELL */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              onClick={() => setShowNotifications(!showNotifications)}
-              className={cn(
-                'relative p-3 transition-all rounded-full',
-                showNotifications
-                  ? 'bg-zinc-900 text-white'
-                  : 'bg-zinc-50 md:bg-transparent text-zinc-500 hover:text-zinc-900'
-              )}
-            >
-              <Bell size={20} />
-              {notifications?.length > 0 && (
-                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white animate-pulse" />
-              )}
-            </motion.button>
-
-            {/* NOTIFICATION PANEL – NOW WITH FULL TEXT */}
-            <AnimatePresence>
-              {showNotifications && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                  className="absolute top-[120%] right-0 w-[calc(100vw-32px)] sm:w-[420px] bg-white border border-zinc-100 shadow-[0_30px_60px_rgba(0,0,0,0.12)] rounded-[35px] overflow-hidden z-[110]"
+          <div className="flex items-center gap-4 shrink-0">
+            {catteryPhone && (
+              <>
+                <a
+                  href={`tel:${catteryPhone.replace(/[^\d+]/g, '')}`}
+                  className="hidden md:inline-flex items-center gap-1.5 font-medium text-white/90 hover:text-[#e8b496] transition-colors"
                 >
-                  <div className="p-6 border-b border-zinc-50 flex justify-between items-center bg-zinc-50/50">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
-                        Broadcasts
-                      </p>
-                      <h4 className="text-lg font-black italic uppercase tracking-tighter">
-                        Activity Feed
-                      </h4>
-                    </div>
-                    <span className="bg-zinc-900 text-white text-[9px] font-black px-3 py-1 rounded-full">
-                      {notifications?.length || 0} NEW
-                    </span>
-                  </div>
+                  <Phone size={11} className="text-[#e8b496]" />
+                  <span>{catteryPhone}</span>
+                </a>
+                <span className="hidden md:inline text-white/25">|</span>
+              </>
+            )}
+            <Link
+              to="/available-kittens"
+              className="inline-flex items-center gap-1.5 font-semibold text-white hover:text-[#e8b496] transition-colors"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-[#4ade80] animate-pulse" />
+              {availableCount > 0 ? `${availableCount} Kittens Available` : 'Browse Nursery'}
+            </Link>
+            <span className="hidden sm:inline text-white/25">|</span>
+            <Link
+              to="/shipping"
+              className="hidden sm:inline-flex items-center gap-1 text-white/80 hover:text-white transition-colors"
+            >
+              <Plane size={11} /> In-Cabin Flight Nanny & Local Pickup
+            </Link>
+          </div>
+        </div>
+      </div>
 
-                  <div className="max-h-[400px] overflow-y-auto p-4 space-y-2">
-                    {notifications?.length > 0 ? (
-                      notifications.map((n) => (
-                        <div
-                          key={n._id}
-                          className="flex gap-4 p-4 hover:bg-zinc-50 rounded-[24px] transition-all"
-                        >
-                          <div className="w-12 h-12 rounded-2xl overflow-hidden bg-zinc-100 flex-shrink-0">
-                            <img
-                              src={n.image}
-                              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
-                              alt=""
-                            />
+      {/* Main Navigation Bar */}
+      <div
+        className={`transition-all duration-300 ${
+          scrolled
+            ? 'bg-[#faf8f5]/95 backdrop-blur-xl shadow-[0_10px_30px_-10px_rgba(24,22,21,0.08)] border-b border-[#181615]/10'
+            : 'bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#181615]/8'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+          {/* Brand Logo */}
+          <Link to="/" className="flex items-center gap-3 group shrink-0">
+            <div className="h-11 w-11 rounded-2xl bg-[#f3efea] border border-[#181615]/10 flex items-center justify-center overflow-hidden shadow-2xs group-hover:border-[#9e5a3c]/40 transition-colors">
+              <img
+                src={logoImg}
+                alt="MunchkinKittie logo"
+                className="h-8 w-8 object-contain"
+              />
+            </div>
+            <div>
+              <span className="block font-serif text-2xl sm:text-[26px] font-semibold tracking-tight text-[#181615] leading-none">
+                MunchkinKittie
+              </span>
+              <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8a8075] mt-1">
+                {catteryLocation}
+              </span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-1" aria-label="Main Navigation">
+            <Link
+              to="/"
+              className={`px-3.5 py-2 rounded-full text-[13px] font-semibold transition-colors ${
+                location.pathname === '/'
+                  ? 'bg-[#181615] text-white'
+                  : 'text-[#181615] hover:bg-[#f3efea]'
+              }`}
+            >
+              Home
+            </Link>
+
+            <Link
+              to="/available-kittens"
+              className={`px-3.5 py-2 rounded-full text-[13px] font-semibold transition-colors inline-flex items-center gap-2 ${
+                location.pathname === '/available-kittens' || location.pathname.startsWith('/kitten/')
+                  ? 'bg-[#181615] text-white'
+                  : 'text-[#181615] hover:bg-[#f3efea]'
+              }`}
+            >
+              Available Kittens
+              {availableCount > 0 && (
+                <span
+                  className={`px-1.5 py-0.5 text-[10px] font-mono rounded-full ${
+                    location.pathname === '/available-kittens'
+                      ? 'bg-[#9e5a3c] text-white'
+                      : 'bg-[#f5ebe6] text-[#84472c]'
+                  }`}
+                >
+                  {availableCount}
+                </span>
+              )}
+            </Link>
+
+            {/* Nursery & Litters Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setActiveDropdown('nursery')}
+              onMouseLeave={() => setActiveDropdown(null)}
+            >
+              <button
+                type="button"
+                onClick={() => setActiveDropdown(activeDropdown === 'nursery' ? null : 'nursery')}
+                aria-expanded={activeDropdown === 'nursery'}
+                className="px-3.5 py-2 rounded-full text-[13px] font-semibold text-[#181615] hover:bg-[#f3efea] inline-flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                Nursery & Litters
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${
+                    activeDropdown === 'nursery' ? 'rotate-180 text-[#9e5a3c]' : 'text-[#8a8075]'
+                  }`}
+                />
+              </button>
+
+              {activeDropdown === 'nursery' && (
+                <div className="absolute left-0 top-full pt-2.5 w-[540px] z-50">
+                  <div className="bg-white rounded-3xl border border-[#181615]/10 editorial-shadow p-5 grid grid-cols-12 gap-5">
+                    <div className="col-span-7 flex flex-col justify-between space-y-1.5">
+                      <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8a8075] mb-1">
+                        Explore the Nursery
+                      </p>
+                      <Link
+                        to="/available-kittens"
+                        className="flex items-start gap-3 p-3 rounded-2xl hover:bg-[#faf8f5] transition-colors group"
+                      >
+                        <div className="h-9 w-9 rounded-xl bg-[#f5ebe6] text-[#9e5a3c] flex items-center justify-center shrink-0 mt-0.5">
+                          <Sparkles size={16} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#181615] group-hover:text-[#9e5a3c] flex items-center gap-1">
+                            Available Kittens
+                            <ArrowUpRight size={13} />
+                          </p>
+                          <p className="text-xs text-[#575049] mt-0.5">
+                            Browse current kittens ready for reservation ($350 – $500).
+                          </p>
+                        </div>
+                      </Link>
+
+                      <Link
+                        to="/upcoming-litters"
+                        className="flex items-start gap-3 p-3 rounded-2xl hover:bg-[#faf8f5] transition-colors group"
+                      >
+                        <div className="h-9 w-9 rounded-xl bg-[#ebf1ee] text-[#263b30] flex items-center justify-center shrink-0 mt-0.5">
+                          <Calendar size={16} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#181615] group-hover:text-[#9e5a3c]">
+                            Upcoming Litters
+                          </p>
+                          <p className="text-xs text-[#575049] mt-0.5">
+                            See confirmed pairings, expected due dates, and join the priority list.
+                          </p>
+                        </div>
+                      </Link>
+
+                      <Link
+                        to="/retired-adults"
+                        className="flex items-start gap-3 p-3 rounded-2xl hover:bg-[#faf8f5] transition-colors group"
+                      >
+                        <div className="h-9 w-9 rounded-xl bg-[#f3efea] text-[#575049] flex items-center justify-center shrink-0 mt-0.5">
+                          <Heart size={16} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#181615] group-hover:text-[#9e5a3c]">
+                            Retired Adults
+                          </p>
+                          <p className="text-xs text-[#575049] mt-0.5">
+                            Gentle retired breeding queens & sires seeking quiet forever homes.
+                          </p>
+                        </div>
+                      </Link>
+                    </div>
+
+                    {/* Live Kitten Feature Card in Mega-Menu */}
+                    <div className="col-span-5">
+                      <Link
+                        to={spotlightKitten ? `/kitten/${spotlightKitten._id}` : '/available-kittens'}
+                        className="group relative block h-full min-h-[210px] rounded-2xl overflow-hidden bg-[#f3efea] border border-[#181615]/10"
+                      >
+                        <img
+                          src={
+                            spotlightKitten?.images?.[0] ||
+                            spotlightKitten?.img ||
+                            CATTERY_PHOTOS.heroPrimary
+                          }
+                          alt={spotlightKitten?.name || 'Munchkin kitten'}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#181615]/85 via-[#181615]/20 to-transparent" />
+                        <div className="absolute bottom-3.5 inset-x-3.5 text-white">
+                          <span className="inline-block px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-semibold uppercase tracking-wider mb-1">
+                            {spotlightKitten ? `Meet ${spotlightKitten.name}` : 'Nursery Spotlight'}
+                          </span>
+                          <p className="font-serif text-lg font-semibold leading-tight">
+                            {spotlightKitten
+                              ? `${spotlightKitten.gender} · ${formatKittenAge(spotlightKitten)} · $${spotlightKitten.price}`
+                              : 'Hand-Raised Kittens'}
+                          </p>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Adoption & Care Mega-Menu */}
+            <div
+              className="relative"
+              onMouseEnter={() => setActiveDropdown('care')}
+              onMouseLeave={() => setActiveDropdown(null)}
+            >
+              <button
+                type="button"
+                onClick={() => setActiveDropdown(activeDropdown === 'care' ? null : 'care')}
+                aria-expanded={activeDropdown === 'care'}
+                className="px-3.5 py-2 rounded-full text-[13px] font-semibold text-[#181615] hover:bg-[#f3efea] inline-flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                Adoption & Health
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${
+                    activeDropdown === 'care' ? 'rotate-180 text-[#9e5a3c]' : 'text-[#8a8075]'
+                  }`}
+                />
+              </button>
+
+              {activeDropdown === 'care' && (
+                <div className="absolute left-0 top-full pt-2.5 w-[560px] z-50">
+                  <div className="bg-white rounded-3xl border border-[#181615]/10 editorial-shadow p-5 grid grid-cols-2 gap-2.5">
+                    <Link
+                      to="/about"
+                      className="flex items-start gap-3 p-3 rounded-2xl hover:bg-[#faf8f5] transition-colors group"
+                    >
+                      <div className="h-9 w-9 rounded-xl bg-[#f5ebe6] text-[#9e5a3c] flex items-center justify-center shrink-0">
+                        <Award size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#181615] group-hover:text-[#9e5a3c]">
+                          About Our Cattery
+                        </p>
+                        <p className="text-xs text-[#575049] mt-0.5">
+                          Our {catteryLocation} home upbringing & ethical breeding philosophy.
+                        </p>
+                      </div>
+                    </Link>
+
+                    <Link
+                      to="/health"
+                      className="flex items-start gap-3 p-3 rounded-2xl hover:bg-[#faf8f5] transition-colors group"
+                    >
+                      <div className="h-9 w-9 rounded-xl bg-[#ebf1ee] text-[#263b30] flex items-center justify-center shrink-0">
+                        <ShieldCheck size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#181615] group-hover:text-[#9e5a3c]">
+                          Health Guarantee
+                        </p>
+                        <p className="text-xs text-[#575049] mt-0.5">
+                          72-hour general health & 2-year congenital warranty details.
+                        </p>
+                      </div>
+                    </Link>
+
+                    <Link
+                      to="/vetting-process"
+                      className="flex items-start gap-3 p-3 rounded-2xl hover:bg-[#faf8f5] transition-colors group"
+                    >
+                      <div className="h-9 w-9 rounded-xl bg-[#f3efea] text-[#181615] flex items-center justify-center shrink-0">
+                        <Stethoscope size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#181615] group-hover:text-[#9e5a3c]">
+                          Adoption & Vetting Process
+                        </p>
+                        <p className="text-xs text-[#575049] mt-0.5">
+                          How we match kittens with loving, prepared indoor homes.
+                        </p>
+                      </div>
+                    </Link>
+
+                    <Link
+                      to="/shipping"
+                      className="flex items-start gap-3 p-3 rounded-2xl hover:bg-[#faf8f5] transition-colors group"
+                    >
+                      <div className="h-9 w-9 rounded-xl bg-[#f5ebe6] text-[#9e5a3c] flex items-center justify-center shrink-0">
+                        <Plane size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#181615] group-hover:text-[#9e5a3c]">
+                          Delivery & Flight Nanny
+                        </p>
+                        <p className="text-xs text-[#575049] mt-0.5">
+                          In-cabin courier, VIP ground transport, or Owego pickup.
+                        </p>
+                      </div>
+                    </Link>
+
+                    <Link
+                      to="/pricing-deposit"
+                      className="flex items-start gap-3 p-3 rounded-2xl hover:bg-[#faf8f5] transition-colors group"
+                    >
+                      <div className="h-9 w-9 rounded-xl bg-[#ebf1ee] text-[#263b30] flex items-center justify-center shrink-0">
+                        <DollarSign size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#181615] group-hover:text-[#9e5a3c]">
+                          Pricing & Reservations
+                        </p>
+                        <p className="text-xs text-[#575049] mt-0.5">
+                          Transparent adoption fees ($350–$500) & what is included.
+                        </p>
+                      </div>
+                    </Link>
+
+                    <Link
+                      to="/care-guide"
+                      className="flex items-start gap-3 p-3 rounded-2xl hover:bg-[#faf8f5] transition-colors group"
+                    >
+                      <div className="h-9 w-9 rounded-xl bg-[#f3efea] text-[#181615] flex items-center justify-center shrink-0">
+                        <BookOpen size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#181615] group-hover:text-[#9e5a3c]">
+                          Kitten Care Guide
+                        </p>
+                        <p className="text-xs text-[#575049] mt-0.5">
+                          Nutrition, litter setup, and first-week transition advice.
+                        </p>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Link
+              to="/reviews"
+              className={`px-3.5 py-2 rounded-full text-[13px] font-semibold transition-colors ${
+                location.pathname === '/reviews'
+                  ? 'bg-[#181615] text-white'
+                  : 'text-[#181615] hover:bg-[#f3efea]'
+              }`}
+            >
+              Family Stories
+            </Link>
+
+            <Link
+              to="/contact"
+              className={`px-3.5 py-2 rounded-full text-[13px] font-semibold transition-colors ${
+                location.pathname === '/contact'
+                  ? 'bg-[#181615] text-white'
+                  : 'text-[#181615] hover:bg-[#f3efea]'
+              }`}
+            >
+              Contact
+            </Link>
+          </nav>
+
+          {/* Right Action Area */}
+          <div className="flex items-center gap-2.5">
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={handleToggleNotifications}
+                aria-label="Cattery Announcements"
+                className="relative h-10 w-10 rounded-full bg-[#f3efea] hover:bg-[#e8e1d5] text-[#181615] flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <Bell size={17} />
+                {activeNotifications.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] px-1 rounded-full bg-[#9e5a3c] text-white text-[10px] font-bold flex items-center justify-center">
+                    {activeNotifications.length}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-3xl bg-white border border-[#181615]/10 editorial-shadow overflow-hidden z-50">
+                  <div className="px-5 py-3.5 bg-[#181615] text-white flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider">
+                      Nursery Bulletins
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowNotifications(false)}
+                      className="text-white/60 hover:text-white"
+                    >
+                      <X size={15} />
+                    </button>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto divide-y divide-[#181615]/8">
+                    {activeNotifications.length > 0 ? (
+                      activeNotifications.map((msg) => (
+                        <div key={msg._id} className="p-4 hover:bg-[#faf8f5] transition-colors">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#f5ebe6] text-[#84472c]">
+                              {msg.type || 'Update'}
+                            </span>
+                            <span className="text-[11px] text-[#8a8075] font-mono">
+                              {msg.createdAt
+                                ? new Date(msg.createdAt).toLocaleDateString()
+                                : ''}
+                            </span>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h5 className="text-[11px] font-black uppercase tracking-tight text-zinc-900 leading-tight mb-1 break-words">
-                              {n.title}
-                            </h5>
-                            {/* Description now shows full text without ellipsis */}
-                            <p className="text-[10px] font-bold text-zinc-400 leading-relaxed whitespace-pre-wrap break-words">
-                              {n.description}
-                            </p>
-                            <div className="flex items-center gap-2 text-zinc-300 mt-2">
-                              <Clock size={10} />
-                              <span className="text-[8px] font-black uppercase tracking-widest">
-                                System Alert
-                              </span>
-                            </div>
-                          </div>
+                          <p className="text-sm font-semibold text-[#181615] mt-1">{msg.title}</p>
+                          <p className="text-xs text-[#575049] mt-1 leading-relaxed">
+                            {msg.description || msg.message || msg.content}
+                          </p>
                         </div>
                       ))
                     ) : (
-                      <div className="p-12 text-center">
-                        <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-200">
-                          <Zap size={24} />
-                        </div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                          All caught up
+                      <div className="p-8 text-center">
+                        <p className="text-xs font-medium text-[#8a8075]">
+                          No new nursery announcements today.
                         </p>
                       </div>
                     )}
                   </div>
-
-                  {notifications?.length > 0 && (
-                    <div className="p-4 bg-zinc-50/50 border-t border-zinc-50">
-                      <button
-                        onClick={() => setShowNotifications(false)}
-                        className="w-full py-3 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 transition-colors"
-                      >
-                        Close Broadcasts
-                      </button>
-                    </div>
-                  )}
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
+            </div>
 
-            {/* DESKTOP CTA */}
+            {/* Primary CTA */}
             <Link
-              to="/available-kittens"
-              className="hidden lg:flex bg-zinc-950 text-white px-8 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-all active:scale-95"
+              to="/apply"
+              className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#181615] hover:bg-[#9e5a3c] text-white text-xs font-semibold tracking-wide transition-colors shadow-xs"
             >
-              Find My Kitten
+              Apply to Adopt
+              <ArrowUpRight size={14} />
             </Link>
 
-            {/* MOBILE HAMBURGER */}
+            {/* Mobile Hamburger Button */}
             <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-3 bg-zinc-50 rounded-full text-zinc-900 hover:bg-zinc-100 transition-colors"
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isOpen}
+              className="lg:hidden h-10 w-10 rounded-full bg-[#181615] text-white flex items-center justify-center"
             >
-              <Menu size={20} />
+              {isOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
-      </nav>
+      </div>
 
-      {/* MOBILE MENU (outside nav for isolation) */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <div className="fixed inset-0 z-[9999] isolate">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <motion.div
-              variants={menuSlide}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="absolute top-0 right-0 h-[100dvh] w-[88%] max-w-[400px] bg-white shadow-2xl flex flex-col"
-            >
-              <div className="p-6 md:p-8 flex justify-between items-center border-b border-zinc-100">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={LogoImg}
-                    alt="Logo"
-                    className="w-8 h-8 object-contain mix-blend-multiply"
-                  />
-                  <span className="font-black text-xl tracking-tighter uppercase">Menu</span>
-                </div>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-zinc-50 rounded-full text-zinc-400 hover:bg-red-50 hover:text-red-500 transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
+      {/* Mobile Navigation Drawer */}
+      {isOpen && (
+        <div className="lg:hidden fixed inset-x-0 top-[116px] bottom-0 bg-[#faf8f5] z-50 overflow-y-auto border-t border-[#181615]/10">
+          <div className="max-w-lg mx-auto px-5 py-6 space-y-6">
+            <div className="space-y-1">
+              <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8a8075] mb-2">
+                Nursery & Discovery
+              </p>
+              <Link
+                to="/"
+                className="flex items-center justify-between px-3.5 py-3 rounded-2xl text-base font-semibold text-[#181615] hover:bg-[#f3efea]"
+              >
+                Home
+              </Link>
+              <Link
+                to="/available-kittens"
+                className="flex items-center justify-between px-3.5 py-3 rounded-2xl text-base font-semibold text-[#181615] bg-[#f3efea]"
+              >
+                <span>Available Kittens</span>
+                <span className="px-2.5 py-0.5 rounded-full bg-[#9e5a3c] text-white text-xs font-mono">
+                  {availableCount} Available
+                </span>
+              </Link>
+              <Link
+                to="/upcoming-litters"
+                className="flex items-center justify-between px-3.5 py-3 rounded-2xl text-base font-semibold text-[#181615] hover:bg-[#f3efea]"
+              >
+                Upcoming Litters
+              </Link>
+              <Link
+                to="/retired-adults"
+                className="flex items-center justify-between px-3.5 py-3 rounded-2xl text-base font-semibold text-[#181615] hover:bg-[#f3efea]"
+              >
+                Retired Adults
+              </Link>
+            </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-32">
+            <div className="space-y-1 pt-4 border-t border-[#181615]/10">
+              <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8a8075] mb-2">
+                Adoption, Health & Care
+              </p>
+              <div className="grid grid-cols-2 gap-2">
                 <Link
-                  to="/available-kittens"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block bg-green-600 p-8 rounded-[32px] text-white shadow-xl shadow-green-100/50"
+                  to="/about"
+                  className="p-3 rounded-2xl bg-white border border-[#181615]/8 text-xs font-semibold text-[#181615]"
                 >
-                  <Cat size={32} className="mb-4 text-white/50" />
-                  <p className="text-2xl font-black tracking-tighter leading-none mb-2">
-                    Browse Nursery
-                  </p>
-                  <p className="text-green-100 text-[10px] font-black uppercase tracking-widest opacity-90">
-                    Find Your Soulmate
-                  </p>
+                  About Our Cattery
                 </Link>
-
-                <div className="space-y-2">
-                  {navData.map((link) => (
-                    <div key={link.name} className="space-y-1">
-                      <NavLink
-                        to={link.path}
-                        onClick={() => !link.dropdown && setMobileMenuOpen(false)}
-                        className="flex items-center justify-between p-5 hover:bg-zinc-50 rounded-2xl group transition-all"
-                      >
-                        <span className="font-black uppercase tracking-widest text-xs text-zinc-900 flex items-center gap-3">
-                          <span className="text-zinc-300">{link.icon}</span>
-                          {link.name}
-                        </span>
-                        <ChevronRight size={16} className="text-zinc-300" />
-                      </NavLink>
-                      {link.dropdown && (
-                        <div className="pl-[52px] space-y-1 border-l-2 border-zinc-50 ml-7 mb-4">
-                          {link.dropdown.map((sub) => (
-                            <Link
-                              key={sub.name}
-                              to={sub.path}
-                              onClick={() => setMobileMenuOpen(false)}
-                              className="block p-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest hover:text-green-600 transition-colors"
-                            >
-                              {sub.name}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="absolute bottom-0 inset-x-0 p-6 bg-white border-t border-zinc-100 z-10 pb-[max(env(safe-area-inset-bottom),24px)]">
+                <Link
+                  to="/health"
+                  className="p-3 rounded-2xl bg-white border border-[#181615]/8 text-xs font-semibold text-[#181615]"
+                >
+                  Health Guarantee
+                </Link>
+                <Link
+                  to="/vetting-process"
+                  className="p-3 rounded-2xl bg-white border border-[#181615]/8 text-xs font-semibold text-[#181615]"
+                >
+                  Vetting Process
+                </Link>
+                <Link
+                  to="/shipping"
+                  className="p-3 rounded-2xl bg-white border border-[#181615]/8 text-xs font-semibold text-[#181615]"
+                >
+                  Flight Nanny & Delivery
+                </Link>
+                <Link
+                  to="/pricing-deposit"
+                  className="p-3 rounded-2xl bg-white border border-[#181615]/8 text-xs font-semibold text-[#181615]"
+                >
+                  Pricing & Deposits
+                </Link>
+                <Link
+                  to="/care-guide"
+                  className="p-3 rounded-2xl bg-white border border-[#181615]/8 text-xs font-semibold text-[#181615]"
+                >
+                  Kitten Care Guide
+                </Link>
+                <Link
+                  to="/reviews"
+                  className="p-3 rounded-2xl bg-white border border-[#181615]/8 text-xs font-semibold text-[#181615]"
+                >
+                  Family Reviews
+                </Link>
                 <Link
                   to="/contact"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full bg-zinc-950 text-white py-6 rounded-[24px] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-transform"
+                  className="p-3 rounded-2xl bg-white border border-[#181615]/8 text-xs font-semibold text-[#181615]"
                 >
-                  Contact Concierge <ArrowRight size={18} />
+                  Contact Us
                 </Link>
               </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </LayoutGroup>
-  );
-};
+            </div>
 
-export default Navbar;
+            <div className="pt-4 border-t border-[#181615]/10 flex flex-col gap-3">
+              {catteryPhone && (
+                <a
+                  href={`tel:${catteryPhone.replace(/[^\d+]/g, '')}`}
+                  className="w-full py-3 rounded-full bg-white border border-[#181615]/15 text-[#181615] text-center text-xs font-semibold flex items-center justify-center gap-2 hover:bg-[#f3efea] transition-colors"
+                >
+                  <Phone size={14} className="text-[#9e5a3c]" />
+                  Call or Text: {catteryPhone}
+                </a>
+              )}
+              <Link
+                to="/apply"
+                className="w-full py-3.5 rounded-full bg-[#181615] text-white text-center text-sm font-semibold"
+              >
+                Start Adoption Application
+              </Link>
+              <Link
+                to="/available-kittens"
+                className="w-full py-3.5 rounded-full bg-[#f5ebe6] text-[#84472c] text-center text-sm font-semibold"
+              >
+                Browse Available Kittens
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}

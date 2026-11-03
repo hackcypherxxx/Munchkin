@@ -1,94 +1,90 @@
 import Kitten from "../models/Kitten.js";
-import Settings from "../models/Settings.js";
 
-// 🔧 helper to attach global location
-const attachLocation = async (data) => {
-  const settings = await Settings.findOne();
-  const location = settings?.mainLocation || "Unknown Location";
-
-  if (Array.isArray(data)) {
-    return data.map(item => ({
-      ...item._doc,
-      location,
-    }));
-  }
-
-  return {
-    ...data._doc,
-    location,
-  };
-};
-
-// 🐱 CREATE KITTEN (ADMIN)
-export const createKitten = async (req, res) => {
+function parseJsonField(val, fallback) {
+  if (val === undefined || val === null || val === "") return fallback;
+  if (typeof val === "object") return val;
   try {
-    const imageUrls = req.files?.map(file => file.path) || [];
-
-    // --- CRITICAL FIX: Parse JSON Strings from FormData ---
-    const bodyData = { ...req.body };
-    
-    if (typeof bodyData.specs === 'string') bodyData.specs = JSON.parse(bodyData.specs);
-    if (typeof bodyData.medical === 'string') bodyData.medical = JSON.parse(bodyData.medical);
-    if (typeof bodyData.lineage === 'string') bodyData.lineage = JSON.parse(bodyData.lineage);
-
-    const kitten = await Kitten.create({
-      ...bodyData,
-      images: imageUrls,
-    });
-
-    const result = await attachLocation(kitten);
-
-    res.status(201).json({
-      success: true,
-      kitten: result,
-    });
-
-  } catch (error) {
-    console.error("CREATE ERROR:", error);
-    res.status(500).json({ error: error.message || "Failed to create kitten" });
+    return JSON.parse(val);
+  } catch {
+    return fallback;
   }
-};
+}
 
-// 📦 GET ALL KITTENS (PUBLIC)
+function parseStringArray(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.filter(Boolean);
+  if (typeof val === "string") {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+    } catch {
+      // single URL string
+      return [val].filter(Boolean);
+    }
+  }
+  return [];
+}
+
+// 🌍 PUBLIC / ADMIN: GET ALL KITTENS (FILTER + SEARCH + PAGINATION)
 export const getKittens = async (req, res) => {
   try {
     const {
+      breed,
+      gender,
       status,
-      sort = "createdAt",
-      order = "desc",
+      minPrice,
+      maxPrice,
+      search,
+      includeAll,
       page = 1,
-      limit = 10,
+      limit = 50,
     } = req.query;
 
-    const query = {};
+    let filter = {};
 
+    if (breed) filter.breed = breed;
+    if (gender) filter.gender = gender;
     if (status) {
-      query.status = status;
+      filter.status = status;
+    } else if (includeAll !== "true") {
+      // Public visitors see Available, Reserved, and Adopted kittens (not Draft or Unavailable)
+      filter.status = { $nin: ["Draft", "Unavailable"] };
     }
 
-    const kittens = await Kitten.find(query)
-      .sort({ [sort]: order === "desc" ? -1 : 1 })
-      .skip((page - 1) * limit)
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { breed: { $regex: search, $options: "i" } },
+        { coat: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const kittens = await Kitten.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * Number(limit))
       .limit(Number(limit));
 
-    const total = await Kitten.countDocuments(query);
-
-    const result = await attachLocation(kittens);
+    const total = await Kitten.countDocuments(filter);
 
     res.json({
       total,
       page: Number(page),
-      pages: Math.ceil(total / limit),
-      kittens: result,
+      pages: Math.ceil(total / Number(limit)),
+      kittens,
     });
-
   } catch (error) {
-    console.error(error);
+    console.error("🔥 GET KITTENS ERROR:", error);
     res.status(500).json({ error: "Failed to fetch kittens" });
   }
 };
 
-// 🔍 GET SINGLE KITTEN
+// 🌍 PUBLIC: GET SINGLE KITTEN
 export const getKittenById = async (req, res) => {
   try {
     const kitten = await Kitten.findById(req.params.id);
@@ -97,17 +93,133 @@ export const getKittenById = async (req, res) => {
       return res.status(404).json({ error: "Kitten not found" });
     }
 
-    const result = await attachLocation(kitten);
-
-    res.json(result);
-
+    res.json(kitten);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Failed to fetch kitten" });
   }
 };
 
-// ✏️ UPDATE KITTEN (ADMIN)
+// 👑 ADMIN: CREATE KITTEN (Supports up to 10 photos via files and/or pre-uploaded AI imageUrls)
+export const createKitten = async (req, res) => {
+  try {
+    const uploadedUrls = Array.isArray(req.files)
+      ? req.files.map((file) => file.path).filter(Boolean)
+      : [];
+
+    const existingUrls = [
+      ...parseStringArray(req.body.existingImages),
+      ...parseStringArray(req.body.imageUrls),
+    ];
+
+    let allImages = [...existingUrls, ...uploadedUrls];
+    // Deduplicate while preserving order
+    allImages = Array.from(new Set(allImages));
+
+    if (allImages.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "At least 1 image is required" });
+    }
+
+    if (allImages.length > 10) {
+      return res.status(400).json({
+        error: "Maximum 10 photographs allowed per kitten listing",
+      });
+    }
+
+    // Handle primary image ordering
+    const requestedPrimary = req.body.primaryImage;
+    if (requestedPrimary && allImages.includes(requestedPrimary)) {
+      allImages = [
+        requestedPrimary,
+        ...allImages.filter((u) => u !== requestedPrimary),
+      ];
+    }
+
+    const specsObj = parseJsonField(req.body.specs, {
+      coatType: req.body.coatType || "",
+      eyeColor: req.body.eyeColor || "",
+      weight: req.body.weight || "",
+      hypoallergenic: req.body.hypoallergenic || "Low-Shedding Standard",
+      legType: req.body.legType || "",
+      pattern: req.body.pattern || "",
+    });
+
+    const medicalObj = parseJsonField(req.body.medical, {
+      vaccinated:
+        req.body.vaccinated !== undefined
+          ? req.body.vaccinated === "true" || req.body.vaccinated === true
+          : true,
+      dewormed:
+        req.body.dewormed !== undefined
+          ? req.body.dewormed === "true" || req.body.dewormed === true
+          : true,
+      healthGuarantee:
+        req.body.healthGuarantee || "1-Year Genetic Guarantee",
+      vetChecked:
+        req.body.vetChecked !== undefined
+          ? req.body.vetChecked === "true" || req.body.vetChecked === true
+          : true,
+      microchipped:
+        req.body.microchipped !== undefined
+          ? req.body.microchipped === "true" || req.body.microchipped === true
+          : true,
+      vetNotes: req.body.vetNotes || "",
+    });
+
+    const lineageObj = parseJsonField(req.body.lineage, {
+      sire: req.body.sire || "",
+      dam: req.body.dam || "",
+      registry: req.body.registry || "",
+    });
+
+    const aiMetadataObj = parseJsonField(req.body.aiMetadata, undefined);
+    if (aiMetadataObj && aiMetadataObj.generatedByAi) {
+      aiMetadataObj.adminApprovedAt = new Date();
+    }
+
+    const imageMetadata = allImages.map((url, index) => ({
+      url,
+      isPrimary: index === 0,
+      order: index,
+      caption: `${req.body.name || "Kitten"} — Photo #${index + 1}`,
+    }));
+
+    const kitten = await Kitten.create({
+      name: req.body.name,
+      breed: req.body.breed,
+      gender: req.body.gender || "Female",
+      ageWeeks: Number(req.body.ageWeeks) || 10,
+      dob: req.body.dob || "",
+      coat: req.body.coat,
+      status: req.body.status || "Available",
+      price: Number(req.body.price) || 1800,
+      Shipping:
+        req.body.Shipping !== undefined ? Number(req.body.Shipping) : 0,
+      trait: req.body.trait || "",
+      shortDescription: req.body.shortDescription || "",
+      description: req.body.description,
+      primaryImage: allImages[0],
+      images: allImages,
+      imageMetadata,
+      specs: specsObj,
+      medical: medicalObj,
+      lineage: lineageObj,
+      seoTitle: req.body.seoTitle || "",
+      seoDescription: req.body.seoDescription || "",
+      ...(aiMetadataObj ? { aiMetadata: aiMetadataObj } : {}),
+    });
+
+    res.status(201).json(kitten);
+  } catch (error) {
+    console.error("🔥 CREATE KITTEN ERROR:", error);
+    res.status(500).json({
+      error: error.message || "Failed to create kitten",
+    });
+  }
+};
+
+// 👑 ADMIN: UPDATE KITTEN (Preserves & reorders existing images + adds new uploads up to 10)
 export const updateKitten = async (req, res) => {
   try {
     const kitten = await Kitten.findById(req.params.id);
@@ -116,55 +228,129 @@ export const updateKitten = async (req, res) => {
       return res.status(404).json({ error: "Kitten not found" });
     }
 
-    const updateData = { ...req.body };
+    const uploadedUrls = Array.isArray(req.files)
+      ? req.files.map((file) => file.path).filter(Boolean)
+      : [];
 
-    // --- CRITICAL FIX: Parse JSON Strings during Update ---
-    if (typeof updateData.specs === 'string') updateData.specs = JSON.parse(updateData.specs);
-    if (typeof updateData.medical === 'string') updateData.medical = JSON.parse(updateData.medical);
-    if (typeof updateData.lineage === 'string') updateData.lineage = JSON.parse(updateData.lineage);
-
-    // update images if new ones uploaded
-    if (req.files && req.files.length > 0) {
-      const imageUrls = req.files.map(file => file.path);
-      kitten.images = imageUrls;
+    let retainedImages = kitten.images || [];
+    if (req.body.existingImages !== undefined) {
+      retainedImages = parseStringArray(req.body.existingImages);
     }
 
-    // update other fields
-    Object.assign(kitten, updateData);
+    let combinedImages =
+      uploadedUrls.length > 0 || req.body.existingImages !== undefined
+        ? Array.from(new Set([...retainedImages, ...uploadedUrls]))
+        : kitten.images;
 
-    await kitten.save();
+    if (combinedImages.length === 0) {
+      return res.status(400).json({
+        error: "At least 1 photograph must remain on the kitten listing",
+      });
+    }
 
-    const result = await attachLocation(kitten);
+    if (combinedImages.length > 10) {
+      return res.status(400).json({
+        error: "Maximum 10 photographs allowed per kitten listing",
+      });
+    }
 
-    res.json({
-      success: true,
-      kitten: result,
+    if (
+      req.body.primaryImage &&
+      combinedImages.includes(req.body.primaryImage)
+    ) {
+      combinedImages = [
+        req.body.primaryImage,
+        ...combinedImages.filter((u) => u !== req.body.primaryImage),
+      ];
+    }
+
+    kitten.images = combinedImages;
+    kitten.primaryImage = combinedImages[0];
+    kitten.imageMetadata = combinedImages.map((url, idx) => ({
+      url,
+      isPrimary: idx === 0,
+      order: idx,
+      caption: `${req.body.name || kitten.name} — Photo #${idx + 1}`,
+    }));
+
+    const scalarFields = [
+      "name",
+      "breed",
+      "gender",
+      "dob",
+      "coat",
+      "status",
+      "trait",
+      "shortDescription",
+      "description",
+      "seoTitle",
+      "seoDescription",
+    ];
+
+    scalarFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        kitten[field] = req.body[field];
+      }
     });
 
+    if (req.body.ageWeeks !== undefined) {
+      kitten.ageWeeks = Number(req.body.ageWeeks);
+    }
+    if (req.body.price !== undefined) {
+      kitten.price = Number(req.body.price);
+    }
+    if (req.body.Shipping !== undefined) {
+      kitten.Shipping = Number(req.body.Shipping);
+    }
+
+    if (req.body.specs) {
+      const parsedSpecs = parseJsonField(req.body.specs, null);
+      if (parsedSpecs) {
+        kitten.specs = { ...(kitten.specs?.toObject?.() || kitten.specs || {}), ...parsedSpecs };
+      }
+    }
+
+    if (req.body.medical) {
+      const parsedMedical = parseJsonField(req.body.medical, null);
+      if (parsedMedical) {
+        kitten.medical = {
+          ...(kitten.medical?.toObject?.() || kitten.medical || {}),
+          ...parsedMedical,
+        };
+      }
+    }
+
+    if (req.body.lineage) {
+      const parsedLineage = parseJsonField(req.body.lineage, null);
+      if (parsedLineage) {
+        kitten.lineage = {
+          ...(kitten.lineage?.toObject?.() || kitten.lineage || {}),
+          ...parsedLineage,
+        };
+      }
+    }
+
+    const updated = await kitten.save();
+    res.json(updated);
   } catch (error) {
-    console.error("UPDATE ERROR:", error);
-    res.status(500).json({ error: error.message || "Failed to update kitten" });
+    console.error("🔥 UPDATE KITTEN ERROR:", error);
+    res.status(500).json({
+      error: error.message || "Failed to update kitten",
+    });
   }
 };
 
-// ❌ DELETE KITTEN (ADMIN)
+// 👑 ADMIN: DELETE KITTEN
 export const deleteKitten = async (req, res) => {
   try {
-    const kitten = await Kitten.findById(req.params.id);
+    const kitten = await Kitten.findByIdAndDelete(req.params.id);
 
     if (!kitten) {
       return res.status(404).json({ error: "Kitten not found" });
     }
 
-    await kitten.deleteOne();
-
-    res.json({
-      success: true,
-      message: "Kitten deleted successfully",
-    });
-
+    res.json({ message: "Kitten deleted successfully" });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Failed to delete kitten" });
   }
 };

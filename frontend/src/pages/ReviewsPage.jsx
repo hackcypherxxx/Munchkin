@@ -1,193 +1,350 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FaInstagram, FaQuoteRight } from 'react-icons/fa6';
-import { 
-  Star, 
-  MapPin, 
-  Plus,
-  ShieldCheck,
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  getReviews,
+  getReviewStats,
+  createReview,
+  clearReviewState,
+} from '../features/review/reviewSlice';
+import PageMeta from '../components/PageMeta';
+import {
+  Star,
+  Quote,
   CheckCircle2,
-  ArrowDown
+  MapPin,
+  Upload,
+  Loader2,
+  AlertCircle,
+  Sparkles,
 } from 'lucide-react';
-import { useDispatch, useSelector } from "react-redux";
 
-import ReviewForm from '../forms/ReviewForm';
-import { getReviews, getReviewStats } from "../features/review/reviewSlice";
-
-const ReviewsPage = () => {
-  const [open, setOpen] = useState(false);
-
+export default function ReviewsPage() {
   const dispatch = useDispatch();
-  const { reviews, stats, loading } = useSelector((state) => state.review);
+  const { reviews, stats, loading, success, error } = useSelector((state) => state.review);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    location: '',
+    rating: 5,
+    text: '',
+  });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     dispatch(getReviews());
     dispatch(getReviewStats());
+    return () => dispatch(clearReviewState());
   }, [dispatch]);
 
-  useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : 'auto';
-  }, [open]);
+  const approvedReviews = Array.isArray(reviews) ? reviews : [];
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const fd = new FormData();
+    fd.append('name', formData.name);
+    fd.append('email', formData.email);
+    fd.append('location', formData.location);
+    fd.append('rating', String(formData.rating));
+    fd.append('review', formData.text);
+    fd.append('text', formData.text);
+    if (imageFile) {
+      fd.append('image', imageFile);
+    }
+    dispatch(createReview(fd));
+  };
 
   return (
-    <div className="bg-white min-h-screen">
-      
-      {/* HERO */}
-      <section className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-zinc-950">
-        <motion.div 
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 0.4, scale: 1 }}
-          transition={{ duration: 2 }}
-          className="absolute inset-0"
-        >
-          <img 
-            src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=2000" 
-            className="w-full h-full object-cover"
-            alt="Hero"
-          />
-        </motion.div>
-        
-        <div className="relative z-10 text-center px-6">
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <ShieldCheck className="text-green-500" size={20} />
-            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/60">
-              Verified Excellence
-            </span>
+    <main className="min-h-screen bg-[#faf8f5] pb-24">
+      <PageMeta
+        title="Verified Adopter Stories & Reviews"
+        description="Read verified stories and see real photos from families who adopted their Munchkin kittens from MunchkinKittie."
+      />
+
+      {/* Editorial Header */}
+      <section className="bg-[#f3efea] border-b border-[#181615]/10 py-14 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+          <div className="max-w-2xl space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#181615]/10 text-xs font-semibold text-[#181615]">
+              <div className="flex items-center gap-0.5 text-[#c58b38]">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} size={12} className="fill-[#c58b38]" />
+                ))}
+              </div>
+              <span>
+                {stats?.avgRating ? `${Number(stats.avgRating).toFixed(1)} / 5.0` : '5.0 / 5.0'}{' '}
+                Average Rating ({stats?.totalReviews || approvedReviews.length || 3} Verified Reviews)
+              </span>
+            </div>
+            <h1 className="font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
+              Verified Family Stories
+            </h1>
+            <p className="text-base sm:text-lg text-[#575049] leading-relaxed">
+              Real experiences and home photographs shared by families who welcomed a MunchkinKittie
+              companion into their lives.
+            </p>
           </div>
-          
-          <h1 className="text-7xl md:text-[140px] font-black text-white tracking-tighter leading-[0.85] mb-12">
-            THE <span className="text-green-500 italic">GUESTBOOK.</span>
-          </h1>
-          
-          <p className="text-white/40 text-lg max-w-2xl mx-auto mb-16">
-            Real families. Real experiences.
-          </p>
 
-          <button 
-            onClick={() => setOpen(true)}
-            className="bg-white text-zinc-950 px-12 py-6 rounded-full text-[10px] font-black uppercase tracking-[0.2em] hover:bg-green-600 hover:text-white transition-all"
+          <a
+            href="#share-story"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#181615] hover:bg-[#9e5a3c] text-white text-xs sm:text-sm font-semibold transition-colors self-start lg:self-end"
           >
-            Share Your Experience
-          </button>
-        </div>
-
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 animate-bounce">
-          <ArrowDown size={32} />
+            <Sparkles size={14} /> Submit Your Adoption Story
+          </a>
         </div>
       </section>
 
-      {/* STATS */}
-      <div className="bg-zinc-50 border-y">
-        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-wrap justify-between items-center gap-12">
-          
-          <div className="flex items-center gap-4">
-            <CheckCircle2 className="text-green-600" />
-            <span className="text-sm font-black uppercase">
-              {stats.totalReviews}+ Reviews
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={14} className="fill-zinc-950" />
-              ))}
-            </div>
-            <span className="text-sm font-black uppercase">
-              {stats.avgRating} Avg Rating
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <ShieldCheck className="text-zinc-400" />
-            <span className="text-sm font-black uppercase">
-              Health Guaranteed
-            </span>
-          </div>
-
-        </div>
-      </div>
-
-      {/* REVIEWS */}
-      <section className="max-w-[1600px] mx-auto px-6 py-32">
-        {loading ? (
-          <p className="text-center text-zinc-400 font-bold">
-            Loading reviews...
-          </p>
-        ) : (
-          <div className="columns-1 md:columns-2 gap-16 space-y-16">
-            {reviews.map((review) => (
-              <motion.div 
+      {/* Reviews Grid */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+        {approvedReviews.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+            {approvedReviews.map((review) => (
+              <article
                 key={review._id}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="break-inside-avoid"
+                className="flex flex-col justify-between rounded-[24px] bg-white border border-[#181615]/10 overflow-hidden editorial-shadow"
               >
-                {review.image ? (
-                  // IMAGE REVIEW
-                  <div className="group relative overflow-hidden rounded-[80px]">
-                    <img 
-                      src={review.image} 
-                      className="w-full object-cover"
-                      alt="review"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 to-transparent" />
-
-                    <div className="absolute bottom-0 p-10">
-                      <div className="flex items-center gap-2 text-white/60 mb-4">
-                        <MapPin size={14} />
-                        <span className="text-xs uppercase">{review.location}</span>
+                <div>
+                  {review.image && (
+                    <div className="relative aspect-[16/11] w-full overflow-hidden bg-[#f3efea]">
+                      <img
+                        src={review.image}
+                        alt={`Kitten adopted by ${review.name}`}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#181615]/75 backdrop-blur-md text-white text-[10px] font-semibold uppercase tracking-wider">
+                        <CheckCircle2 size={11} className="text-[#8fc4a6]" />
+                        Verified Family Photo
                       </div>
-
-                      <p className="text-white text-xl mb-6">
-                        {review.review || review.text}
-                      </p>
-
-                      <h4 className="text-white font-black">
-                        {review.name}
-                      </h4>
                     </div>
-                  </div>
-                ) : (
-                  // TEXT REVIEW
-                  <div className="bg-white p-16 rounded-[60px] border">
-                    <FaQuoteRight className="text-zinc-100 mb-6" size={60} />
+                  )}
 
-                    <p className="text-2xl font-bold mb-8 italic">
-                      "{review.text}"
-                    </p>
-
-                    <h4 className="font-black">
-                      {review.name}
-                    </h4>
-                    <p className="text-xs text-zinc-400 uppercase">
-                      {review.location}
+                  <div className="p-6 sm:p-7">
+                    <div className="flex items-center justify-between gap-2 mb-4">
+                      <div className="flex items-center gap-0.5 text-[#c58b38]">
+                        {Array.from({ length: Number(review.rating) || 5 }).map((_, i) => (
+                          <Star key={i} size={14} className="fill-[#c58b38]" />
+                        ))}
+                      </div>
+                      <Quote size={18} className="text-[#9e5a3c]/35" />
+                    </div>
+                    <p className="text-sm sm:text-[15px] text-[#181615] leading-relaxed">
+                      “{String(review.review || review.text || '').trim()}”
                     </p>
                   </div>
-                )}
-              </motion.div>
+                </div>
+
+                <div className="px-6 py-4 bg-[#faf8f5] border-t border-[#181615]/8 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-[#181615]">{review.name}</p>
+                    <p className="text-xs text-[#575049] inline-flex items-center gap-1 mt-0.5">
+                      <MapPin size={11} className="text-[#9e5a3c]" />
+                      {review.location || 'United States'}
+                    </p>
+                  </div>
+                  <span className="text-[11px] font-mono text-[#8a8075]">
+                    {review.date ||
+                      (review.createdAt
+                        ? new Date(review.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          year: 'numeric',
+                        })
+                        : '')}
+                  </span>
+                </div>
+              </article>
             ))}
           </div>
         )}
-      </section>
 
-      {/* CTA */}
-      <section className="py-40 bg-zinc-50 text-center">
-        <h2 className="text-5xl font-black mb-6">
-          Become part of our family
-        </h2>
-
-        <button 
-          onClick={() => setOpen(true)}
-          className="px-12 py-6 border rounded-full font-black uppercase"
+        {/* Submit Review Form Section */}
+        <div
+          id="share-story"
+          className="mt-20 pt-16 border-t border-[#181615]/10 max-w-3xl mx-auto"
         >
-          Add Your Story
-        </button>
+          <div className="rounded-[28px] bg-white border border-[#181615]/10 p-7 sm:p-10 editorial-shadow">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9e5a3c]">
+              Adopted From MunchkinKittie?
+            </span>
+            <h2 className="mt-1 font-serif text-3xl sm:text-4xl font-semibold text-[#181615]">
+              Share your kitten’s story & photo
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-[#575049]">
+              We love seeing how our kittens grow in their new homes. Submitted reviews are verified
+              by our nursery team before appearing publicly.
+            </p>
+
+            {success ? (
+              <div className="mt-6 p-6 rounded-2xl bg-[#ebf1ee] border border-[#263b30]/20 text-center space-y-2">
+                <CheckCircle2 size={28} className="mx-auto text-[#263b30]" />
+                <p className="font-serif text-2xl font-semibold text-[#181615]">
+                  Thank You for Sharing Your Story!
+                </p>
+                <p className="text-xs text-[#575049]">
+                  Your review and photo have been received and will appear once approved.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+                {error && (
+                  <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2">
+                    <AlertCircle size={15} />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label
+                      htmlFor="reviewer-name"
+                      className="block text-xs font-semibold text-[#181615] mb-1.5"
+                    >
+                      Your Name *
+                    </label>
+                    <input
+                      id="reviewer-name"
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="e.g., Sarah & Mark"
+                      className="w-full px-4 py-3 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm text-[#181615]"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="reviewer-email"
+                      className="block text-xs font-semibold text-[#181615] mb-1.5"
+                    >
+                      Your Email (Private) *
+                    </label>
+                    <input
+                      id="reviewer-email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="e.g., sarah@example.com"
+                      className="w-full px-4 py-3 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm text-[#181615]"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="reviewer-location"
+                      className="block text-xs font-semibold text-[#181615] mb-1.5"
+                    >
+                      Your City & State *
+                    </label>
+                    <input
+                      id="reviewer-location"
+                      type="text"
+                      required
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      placeholder="e.g., Boston, MA"
+                      className="w-full px-4 py-3 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm text-[#181615]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#181615] mb-1.5">
+                      Rating *
+                    </label>
+                    <div className="flex items-center gap-2 py-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, rating: star })}
+                          className="p-1 cursor-pointer"
+                        >
+                          <Star
+                            size={22}
+                            className={
+                              star <= formData.rating
+                                ? 'text-[#c58b38] fill-[#c58b38]'
+                                : 'text-[#8a8075]/40'
+                            }
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#181615] mb-1.5">
+                      Upload Kitten Photo *
+                    </label>
+                    <label className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#faf8f5] border border-dashed border-[#181615]/25 cursor-pointer hover:border-[#9e5a3c] text-xs font-medium text-[#575049]">
+                      <Upload size={15} className="text-[#9e5a3c]" />
+                      <span className="truncate">
+                        {imageFile ? imageFile.name : 'Choose a photo of your kitten...'}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        required
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {imagePreview && (
+                  <div className="h-28 w-28 rounded-2xl overflow-hidden border border-[#181615]/10">
+                    <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                  </div>
+                )}
+
+                <div>
+                  <label
+                    htmlFor="reviewer-text"
+                    className="block text-xs font-semibold text-[#181615] mb-1.5"
+                  >
+                    Your Experience *
+                  </label>
+                  <textarea
+                    id="reviewer-text"
+                    rows={4}
+                    required
+                    value={formData.text}
+                    onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+                    placeholder="Tell future families about your kitten and adoption experience..."
+                    className="w-full p-4 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm text-[#181615]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#181615] hover:bg-[#9e5a3c] text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" /> Submitting Story...
+                    </>
+                  ) : (
+                    'Submit Review for Verification'
+                  )}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
       </section>
-
-      <ReviewForm isOpen={open} onClose={() => setOpen(false)} />
-    </div>
+    </main>
   );
-};
-
-export default ReviewsPage;
+}

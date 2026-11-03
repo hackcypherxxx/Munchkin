@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../services/api";
 
-
 // ➕ CREATE APPLICATION (PUBLIC)
 export const createApplication = createAsyncThunk(
   "application/create",
@@ -17,7 +16,6 @@ export const createApplication = createAsyncThunk(
   }
 );
 
-
 // 📦 GET ALL APPLICATIONS (ADMIN)
 export const getApplications = createAsyncThunk(
   "application/getAll",
@@ -30,7 +28,6 @@ export const getApplications = createAsyncThunk(
     }
   }
 );
-
 
 // 📄 GET ONE APPLICATION
 export const getApplicationById = createAsyncThunk(
@@ -45,6 +42,28 @@ export const getApplicationById = createAsyncThunk(
   }
 );
 
+// 🔄 UPDATE APPLICATION STATUS & NOTES (ADMIN)
+export const updateApplicationStatus = createAsyncThunk(
+  "application/updateStatus",
+  async (
+    { id, status, adminNotes, note, sendEmailNotification = true },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await api.put(`/applications/${id}/status`, {
+        status,
+        adminNotes,
+        note,
+        sendEmailNotification,
+      });
+      return { id, data: res.data };
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.error || "Failed to update application status"
+      );
+    }
+  }
+);
 
 // ✅ APPROVE APPLICATION
 export const approveApplication = createAsyncThunk(
@@ -59,7 +78,6 @@ export const approveApplication = createAsyncThunk(
   }
 );
 
-
 // ❌ REJECT APPLICATION
 export const rejectApplication = createAsyncThunk(
   "application/reject",
@@ -72,7 +90,6 @@ export const rejectApplication = createAsyncThunk(
     }
   }
 );
-
 
 // 🗑️ DELETE APPLICATION
 export const deleteApplication = createAsyncThunk(
@@ -87,12 +104,12 @@ export const deleteApplication = createAsyncThunk(
   }
 );
 
-
 const applicationSlice = createSlice({
   name: "application",
   initialState: {
     applications: [],
     application: null,
+    lastSubmittedReference: null,
     loading: false,
     error: null,
     success: null,
@@ -107,20 +124,21 @@ const applicationSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-
       // ➕ CREATE
       .addCase(createApplication.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
-      .addCase(createApplication.fulfilled, (state) => {
+      .addCase(createApplication.fulfilled, (state, action) => {
         state.loading = false;
         state.success = "Application submitted successfully";
+        state.lastSubmittedReference =
+          action.payload?.applicationReference || null;
       })
       .addCase(createApplication.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
 
       // 📦 GET ALL
       .addCase(getApplications.pending, (state) => {
@@ -128,13 +146,14 @@ const applicationSlice = createSlice({
       })
       .addCase(getApplications.fulfilled, (state, action) => {
         state.loading = false;
-        state.applications = action.payload;
+        state.applications = Array.isArray(action.payload)
+          ? action.payload
+          : [];
       })
       .addCase(getApplications.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
 
       // 📄 GET ONE
       .addCase(getApplicationById.pending, (state) => {
@@ -149,30 +168,40 @@ const applicationSlice = createSlice({
         state.error = action.payload;
       })
 
+      // 🔄 UPDATE STATUS & NOTES
+      .addCase(updateApplicationStatus.fulfilled, (state, action) => {
+        const updatedApp = action.payload?.data?.application;
+        const index = state.applications.findIndex(
+          (a) => a._id === action.payload.id
+        );
+        if (index !== -1) {
+          if (updatedApp) {
+            state.applications[index] = updatedApp;
+          } else if (action.meta?.arg?.status) {
+            state.applications[index].status = action.meta.arg.status;
+          }
+        }
+      })
 
       // ✅ APPROVE
       .addCase(approveApplication.fulfilled, (state, action) => {
         const index = state.applications.findIndex(
           (a) => a._id === action.payload.id
         );
-
         if (index !== -1) {
           state.applications[index].status = "Approved";
         }
       })
-
 
       // ❌ REJECT
       .addCase(rejectApplication.fulfilled, (state, action) => {
         const index = state.applications.findIndex(
           (a) => a._id === action.payload.id
         );
-
         if (index !== -1) {
           state.applications[index].status = "Rejected";
         }
       })
-
 
       // 🗑️ DELETE
       .addCase(deleteApplication.fulfilled, (state, action) => {

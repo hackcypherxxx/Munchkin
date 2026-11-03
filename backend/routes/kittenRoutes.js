@@ -1,10 +1,9 @@
-// routes/kittenRoutes.js
 import express from "express";
-
+import multer from "multer";
 import {
-  createKitten,
   getKittens,
   getKittenById,
+  createKitten,
   updateKitten,
   deleteKitten,
 } from "../controllers/kittenController.js";
@@ -14,31 +13,37 @@ import upload from "../utils/cloudinaryStorage.js";
 
 const router = express.Router();
 
+// Multer wrapper enforcing maximum 10 photographs per kitten listing
+const uploadMax10Images = (req, res, next) => {
+  const handler = upload.array("images", 10);
+  handler(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (
+        err.code === "LIMIT_UNEXPECTED_FILE" ||
+        err.code === "LIMIT_FILE_COUNT"
+      ) {
+        return res.status(400).json({
+          error: "Maximum 10 photographs allowed per kitten listing",
+        });
+      }
+      return res.status(400).json({ error: `Upload error: ${err.message}` });
+    }
+    if (err) {
+      return res.status(400).json({
+        error: err.message || "Failed to upload photographs",
+      });
+    }
+    next();
+  });
+};
 
-// 📦 PUBLIC ROUTES
-router.get("/", getKittens);           // get all kittens
-router.get("/:id", getKittenById);     // get single kitten
+// 🌍 Public (supports ?includeAll=true for Admin Dashboard)
+router.get("/", getKittens);
+router.get("/:id", getKittenById);
 
-
-// 🔐 ADMIN ROUTES
-router.post(
-  "/",
-  protect,
-  upload.array("images", 5),
-  createKitten
-);
-
-router.put(
-  "/:id",
-  protect,
-  upload.array("images", 5),
-  updateKitten
-);
-
-router.delete(
-  "/:id",
-  protect,
-  deleteKitten
-);
+// 👑 Admin Only (supports up to 10 uploaded photos + pre-uploaded URLs)
+router.post("/", protect, uploadMax10Images, createKitten);
+router.put("/:id", protect, uploadMax10Images, updateKitten);
+router.delete("/:id", protect, deleteKitten);
 
 export default router;

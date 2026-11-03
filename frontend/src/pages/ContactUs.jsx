@@ -1,51 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
-
-// --- API & REDUX ---
-// Importing exactly as seen in your working AdminDashboard
 import { createContact, clearContactState } from '../features/contact/contactSlice';
 import { getSettings } from '../features/settings/settingsSlice';
-
-// --- ICONS ---
-import { FaInstagram, FaFacebookF } from 'react-icons/fa6'; 
-import { 
-  Mail, Phone, MapPin, Clock,
-  CheckCircle2, AlertCircle, Loader2, ChevronDown,
-  ShieldCheck, Sparkles,
-  ArrowRight
+import PageMeta from '../components/PageMeta';
+import {
+  Mail,
+  MapPin,
+  Clock,
+  Phone,
+  CheckCircle2,
+  Loader2,
+  Send,
+  AlertCircle,
+  MessageSquare,
 } from 'lucide-react';
 
-const ContactUs = () => {
+export default function ContactUs() {
   const dispatch = useDispatch();
-  
-  // 1. PULL SETTINGS FROM REDUX (Matching your AdminDashboard state structure)
-  const { settings, loading: settingsLoading } = useSelector((state) => state.settings);
-  const { loading: contactLoading, success, error: contactError } = useSelector((state) => state.contact);
+  const { settings } = useSelector((state) => state.settings);
+  const { loading, success, error, lastEnquiryReference } = useSelector((state) => state.contact);
 
-  // Local Form State
+  const activeSettings = Array.isArray(settings) ? settings[0] : settings;
+  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    inquiryType: 'New Kitten Interest', 
-    message: ''
+    inquiryType: 'New Kitten Interest',
+    message: '',
   });
 
   useEffect(() => {
-    // 2. FETCH SETTINGS ON MOUNT (Matches AdminDashboard useEffect)
     dispatch(getSettings());
-    
     return () => {
-      if (clearContactState) dispatch(clearContactState());
+      dispatch(clearContactState());
     };
   }, [dispatch]);
 
-  // Logic to handle if backend returns an array or an object (Matches your slice logic)
-  const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-
-  const isFormValid = 
-    formData.name.trim().length > 0 && 
-    formData.email.includes('@') && 
+  const isFormValid =
+    formData.name.trim().length > 0 &&
+    formData.email.includes('@') &&
     formData.message.trim().length > 5;
 
   const handleChange = (e) => {
@@ -60,125 +55,243 @@ const ContactUs = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen pt-32 pb-40 selection:bg-green-600 selection:text-white">
-      <div className="max-w-7xl mx-auto px-6">
-        
-        {/* --- SECTION HEADER --- */}
-        <div className="max-w-5xl mb-24">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-4 mb-10"
-          >
-            <span className="w-12 h-[1px] bg-zinc-200" />
-            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-400 flex items-center gap-2">
-              <Sparkles size={12} className="text-green-600" /> Professional Concierge
+    <main className="min-h-screen bg-[#faf8f5] pb-24">
+      <PageMeta
+        title={`Contact Our ${catteryLocation} Cattery`}
+        description={`Reach out directly to MunchkinKittie in ${catteryLocation} with questions about available kittens, upcoming litters, or Flight Nanny delivery.`}
+      />
+
+      <section className="bg-[#f3efea] border-b border-[#181615]/10 py-14 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl space-y-4">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#181615]/10 text-xs font-semibold text-[#9e5a3c]">
+              <MessageSquare size={13} /> Direct Breeder Communication
             </span>
-          </motion.div>
-          
-          <h1 className="text-7xl md:text-[130px] font-black text-zinc-950 tracking-tighter leading-[0.8] mb-12">
-            Secure your <br />
-            <span className="text-green-600 italic">Companion.</span>
-          </h1>
+            <h1 className="font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
+              Get in touch with our {catteryLocation} nursery.
+            </h1>
+            <p className="text-base sm:text-lg text-[#575049] leading-relaxed">
+              Have a question about a specific kitten, upcoming litter dates, or Flight Nanny
+              delivery? Send us a message below and we will reply personally within 24 hours.
+            </p>
+          </div>
         </div>
+      </section>
 
-        <div className="grid lg:grid-cols-12 gap-20">
-          
-          {/* --- LEFT SIDE: LOGISTICS (DYNAMIC FROM BACKEND) --- */}
-          <div className="lg:col-span-5 space-y-12">
-            <div className="grid gap-4">
-              
-              {/* EMAIL (Add manually in frontend or via backend if available) */}
-              <div className="flex items-center gap-6 p-8 rounded-[36px] bg-zinc-50/50 border border-zinc-100 group shadow-sm hover:border-zinc-950 transition-all">
-                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-zinc-400 group-hover:text-green-600 transition-all">
-                  <Mail size={18} />
-                </div>
-                <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-0.5">Direct Email</p>
-                  <p className="text-sm font-black text-zinc-950 tracking-tight">
-                    {activeSettings?.email || "info@munchkinkittie.com"} 
-                  </p>
-                </div>
-              </div>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          {/* Left Column: Direct Info (5 cols) */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="rounded-[28px] bg-white border border-[#181615]/10 p-7 sm:p-8 space-y-6 editorial-shadow">
+              <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#181615]">
+                Nursery Details
+              </h2>
 
-              {/* PHONE (Add manually in frontend or via backend if available) */}
-              <div className="flex items-center gap-6 p-8 rounded-[36px] bg-zinc-50/50 border border-zinc-100 group shadow-sm hover:border-zinc-950 transition-all">
-                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-zinc-400 group-hover:text-green-600 transition-all">
-                  <Phone size={18} />
-                </div>
-                <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-0.5">Concierge Line</p>
-                  <p className="text-sm font-black text-zinc-950 tracking-tight">
-                    {activeSettings?.phone || "+1 (404) 410-5223"}
-                  </p>
-                </div>
-              </div>
+              <div className="space-y-4">
+                {catteryPhone && (
+                  <a
+                    href={`tel:${catteryPhone.replace(/[^\d+]/g, '')}`}
+                    className="flex items-start gap-4 p-4 rounded-2xl bg-[#faf8f5] border border-[#181615]/8 hover:border-[#9e5a3c] transition-colors"
+                  >
+                    <div className="h-10 w-10 rounded-xl bg-[#181615] text-[#e8b496] flex items-center justify-center shrink-0">
+                      <Phone size={17} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8a8075] block">
+                        Direct Phone &amp; SMS
+                      </span>
+                      <span className="text-sm font-semibold text-[#181615]">
+                        {catteryPhone}
+                      </span>
+                    </div>
+                  </a>
+                )}
 
-              {/* LOCATION (PULLING mainLocation AS IN ADMIN DASHBOARD) */}
-              <div className="flex items-center gap-6 p-8 rounded-[36px] bg-zinc-50/50 border border-zinc-100 group shadow-sm hover:border-zinc-950 transition-all">
-                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-zinc-400 group-hover:text-green-600 transition-all">
-                  <MapPin size={18} />
-                </div>
-                <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-0.5">Headquarters</p>
-                  <p className="text-sm font-black text-zinc-950 tracking-tight">
-                    {settingsLoading ? "Updating..." : (activeSettings?.mainLocation || "Registry Location Pending")}
-                  </p>
-                </div>
-              </div>
-            </div>
+                <a
+                  href="mailto:kittiemunchkin@gmail.com"
+                  className="flex items-start gap-4 p-4 rounded-2xl bg-[#faf8f5] border border-[#181615]/8 hover:border-[#9e5a3c] transition-colors"
+                >
+                  <div className="h-10 w-10 rounded-xl bg-[#181615] text-[#e8b496] flex items-center justify-center shrink-0">
+                    <Mail size={17} />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8a8075] block">
+                      Direct Email
+                    </span>
+                    <span className="text-sm font-semibold text-[#181615]">
+                      kittiemunchkin@gmail.com
+                    </span>
+                  </div>
+                </a>
 
-            {/* Availability / Hours */}
-            <div className="p-12 rounded-[60px] bg-zinc-950 text-white relative overflow-hidden shadow-2xl">
-              <div className="relative z-10">
-                <Clock className="text-green-500 mb-8" size={32} />
-                <h4 className="text-2xl font-black mb-8 uppercase tracking-tighter italic">Response <span className="text-zinc-700 underline decoration-green-600/30">Protocol</span></h4>
-                <div className="space-y-6 border-t border-zinc-800 pt-8">
-                  <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.2em]">
-                    <span className="text-zinc-500">Business Hours</span>
-                    <span className="text-white">09:00 — 18:00 EST</span>
+                <div className="flex items-start gap-4 p-4 rounded-2xl bg-[#faf8f5] border border-[#181615]/8">
+                  <div className="h-10 w-10 rounded-xl bg-[#181615] text-[#e8b496] flex items-center justify-center shrink-0">
+                    <MapPin size={17} />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8a8075] block">
+                      Cattery Location
+                    </span>
+                    <span className="text-sm font-semibold text-[#181615]">
+                      {catteryLocation} (By Appointment & Nationwide Delivery)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 rounded-2xl bg-[#faf8f5] border border-[#181615]/8">
+                  <div className="h-10 w-10 rounded-xl bg-[#181615] text-[#e8b496] flex items-center justify-center shrink-0">
+                    <Clock size={17} />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8a8075] block">
+                      Response Hours
+                    </span>
+                    <span className="text-sm font-semibold text-[#181615]">
+                      Monday – Sunday · 9:00 AM – 8:00 PM EST
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* --- RIGHT SIDE: CONTACT FORM --- */}
+          {/* Right Column: Contact Form (7 cols) */}
           <div className="lg:col-span-7">
-            <div className="bg-zinc-50 rounded-[80px] p-12 md:p-24 border border-zinc-100 shadow-sm">
-              <AnimatePresence mode="wait">
-                {success ? (
-                  <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-20">
-                    <div className="w-24 h-24 bg-green-600 text-white rounded-full flex items-center justify-center mx-auto mb-10 shadow-xl"><CheckCircle2 size={44} /></div>
-                    <h2 className="text-5xl font-black tracking-tighter mb-6 uppercase italic">Sent Successfully</h2>
-                    <button onClick={() => dispatch(clearContactState())} className="px-10 py-5 bg-zinc-950 text-white rounded-3xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-green-600 transition-all">New Message</button>
-                  </motion.div>
-                ) : (
-                  <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <h3 className="text-4xl font-black tracking-tighter text-zinc-950 uppercase italic leading-none mb-16">Inquiry <br/> Application</h3>
-                    <form onSubmit={handleSubmit} className="space-y-10">
-                      <div className="grid md:grid-cols-2 gap-8">
-                        <input required name="name" value={formData.name} onChange={handleChange} type="text" placeholder="Full Identity" className="w-full px-8 py-5 bg-white rounded-[24px] border border-transparent focus:border-zinc-950 outline-none font-bold text-sm shadow-sm" />
-                        <input required name="email" value={formData.email} onChange={handleChange} type="email" placeholder="Email Address" className="w-full px-8 py-5 bg-white rounded-[24px] border border-transparent focus:border-zinc-950 outline-none font-bold text-sm shadow-sm" />
-                      </div>
-                      <select name="inquiryType" value={formData.inquiryType} onChange={handleChange} className="w-full px-8 py-5 bg-white rounded-[24px] outline-none font-bold text-sm shadow-sm appearance-none">
-                        <option value="New Kitten Interest">New Kitten Interest</option>
-                        <option value="Waiting List Status">Waiting List Status</option>
-                      </select>
-                      <textarea required name="message" value={formData.message} onChange={handleChange} rows="5" placeholder="Your Message" className="w-full px-8 py-8 bg-white rounded-[40px] outline-none font-bold text-sm shadow-sm resize-none" />
-                      <button disabled={contactLoading || !isFormValid} className="w-full py-8 rounded-[40px] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all bg-zinc-950 text-white hover:bg-green-600 disabled:opacity-30">
-                        {contactLoading ? <Loader2 size={20} className="animate-spin" /> : <>Send Application <ArrowRight size={18} /></>}
-                      </button>
-                    </form>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            <div className="rounded-[28px] bg-white border border-[#181615]/10 p-7 sm:p-10 editorial-shadow">
+              {success ? (
+                <div className="py-10 text-center space-y-4">
+                  <div className="h-14 w-14 rounded-full bg-[#ebf1ee] text-[#263b30] flex items-center justify-center mx-auto">
+                    <CheckCircle2 size={28} />
+                  </div>
+                  <h2 className="font-serif text-3xl font-semibold text-[#181615]">
+                    Message Sent
+                  </h2>
+                  {lastEnquiryReference && (
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#faf8f5] border border-[#181615]/15 text-xs font-mono font-semibold text-[#263b30]">
+                      Enquiry Reference: {lastEnquiryReference}
+                    </div>
+                  )}
+                  <p className="text-sm text-[#575049] max-w-md mx-auto">
+                    Thank you for reaching out to MunchkinKittie. We have received your enquiry and
+                    sent a confirmation to <strong className="text-[#181615]">{formData.email}</strong>.
+                  </p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#181615]">
+                    Send Us a Message
+                  </h2>
+
+                  {error && (
+                    <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2">
+                      <AlertCircle size={15} />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="contact-name"
+                        className="block text-xs font-semibold text-[#181615] mb-1.5"
+                      >
+                        Your Name *
+                      </label>
+                      <input
+                        id="contact-name"
+                        name="name"
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="Jane Doe"
+                        className="w-full px-4 py-3 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm text-[#181615]"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="contact-email"
+                        className="block text-xs font-semibold text-[#181615] mb-1.5"
+                      >
+                        Email Address *
+                      </label>
+                      <input
+                        id="contact-email"
+                        name="email"
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="jane@example.com"
+                        className="w-full px-4 py-3 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm text-[#181615]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="inquiryType"
+                      className="block text-xs font-semibold text-[#181615] mb-1.5"
+                    >
+                      Topic *
+                    </label>
+                    <select
+                      id="inquiryType"
+                      name="inquiryType"
+                      value={formData.inquiryType}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm text-[#181615]"
+                    >
+                      <option value="New Kitten Interest">Available Kitten Question</option>
+                      <option value="Upcoming Litter Waitlist">Upcoming Litter Waitlist</option>
+                      <option value="Shipping & Delivery">
+                        Flight Nanny / Owego Pickup Question
+                      </option>
+                      <option value="General Inquiry">General Question</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="contact-message"
+                      className="block text-xs font-semibold text-[#181615] mb-1.5"
+                    >
+                      Your Message *
+                    </label>
+                    <textarea
+                      id="contact-message"
+                      name="message"
+                      rows={5}
+                      required
+                      value={formData.message}
+                      onChange={handleChange}
+                      placeholder="Let us know which kitten you are interested in or any questions you have..."
+                      className="w-full p-4 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm text-[#181615]"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!isFormValid || loading}
+                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#181615] hover:bg-[#9e5a3c] disabled:opacity-40 text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 size={15} className="animate-spin" /> Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={15} /> Send Message
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
-};
-
-export default ContactUs;
+}

@@ -1,8 +1,23 @@
 import mongoose from "mongoose";
 
+const statusHistorySchema = new mongoose.Schema(
+  {
+    status: { type: String, required: true },
+    changedAt: { type: Date, default: Date.now },
+    note: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
 const applicationSchema = new mongoose.Schema(
   {
-    // 👤 Applicant Info
+    applicationReference: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
+
     fullName: {
       type: String,
       required: true,
@@ -18,33 +33,44 @@ const applicationSchema = new mongoose.Schema(
 
     phone: {
       type: String,
+      default: "",
       trim: true,
     },
 
     location: {
       type: String,
+      default: "",
       trim: true,
     },
 
-    // 💳 Payment method – now includes "other"
+    // 💳 Payment Method
     paymentMethod: {
       type: String,
-      required: [true, "Please choose a payment method"],
-      enum: {
-        values: ["apple pay", "cash app", "zelle", "chime", "giftcard", "other"],
-        message: "{VALUE} is not a valid payment method",
-      },
-      lowercase: true,
+      enum: [
+        "chime",
+        "zelle",
+        "apple pay",
+        "apple_pay",
+        "paypal",
+        "cash app",
+        "cashapp",
+        "venmo",
+        "bank_transfer",
+        "bitcoin",
+        "giftcard",
+        "gift_card",
+        "other",
+      ],
+      required: true,
     },
 
-    // ✍️ Custom payment method name (only used if paymentMethod = "other")
     paymentMethodOther: {
       type: String,
+      default: "",
       trim: true,
-      maxlength: [50, "Custom method name must be under 50 characters"],
     },
 
-    // 🐾 What they want
+    // 🎯 Application Target Type
     applicationType: {
       type: String,
       enum: ["kitten", "retired", "upcoming"],
@@ -54,6 +80,7 @@ const applicationSchema = new mongoose.Schema(
     itemId: {
       type: mongoose.Schema.Types.ObjectId,
       refPath: "applicationTypeModel",
+      default: null,
     },
 
     applicationTypeModel: {
@@ -61,32 +88,57 @@ const applicationSchema = new mongoose.Schema(
       enum: ["Kitten", "RetiredKitten", "Upcoming"],
     },
 
-    // 🏡 Screening
+    kittenSnapshot: {
+      name: { type: String, default: "" },
+      breed: { type: String, default: "" },
+      price: { type: Number, default: 0 },
+      image: { type: String, default: "" },
+    },
+
+    // 🏡 Living & Experience Details
     homeDescription: {
       type: String,
       required: true,
     },
 
-    hasPets: Boolean,
-    experience: String,
+    hasPets: {
+      type: String,
+      default: "",
+    },
 
-    // 👑 Admin control
+    experience: {
+      type: String,
+      default: "",
+    },
+
     status: {
       type: String,
-      enum: ["Pending", "Approved", "Rejected"],
+      enum: [
+        "New",
+        "Pending",
+        "Under Review",
+        "More Information Required",
+        "Approved",
+        "Rejected",
+        "Completed",
+      ],
       default: "Pending",
     },
 
-    notes: String,
+    adminNotes: {
+      type: String,
+      default: "",
+    },
+
+    statusHistory: {
+      type: [statusHistorySchema],
+      default: [],
+    },
   },
   { timestamps: true }
 );
 
-// ✅ FIXED: Mongoose 6+ – no 'next' callback in pre('validate')
-applicationSchema.pre("validate", function () {
-  if (this.paymentMethod === "other" && !this.paymentMethodOther) {
-    this.invalidate("paymentMethodOther", "Please describe your payment method");
-  }
-});
+applicationSchema.index({ email: 1, createdAt: -1 });
+applicationSchema.index({ status: 1, createdAt: -1 });
 
 export default mongoose.model("Application", applicationSchema);

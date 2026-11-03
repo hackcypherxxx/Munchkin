@@ -1,181 +1,183 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Truck, 
-  Plane, 
-  MapPin, 
-  ShieldCheck, 
-  Heart, 
-  Clock, 
-  CheckCircle2, 
-  Info,
-  Globe,
-  ArrowRight
+import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import PageMeta from '../components/PageMeta';
+import {
+  Plane,
+  Car,
+  Home,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowUpRight,
+  MapPin,
+  Phone,
 } from 'lucide-react';
+import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 
-const ShippingDelivery = () => {
-  const deliveryMethods = [
-    {
-      title: "Flight Nanny Service",
-      icon: <Plane className="text-green-600" />,
-      desc: "Our most popular option. A professional nanny hand-carries your kitten in the cabin. They are never in cargo.",
-      price: "From $550",
-      features: ["In-cabin travel", "Real-time photo updates", "Hand-to-hand delivery"]
-    },
-    {
-      title: "VIP Ground Transport",
-      icon: <Truck className="text-green-600" />,
-      desc: "Climate-controlled specialized pet transport for regional deliveries (within 500 miles of Portland).",
-      price: "From $350",
-      features: ["Frequent stretch breaks", "Hydration monitoring", "Door-to-door service"]
-    },
-    {
-      title: "Local Boutique Pickup",
-      icon: <MapPin className="text-green-600" />,
-      desc: "Visit our facility in person. Meet the parents and pick up your new family member directly.",
-      price: "Free",
-      features: ["Tour the nursery", "In-person care lesson", "Complimentary carrier"]
-    }
-  ];
+export default function ShippingDelivery() {
+  const { settings } = useSelector((state) => state.settings);
+  const activeSettings = Array.isArray(settings) ? settings[0] : settings;
+  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
 
   return (
-    <div className="bg-white min-h-screen pt-24 pb-32">
-      <div className="max-w-7xl mx-auto px-6">
-        
-        {/* --- HERO SECTION --- */}
-        <div className="max-w-3xl mb-24">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 mb-6"
-          >
-            <div className="w-10 h-[1px] bg-zinc-300" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Global Safe Passage</span>
-          </motion.div>
-          <h1 className="text-5xl md:text-8xl font-black text-zinc-950 tracking-tighter leading-[0.9] mb-8">
-            Safe <span className="text-green-600 italic">Transit</span> <br />to your door.
-          </h1>
-          <p className="text-zinc-500 text-lg font-medium leading-relaxed">
-            We handle 100% of the travel logistics. Whether you are in New York or London, our priority is a stress-free transition for your Munchkin.
-          </p>
-        </div>
+    <main className="min-h-screen bg-[#faf8f5] pb-24">
+      <PageMeta
+        title="Delivery & Flight Nanny Options"
+        description={`Pick up your kitten in ${catteryLocation} for free, or choose safe in-cabin Flight Nanny or VIP ground transport anywhere in the United States.`}
+      />
 
-        {/* --- DELIVERY OPTIONS GRID --- */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-32">
-          {deliveryMethods.map((method, i) => (
-            <motion.div 
-              key={i}
-              whileHover={{ y: -10 }}
-              className="p-10 rounded-[48px] bg-zinc-50 border border-zinc-100 flex flex-col h-full hover:shadow-2xl hover:shadow-zinc-200 transition-all duration-500"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-8">
-                {method.icon}
-              </div>
-              <h3 className="text-2xl font-black tracking-tight text-zinc-950 mb-4">{method.title}</h3>
-              <p className="text-zinc-500 text-sm font-medium leading-relaxed mb-8 flex-1">
-                {method.desc}
-              </p>
-              
-              <div className="space-y-4 mb-10">
-                {method.features.map(f => (
-                  <div key={f} className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                    <CheckCircle2 size={14} className="text-green-600" /> {f}
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-8 border-t border-zinc-200/50 flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Estimated Cost</span>
-                <span className="text-xl font-black text-zinc-900 tracking-tighter">{method.price}</span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* --- LOGISTICS TIMELINE --- */}
-        <div className="bg-zinc-950 rounded-[64px] p-10 md:p-20 text-white relative overflow-hidden mb-32">
-          <div className="relative z-10">
-            <div className="flex flex-col lg:flex-row gap-16 items-center">
-              <div className="lg:w-1/2">
-                <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-8 leading-tight">
-                  The Journey <br /><span className="text-zinc-500">Timeline.</span>
-                </h2>
-                <div className="space-y-12">
-                  {[
-                    { step: "01", title: "Health Certification", desc: "48 hours before travel, our vet issues a USDA Health Certificate." },
-                    { step: "02", title: "Nanny Coordination", desc: "We provide you with the flight number, nanny contact, and ETA." },
-                    { step: "03", title: "Final Settlement", desc: "Delivery fees are paid in full to secure the ticket and transport slot." },
-                    { step: "04", title: "Home Arrival", desc: "Meet your nanny at the airport or your front door for the hand-off." }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex gap-6">
-                      <span className="text-green-600 font-black text-xl italic">{item.step}</span>
-                      <div>
-                        <h4 className="text-lg font-black mb-1">{item.title}</h4>
-                        <p className="text-zinc-400 text-sm font-medium leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="lg:w-1/2 w-full aspect-square rounded-[48px] overflow-hidden relative">
-                <div className="absolute inset-0 bg-green-600/10 z-10" />
-                <img 
-                  src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800" 
-                  alt="Kitten Travel" 
-                  className="w-full h-full object-cover grayscale opacity-50"
-                />
-                <div className="absolute inset-0 flex items-center justify-center z-20">
-                  <div className="bg-white/10 backdrop-blur-xl p-10 rounded-full border border-white/20">
-                    <Globe size={64} className="text-white animate-pulse" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* --- SHIPPING FAQ / IMPORTANT NOTES --- */}
-        <div className="grid md:grid-cols-2 gap-16">
-          <div>
-            <div className="flex items-center gap-3 mb-8">
-              <ShieldCheck className="text-green-600" size={24} />
-              <h3 className="text-2xl font-black tracking-tight">Safety Standards</h3>
-            </div>
-            <ul className="space-y-6">
-              <li className="flex gap-4">
-                <CheckCircle2 size={20} className="text-green-600 flex-shrink-0 mt-1" />
-                <p className="text-zinc-600 font-medium">We do <span className="text-zinc-950 font-black">NEVER</span> ship kittens in the cargo hold of an airplane. Only in-cabin or ground.</p>
-              </li>
-              <li className="flex gap-4">
-                <CheckCircle2 size={20} className="text-green-600 flex-shrink-0 mt-1" />
-                <p className="text-zinc-600 font-medium">Delivery is only available once the kitten is <span className="text-zinc-950 font-black">12 weeks old</span> and fully vaccinated.</p>
-              </li>
-            </ul>
-          </div>
-
-          <div className="bg-zinc-50 p-10 rounded-[40px] border border-zinc-100">
-            <div className="flex items-center gap-3 mb-6">
-              <Clock className="text-zinc-400" size={20} />
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Ready to schedule?</h4>
-            </div>
-            <p className="text-zinc-600 font-bold mb-8">
-              Most deliveries are scheduled 14 days in advance. Contact our transport coordinator to get an exact quote.
+      {/* Editorial Hero */}
+      <section className="bg-[#f3efea] border-b border-[#181615]/10 py-14 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-7 space-y-5">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#181615]/10 text-xs font-semibold text-[#9e5a3c]">
+              <Plane size={13} /> Never Shipped in Cargo · Hand-Delivered Care
+            </span>
+            <h1 className="font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
+              Safe Delivery & {catteryLocation} Pickup
+            </h1>
+            <p className="text-base sm:text-lg text-[#575049] leading-relaxed max-w-2xl">
+              Whether you live nearby in New York or across the country, we make bringing your
+              kitten home calm, safe, and personal. Kittens never travel unattended in cargo.
             </p>
-            <button className="w-full py-5 bg-zinc-950 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition-all flex items-center justify-center gap-3">
-              Request Delivery Quote <ArrowRight size={16} />
-            </button>
+          </div>
+          <div className="lg:col-span-5">
+            <div className="aspect-[16/11] rounded-[28px] overflow-hidden bg-white border border-[#181615]/10 editorial-shadow">
+              <img
+                src={CATTERY_PHOTOS.editorialLounge}
+                alt="Munchkin kitten prepared for travel"
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* --- FINAL FOOTNOTE --- */}
-        <p className="mt-20 text-center text-[10px] font-black text-zinc-300 uppercase tracking-[0.4em]">
-          International Shipping available to select UK & EU locations.
-        </p>
+      {/* 3 Delivery Tiers */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+          {/* Option 1: Local Pickup */}
+          <div className="rounded-[28px] bg-white border border-[#181615]/10 p-7 sm:p-8 flex flex-col justify-between editorial-shadow">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="h-11 w-11 rounded-2xl bg-[#ebf1ee] text-[#263b30] flex items-center justify-center">
+                  <Home size={20} />
+                </div>
+                <span className="font-mono text-lg font-semibold text-[#263b30]">Free</span>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#181615]">
+                In-Person Pickup ({catteryLocation})
+              </h2>
+              <p className="text-sm text-[#575049] leading-relaxed">
+                Approved families are welcome to schedule an appointment at our {catteryLocation}{' '}
+                nursery to meet and pick up their kitten in person at no extra charge.
+              </p>
+              <ul className="space-y-2 text-xs text-[#181615] pt-2">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-[#263b30] shrink-0" />
+                  <span>Direct handover at our {catteryLocation} nursery</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-[#263b30] shrink-0" />
+                  <span>Includes travel carrier & starter food pack</span>
+                </li>
+              </ul>
+            </div>
+            <Link
+              to="/apply"
+              className="mt-6 w-full py-3 rounded-full bg-[#f3efea] hover:bg-[#181615] hover:text-white text-center text-xs font-semibold text-[#181615] transition-colors"
+            >
+              Request Local Pickup
+            </Link>
+          </div>
 
-      </div>
-    </div>
+          {/* Option 2: VIP Ground */}
+          <div className="rounded-[28px] bg-white border border-[#181615]/10 p-7 sm:p-8 flex flex-col justify-between editorial-shadow">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="h-11 w-11 rounded-2xl bg-[#f5ebe6] text-[#9e5a3c] flex items-center justify-center">
+                  <Car size={20} />
+                </div>
+                <span className="font-mono text-sm font-semibold text-[#9e5a3c]">
+                  Regional Ground
+                </span>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#181615]">
+                Private Ground Courier
+              </h2>
+              <p className="text-sm text-[#575049] leading-relaxed">
+                For families in New York, Pennsylvania, New Jersey, New England, and surrounding
+                states, we offer climate-controlled door-to-door ground delivery.
+              </p>
+              <ul className="space-y-2 text-xs text-[#181615] pt-2">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-[#263b30] shrink-0" />
+                  <span>Climate-controlled private vehicle transport</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-[#263b30] shrink-0" />
+                  <span>Regular photo & GPS updates en route</span>
+                </li>
+              </ul>
+            </div>
+            <div className="mt-6 flex flex-col gap-2">
+              <Link
+                to="/contact"
+                className="w-full py-3 rounded-full bg-[#f3efea] hover:bg-[#181615] hover:text-white text-center text-xs font-semibold text-[#181615] transition-colors"
+              >
+                Request Ground Quote
+              </Link>
+              {catteryPhone && (
+                <a
+                  href={`tel:${catteryPhone.replace(/[^\d+]/g, '')}`}
+                  className="w-full py-2.5 rounded-full border border-[#181615]/12 hover:border-[#9e5a3c] text-center text-xs font-semibold text-[#181615] flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <Phone size={12} className="text-[#9e5a3c]" />
+                  Call or Text: {catteryPhone}
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Option 3: Flight Nanny */}
+          <div className="rounded-[28px] bg-[#181615] text-white p-7 sm:p-8 flex flex-col justify-between editorial-shadow">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="h-11 w-11 rounded-2xl bg-white/10 text-[#e8b496] flex items-center justify-center">
+                  <Plane size={20} />
+                </div>
+                <span className="font-mono text-xs uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#9e5a3c] text-white">
+                  Most Popular Out-of-State
+                </span>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-medium">
+                In-Cabin Flight Nanny
+              </h2>
+              <p className="text-sm text-white/75 leading-relaxed">
+                A dedicated pet nanny flies with your kitten right inside the pressurized passenger
+                cabin and meets you in person at your nearest major US airport.
+              </p>
+              <ul className="space-y-2 text-xs text-white/85 pt-2">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-[#8fc4a6] shrink-0" />
+                  <span>100% in-cabin travel—never placed in cargo</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-[#8fc4a6] shrink-0" />
+                  <span>Veterinary health certificate & carrier included</span>
+                </li>
+              </ul>
+            </div>
+            <Link
+              to="/apply"
+              className="mt-6 w-full py-3 rounded-full bg-[#9e5a3c] hover:bg-[#b87354] text-center text-xs font-semibold text-white transition-colors"
+            >
+              Select Flight Nanny in Application
+            </Link>
+          </div>
+        </div>
+      </section>
+    </main>
   );
-};
-
-export default ShippingDelivery;
+}

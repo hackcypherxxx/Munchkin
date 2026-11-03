@@ -13,34 +13,40 @@ import contactRoutes from "./routes/contactRoutes.js";
 import adminContactRoutes from "./routes/adminContactRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
+import emailRoutes from "./routes/emailRoutes.js";
+import { ensureDefaultEmailTemplates } from "./utils/sendEmail.js";
 
 dotenv.config();
 
 const app = express();
 
-// 🔌 Connect DB
-connectDB();
+// 🔌 Connect DB & Seed Default Email Templates
+connectDB().then(() => {
+  ensureDefaultEmailTemplates().catch(() => {});
+});
 
-
-// 🌍 CORS CONFIG (FIXED + CLEAN)
+// 🌍 CORS CONFIG
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // from .env (Vercel frontend)
+  process.env.FRONTEND_URL,
   "https://www.munchkinkittie.com",
   "https://munchkinkittie.com",
-  "http://localhost:5173"
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:4173",
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow Postman / server-to-server
       if (!origin) return callback(null, true);
-
-      // Match allowed origins
-      if (allowedOrigins.some((o) => origin === o)) {
+      if (
+        allowedOrigins.some((o) => origin === o) ||
+        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+      ) {
         return callback(null, true);
       }
-
       console.log("❌ Blocked by CORS:", origin);
       return callback(new Error("Not allowed by CORS"));
     },
@@ -48,18 +54,15 @@ app.use(
   })
 );
 
-
 // 🧩 Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
-
-// 🔥 GLOBAL LOGGER (helps debugging on Railway)
+// 🔥 GLOBAL LOGGER
 app.use((req, res, next) => {
   console.log(`➡️ ${req.method} ${req.url}`);
   next();
 });
-
 
 // 🛣️ Routes
 app.use("/api/auth", authRoutes);
@@ -72,13 +75,13 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/admin/contact", adminContactRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/emails", emailRoutes);
 
-
-// 🧪 Health Check Route (IMPORTANT for Railway)
+// 🧪 Health Check Route
 app.get("/", (req, res) => {
   res.send("API running...");
 });
-
 
 // ❌ GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
@@ -88,9 +91,8 @@ app.use((err, req, res, next) => {
     return res.status(403).json({ error: "CORS blocked this request" });
   }
 
-  res.status(500).json({ error: "Server error" });
+  res.status(500).json({ error: err.message || "Server error" });
 });
-
 
 // 🚀 Start server
 const PORT = process.env.PORT || 5000;

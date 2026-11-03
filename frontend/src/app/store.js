@@ -9,18 +9,22 @@ import retiredReducer from "../features/retired/retiredSlice";
 import reviewReducer from "../features/review/reviewSlice";
 import settingsReducer from "../features/settings/settingsSlice";
 import upcomingReducer from "../features/upcoming/upcomingSlice";
+import aiReducer from "../features/ai/aiSlice";
+import emailReducer from "../features/email/emailSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-     application: applicationReducer,
-     adminContact: adminContactReducer,
-     contact: contactReducer,
-     kitten: kittenReducer,
-     notification: notificationReducer,
-     retired: retiredReducer,
-     review: reviewReducer,
-     settings: settingsReducer,
-     upcoming: upcomingReducer,
+    application: applicationReducer,
+    adminContact: adminContactReducer,
+    contact: contactReducer,
+    kitten: kittenReducer,
+    notification: notificationReducer,
+    retired: retiredReducer,
+    review: reviewReducer,
+    settings: settingsReducer,
+    upcoming: upcomingReducer,
+    ai: aiReducer,
+    email: emailReducer,
   },
 });

@@ -16,8 +16,8 @@ export const getSettings = createAsyncThunk(
 );
 
 
-// 🔐 UPDATE LOCATION (ADMIN)
-export const updateLocation = createAsyncThunk(
+// 🔐 UPDATE SETTINGS (ADMIN)
+export const updateSettings = createAsyncThunk(
   "settings/update",
   async (data, { rejectWithValue }) => {
     try {
@@ -25,11 +25,12 @@ export const updateLocation = createAsyncThunk(
       return res.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.error || "Failed to update location"
+        error.response?.data?.error || "Failed to update settings"
       );
     }
   }
 );
+export const updateLocation = updateSettings;
 
 
 const settingsSlice = createSlice({

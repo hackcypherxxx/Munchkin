@@ -1,170 +1,152 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Dna, 
-  Stethoscope, 
-  Microscope, 
-  ShieldCheck, 
-  Activity, 
-  Syringe,
-  HeartPulse,
-  ClipboardCheck,
-  Search,
-  Check
-} from 'lucide-react';
 import { Link } from 'react-router-dom';
+import PageMeta from '../components/PageMeta';
+import {
+  FileText,
+  MessageSquareHeart,
+  ShieldCheck,
+  Home,
+  CheckCircle2,
+  ArrowUpRight,
+} from 'lucide-react';
+import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 
-const VettingProcess = () => {
-  const medicalStages = [
-    {
-      week: "Week 0-2",
-      title: "Neonatal Monitoring",
-      desc: "Daily weight tracking and thermal regulation. We ensure early neurological stimulation (ENS) begins during this critical window.",
-      icon: <Activity className="text-green-600" />
-    },
-    {
-      week: "Week 4-6",
-      title: "First Clinical Screening",
-      desc: "Initial physical exam by our licensed veterinarian. We monitor for structural soundess and heart murmurs.",
-      icon: <Stethoscope className="text-green-600" />
-    },
-    {
-      week: "Week 8-10",
-      title: "Core Immunity Phase",
-      desc: "Administration of FVRCP vaccinations and full deworming protocol. Socialization with adult cats begins.",
-      icon: <Syringe className="text-green-600" />
-    },
-    {
-      week: "Week 12",
-      title: "Final Clearance",
-      desc: "Final USDA-standard health certificate issued. Kitten is cleared for travel or local pickup.",
-      icon: <ShieldCheck className="text-green-600" />
-    }
-  ];
+const VETTING_STEPS = [
+  {
+    step: '01',
+    title: 'Online Adoption Application',
+    desc: 'Complete our short application form sharing your contact details, living environment, and whether you have other pets.',
+    icon: FileText,
+  },
+  {
+    step: '02',
+    title: '24-Hour Breeder Review & Conversation',
+    desc: 'Our Owego, NY cattery team reviews your application within 24 hours and connects with you directly to answer questions and confirm compatibility.',
+    icon: MessageSquareHeart,
+  },
+  {
+    step: '03',
+    title: 'Indoor Safety & Care Readiness',
+    desc: 'We verify that every kitten will be kept strictly indoors in a safe, loving environment with access to routine veterinary care.',
+    icon: Home,
+  },
+  {
+    step: '04',
+    title: 'Reservation & Final Veterinary Clearance',
+    desc: 'Once approved, your kitten is reserved in your name, completes their final pre-departure vet check, and is prepared for Owego pickup or Flight Nanny delivery.',
+    icon: ShieldCheck,
+  },
+];
 
+export default function VettingProcess() {
   return (
-    <div className="bg-white min-h-screen pt-24 pb-32">
-      <div className="max-w-7xl mx-auto px-6">
-        
-        {/* --- HEADER: THE GOLD STANDARD --- */}
-        <div className="max-w-4xl mb-24">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-3 px-3 py-1 rounded-full bg-zinc-50 border border-zinc-100 mb-8"
-          >
-            <Microscope size={14} className="text-green-600" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Evidence-Based Breeding</span>
-          </motion.div>
-          <h1 className="text-6xl md:text-8xl font-black text-zinc-950 tracking-tighter leading-[0.9] mb-10">
-            Precision <br /><span className="text-green-600 italic">Vetting.</span>
-          </h1>
-          <p className="text-zinc-500 text-xl font-medium leading-relaxed max-w-2xl">
-            Our vetting process is rigorous, transparent, and built on the latest feline pediatric research. We leave nothing to chance.
-          </p>
-        </div>
+    <main className="min-h-screen bg-[#faf8f5] pb-24">
+      <PageMeta
+        title="Adoption & Vetting Process"
+        description="Learn how MunchkinKittie reviews adoption applications and matches home-raised kittens with loving indoor families."
+      />
 
-        {/* --- DNA & GENETICS SECTION (THE "WHY") --- */}
-        <div className="grid lg:grid-cols-2 gap-12 mb-32">
-          <div className="p-12 rounded-[64px] bg-zinc-950 text-white flex flex-col justify-center relative overflow-hidden">
-            <Dna size={48} className="text-green-500 mb-8" />
-            <h2 className="text-4xl font-black tracking-tighter mb-6">Genetic <br />Integrity.</h2>
-            <p className="text-zinc-400 text-lg leading-relaxed mb-8">
-              Every breeding parent is screened for over 40+ genetic markers, including HCM (Heart) and PKD (Kidneys). If a cat doesn't have a perfect scorecard, they don't enter our program.
+      <section className="bg-[#f3efea] border-b border-[#181615]/10 py-14 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-7 space-y-5">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#181615]/10 text-xs font-semibold text-[#9e5a3c]">
+              Thoughtful Placement Standards
+            </span>
+            <h1 className="font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
+              Our Adoption & Vetting Process
+            </h1>
+            <p className="text-base sm:text-lg text-[#575049] leading-relaxed max-w-2xl">
+              Because we raise every kitten in our Owego, NY home, we take care to ensure each
+              companion joins a prepared, affectionate indoor household.
             </p>
-            <div className="flex gap-4">
-              <div className="px-4 py-2 bg-white/10 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest">FeLV/FIV Negative</div>
-              <div className="px-4 py-2 bg-white/10 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest">Optimal Selection™ Verified</div>
+            <div className="pt-2">
+              <Link
+                to="/apply"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#181615] hover:bg-[#9e5a3c] text-white text-xs sm:text-sm font-semibold transition-colors"
+              >
+                Start Adoption Application <ArrowUpRight size={15} />
+              </Link>
             </div>
-            {/* Ambient Background Glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-green-600/10 blur-[100px]" />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {[
-              { title: "Echocardiograms", desc: "Annual heart scans for all breeding kings and queens." },
-              { title: "Pedigree Audit", desc: "Verifying 5 generations of health history via TICA." },
-              { title: "Blood Panels", desc: "Bi-annual comprehensive labs for metabolic health." },
-              { title: "X-Ray Analysis", desc: "Ensuring spinal health in our Munchkin lineage." }
-            ].map((item, i) => (
-              <div key={i} className="p-8 rounded-[40px] border border-zinc-100 bg-zinc-50/50">
-                <Check className="text-green-600 mb-4" size={20} />
-                <h4 className="font-black text-zinc-950 mb-2 uppercase tracking-tight">{item.title}</h4>
-                <p className="text-xs text-zinc-500 font-medium leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
+          <div className="lg:col-span-5">
+            <div className="aspect-[16/11] rounded-[28px] overflow-hidden bg-white border border-[#181615]/10 editorial-shadow">
+              <img
+                src={CATTERY_PHOTOS.editorialNursery}
+                alt="Munchkin kitten in Owego, NY nursery"
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* --- THE VETTING TIMELINE --- */}
-        <div className="mb-32">
-          <h2 className="text-4xl font-black tracking-tighter mb-16 text-center">Developmental <span className="text-zinc-400">Milestones.</span></h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {medicalStages.map((stage, i) => (
-              <div key={i} className="group relative">
-                <div className="p-8 rounded-[48px] bg-white border border-zinc-100 hover:border-green-600 transition-all duration-500 h-full shadow-sm hover:shadow-xl hover:shadow-zinc-200">
-                  <p className="text-[10px] font-black text-green-600 uppercase tracking-[0.2em] mb-6">{stage.week}</p>
-                  <div className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center mb-6 group-hover:bg-green-50 transition-colors">
-                    {stage.icon}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {VETTING_STEPS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.step}
+                className="rounded-[28px] bg-white border border-[#181615]/10 p-7 sm:p-8 space-y-4 editorial-shadow"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-semibold text-[#9e5a3c] bg-[#f5ebe6] px-3 py-1 rounded-full">
+                    Step {item.step}
+                  </span>
+                  <div className="h-10 w-10 rounded-2xl bg-[#faf8f5] border border-[#181615]/8 flex items-center justify-center text-[#181615]">
+                    <Icon size={18} />
                   </div>
-                  <h4 className="text-xl font-black text-zinc-950 mb-4">{stage.title}</h4>
-                  <p className="text-zinc-500 text-sm font-medium leading-relaxed">{stage.desc}</p>
                 </div>
+                <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#181615]">
+                  {item.title}
+                </h2>
+                <p className="text-sm text-[#575049] leading-relaxed">{item.desc}</p>
               </div>
-            ))}
+            );
+          })}
+        </div>
+
+        {/* What We Look For Card */}
+        <div className="mt-12 rounded-[28px] bg-[#181615] text-white p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-7 space-y-4">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#e8b496]">
+              Adopter Commitments
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-medium">
+              What we ask of every adopting family
+            </h2>
+            <ul className="space-y-3 text-sm text-white/80 pt-2">
+              <li className="flex items-center gap-2.5">
+                <CheckCircle2 size={16} className="text-[#8fc4a6] shrink-0" />
+                <span>Strictly indoor-only living environment for safety and longevity</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <CheckCircle2 size={16} className="text-[#8fc4a6] shrink-0" />
+                <span>Strict non-declawing agreement (scratching posts & nail trims only)</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <CheckCircle2 size={16} className="text-[#8fc4a6] shrink-0" />
+                <span>Initial veterinary wellness check within 72 hours of arrival</span>
+              </li>
+            </ul>
+          </div>
+          <div className="lg:col-span-5 flex flex-col sm:flex-row lg:flex-col gap-3">
+            <Link
+              to="/apply"
+              className="w-full py-4 px-6 rounded-full bg-[#9e5a3c] hover:bg-[#b87354] text-white text-center text-xs sm:text-sm font-semibold transition-colors"
+            >
+              Submit Your Application Now
+            </Link>
+            <Link
+              to="/available-kittens"
+              className="w-full py-4 px-6 rounded-full bg-white/10 hover:bg-white/15 text-white text-center text-xs sm:text-sm font-semibold transition-colors"
+            >
+              Browse Available Kittens
+            </Link>
           </div>
         </div>
-
-        {/* --- THE "VET-READY" CHECKLIST --- */}
-        <div className="bg-zinc-50 rounded-[64px] p-10 md:p-20 border border-zinc-100">
-          <div className="flex flex-col lg:flex-row gap-16 items-start">
-            <div className="lg:w-1/3">
-              <div className="w-16 h-16 rounded-[24px] bg-zinc-950 flex items-center justify-center mb-8">
-                <ClipboardCheck className="text-white" size={28} />
-              </div>
-              <h2 className="text-4xl font-black tracking-tighter mb-6">The Departure <br />Dossier.</h2>
-              <p className="text-zinc-500 font-medium leading-relaxed">
-                Every kitten leaves with a physical health folder containing their entire medical history from birth to departure.
-              </p>
-            </div>
-
-            <div className="lg:w-2/3 grid sm:grid-cols-2 gap-8 w-full">
-              {[
-                "State Certified Health Certificate",
-                "Full Vaccination Record (Signed by Vet)",
-                "Microchip Registration Papers",
-                "Deworming Schedule History",
-                "FIV/FeLV Testing Results",
-                "TICA Registration Ownership Transfer"
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-4 py-4 border-b border-zinc-200">
-                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <Check size={14} className="text-green-700" />
-                  </div>
-                  <span className="text-sm font-bold text-zinc-700 uppercase tracking-tight">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* --- CTA / FOOTER --- */}
-        <div className="mt-32 flex flex-col items-center text-center">
-          <HeartPulse size={48} className="text-zinc-200 mb-8" />
-          <h3 className="text-3xl font-black tracking-tighter mb-6 italic">Health is our primary heritage.</h3>
-          <p className="text-zinc-400 text-sm max-w-xl mb-10">
-            We partner with the <span className="text-zinc-950 font-bold">Portland Feline Specialty Clinic</span> to ensure all echocardiograms and specialized screenings meet board-certified standards.
-          </p>
-          <Link to="/contact">
-          <button className="px-12 py-5 bg-zinc-950 text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all shadow-2xl">
-            Inquire About Our Protocols
-          </button>
-          </Link>
-        </div>
-
-      </div>
-    </div>
+      </section>
+    </main>
   );
-};
-
-export default VettingProcess;
+}

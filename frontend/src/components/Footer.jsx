@@ -1,211 +1,236 @@
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { getSettings } from '../features/settings/settingsSlice'; // Adjust path if needed
-
-// Functional UI Icons
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  ArrowUpRight, 
+import { useSelector } from 'react-redux';
+import {
   ShieldCheck,
-  Heart
+  MapPin,
+  Mail,
+  Phone,
+  Heart,
+  ArrowUpRight,
+  Plane,
+  Stethoscope,
 } from 'lucide-react';
+import logoImg from '../assets/LOGO1.png';
 
-// Brand Specific Icons
-import { FiInstagram, FiFacebook } from 'react-icons/fi';
-import LogoImg from '../assets/LOGO1.png'; 
-
-const Footer = () => {
-  const currentYear = new Date().getFullYear();
-  const dispatch = useDispatch();
-
-  // Pull settings from Redux state
+export default function Footer() {
   const { settings } = useSelector((state) => state.settings);
-
-  // Fetch settings on mount
-  useEffect(() => {
-    dispatch(getSettings());
-  }, [dispatch]);
-
-  // Handle data structure (in case backend returns an array)
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-
-  // Updated with 'path' to work with your App Router
-  const footerLinks = [
-    {
-      title: "The Nursery",
-      links: [
-        { name: "Available Kittens", path: "/available-kittens" },
-        { name: "Upcoming Litters", path: "/upcoming-litters" },
-        { name: "Retired Adults", path: "/retired-adults" },
-        { name: "Pricing & Deposit", path: "/pricing-deposit" }
-      ]
-    },
-    {
-      title: "Adoption Process",
-      links: [
-        { name: "Shipping & Delivery", path: "/shipping" },
-        { name: "Health Guarantee", path: "/health" },
-        { name: "Care Guide", path: "/care-guide" },
-        { name: "The Vetting Process", path: "/vetting-process" }
-      ]
-    },
-    {
-      title: "Our World",
-      links: [
-        { name: "About the Breeder", path: "/about" },
-        { name: "Client Reviews", path: "/reviews" },
-        { name: "Contact Us", path: "/contact" }
-      ]
-    }
-  ];
-
-  const socialLinks = [
-    { Icon: FiFacebook, href: activeSettings?.facebook || "https://www.facebook.com/profile.php?id=61589228033999", isExternal: true },
-    { Icon: Mail, href: `mailto:${activeSettings?.email || "info@munchkinkittie.com"}`, isExternal: true }
-  ];
-
-  // Smooth scroll to top when clicking internal links
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
 
   return (
-    <footer className="bg-white pt-24 pb-12 border-t border-zinc-100">
-      <div className="max-w-7xl mx-auto px-6">
-        
-        {/* TOP SECTION: BRAND & NEWSLETTER */}
-        <div className="grid lg:grid-cols-2 gap-16 mb-20">
-          <div>
-            <Link to="/" onClick={scrollToTop} className="flex items-center gap-3 mb-8 group cursor-pointer w-fit">
-              <div className="relative w-14 h-14 overflow-hidden">
-                <img 
-                  src={LogoImg} 
-                  alt="MunchkinKittie Logo" 
-                  className="w-full h-full object-contain scale-150 mix-blend-multiply" 
-                />
-              </div>
-              <h2 className="text-3xl font-black tracking-tighter text-zinc-900">
-                Munchkin<span className="text-green-600">Kittie</span>
-              </h2>
-            </Link>
-            <p className="text-zinc-500 text-lg font-medium max-w-sm mb-8 leading-relaxed">
-              Ethical breeding with a family-first philosophy. Raising healthy, short-legged companions since 2012.
-            </p>
-            
-            {/* SOCIAL BAR */}
-            <div className="flex gap-4">
-              {socialLinks.map(({ Icon, href }, i) => (
-                <motion.a 
-                  key={i}
-                  whileHover={{ y: -4, scale: 1.1 }}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-green-600 hover:bg-green-50 transition-all border border-zinc-100"
-                >
-                  <Icon size={20} />
-                </motion.a>
-              ))}
-            </div>
+    <footer className="bg-[#181615] text-[#f3efea] border-t border-white/10">
+      {/* Upper Editorial Callout Bar */}
+      <div className="border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#e8b496]">
+              <Heart size={12} /> Hand-Raised in {catteryLocation}
+            </span>
+            <h2 className="mt-3 font-serif text-3xl sm:text-4xl lg:text-5xl font-medium text-white tracking-tight leading-[1.1]">
+              Ready to welcome a gentle Munchkin companion into your home?
+            </h2>
           </div>
-
-          {/* NEWSLETTER BOX */}
-          <div className="bg-zinc-950 rounded-[40px] p-8 md:p-12 text-white relative overflow-hidden group">
-            <div className="relative z-10">
-              <h3 className="text-3xl font-black tracking-tight mb-4">Join the Litter List</h3>
-              <p className="text-zinc-400 font-medium mb-8 max-w-xs">Be the first to know when new Munchkin litters are born.</p>
-              
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input 
-                  type="email" 
-                  placeholder="Your email address" 
-                  className="flex-1 bg-white/10 border border-white/15 rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-green-500 transition-all text-sm font-bold text-white placeholder:text-zinc-500"
-                />
-                <button className="bg-white text-zinc-950 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all active:scale-95 shadow-xl shadow-black/20">
-                  Subscribe
-                </button>
-              </div>
-            </div>
-            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-green-600/20 rounded-full blur-[80px]" />
+          <div className="flex flex-wrap items-center gap-3.5 shrink-0">
+            <Link
+              to="/available-kittens"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#9e5a3c] hover:bg-[#b87354] text-white text-xs sm:text-sm font-semibold transition-colors"
+            >
+              Browse Available Kittens
+              <ArrowUpRight size={16} />
+            </Link>
+            <Link
+              to="/apply"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white/10 hover:bg-white/15 text-white border border-white/15 text-xs sm:text-sm font-semibold transition-colors"
+            >
+              Adoption Application
+            </Link>
           </div>
         </div>
+      </div>
 
-        {/* MIDDLE SECTION: LINKS */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-20 border-t border-zinc-100 pt-20">
-          {footerLinks.map((column) => (
-            <div key={column.title}>
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-8">{column.title}</h4>
-              <ul className="space-y-4">
-                {column.links.map((link) => (
-                  <li key={link.name}>
-                    <Link 
-                      to={link.path} 
-                      onClick={scrollToTop}
-                      className="text-zinc-600 font-bold hover:text-green-600 flex items-center gap-1 group/link transition-colors"
-                    >
-                      {link.name}
-                      <ArrowUpRight size={14} className="opacity-0 group-hover/link:opacity-100 group-hover/link:translate-x-0.5 transition-all" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+      {/* Main Footer Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
+          {/* Column 1: Brand Identity */}
+          <div className="lg:col-span-4 space-y-5">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
+                <img
+                  src={logoImg}
+                  alt="MunchkinKittie logo"
+                  className="h-8 w-8 object-contain brightness-110"
+                />
+              </div>
+              <div>
+                <span className="block font-serif text-2xl font-semibold text-white leading-none">
+                  MunchkinKittie
+                </span>
+                <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e8b496] mt-1">
+                  {catteryLocation}
+                </span>
+              </div>
+            </Link>
+
+            <p className="text-sm text-white/70 leading-relaxed max-w-sm">
+              A dedicated home-based Munchkin cattery in {catteryLocation} focused on sound
+              conformation, veterinary-verified health, and affectionate indoor socialization.
+            </p>
+
+            <div className="space-y-2.5 pt-1 text-xs text-white/75">
+              <div className="flex items-center gap-2.5">
+                <MapPin size={14} className="text-[#e8b496] shrink-0" />
+                <span>Cattery Location: {catteryLocation} (Local Pickup & Nationwide Delivery)</span>
+              </div>
+              {catteryPhone && (
+                <div className="flex items-center gap-2.5">
+                  <Phone size={14} className="text-[#e8b496] shrink-0" />
+                  <a
+                    href={`tel:${catteryPhone.replace(/[^\d+]/g, '')}`}
+                    className="hover:text-white transition-colors"
+                  >
+                    Direct Line: {catteryPhone}
+                  </a>
+                </div>
+              )}
+              <div className="flex items-center gap-2.5">
+                <Mail size={14} className="text-[#e8b496] shrink-0" />
+                <a
+                  href="mailto:kittiemunchkin@gmail.com"
+                  className="hover:text-white transition-colors"
+                >
+                  kittiemunchkin@gmail.com
+                </a>
+              </div>
             </div>
-          ))}
+          </div>
 
-          {/* DYNAMIC CONTACT INFO FROM BACKEND */}
-          <div>
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-8">Contact</h4>
-            <ul className="space-y-6">
-              <li className="flex gap-4">
-                <div className="text-green-600 pt-1"><MapPin size={18} /></div>
-                <p className="text-zinc-600 font-bold leading-tight">
-                  {activeSettings?.mainLocation || "Nursery Location"}<br />
-                  <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest">Breeding Facility</span>
-                </p>
+          {/* Column 2: Nursery */}
+          <div className="lg:col-span-2 space-y-3">
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#e8b496]">
+              The Nursery
+            </h3>
+            <ul className="space-y-2.5 text-sm text-white/75">
+              <li>
+                <Link to="/available-kittens" className="hover:text-white transition-colors">
+                  Available Kittens
+                </Link>
               </li>
-              <li className="flex gap-4">
-                <div className="text-green-600 pt-1"><Phone size={18} /></div>
-                <p className="text-zinc-600 font-bold leading-tight">
-                  {activeSettings?.phone || "(404) 410-5223"}<br />
-                  <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest">
-                    {activeSettings?.weekdayHours || "Mon - Fri: 9am - 5pm"}
-                  </span>
-                </p>
+              <li>
+                <Link to="/upcoming-litters" className="hover:text-white transition-colors">
+                  Upcoming Litters
+                </Link>
+              </li>
+              <li>
+                <Link to="/retired-adults" className="hover:text-white transition-colors">
+                  Retired Adults
+                </Link>
+              </li>
+              <li>
+                <Link to="/apply" className="hover:text-white transition-colors">
+                  Adoption Application
+                </Link>
+              </li>
+              <li>
+                <Link to="/reviews" className="hover:text-white transition-colors">
+                  Verified Family Reviews
+                </Link>
               </li>
             </ul>
           </div>
-        </div>
 
-        {/* BOTTOM SECTION: LEGAL & TRUST */}
-        <div className="border-t border-zinc-100 pt-12 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
-          <div className="flex items-center gap-6">
-            <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">
-              © {currentYear} MunchkinKittie
-            </p>
-            <div className="hidden md:flex gap-4 text-zinc-300 text-[10px] font-black uppercase tracking-widest">
-              <Link to="/terms-policy" onClick={scrollToTop} className="hover:text-zinc-950 transition-colors">Privacy</Link>
-              <Link to="/terms-policy" onClick={scrollToTop} className="hover:text-zinc-950 transition-colors">Terms</Link>
+          {/* Column 3: Health & Standards */}
+          <div className="lg:col-span-3 space-y-3">
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#e8b496]">
+              Health & Transparency
+            </h3>
+            <ul className="space-y-2.5 text-sm text-white/75">
+              <li>
+                <Link to="/about" className="hover:text-white transition-colors">
+                  About Our Cattery
+                </Link>
+              </li>
+              <li>
+                <Link to="/health" className="hover:text-white transition-colors">
+                  72-Hr & 2-Year Health Guarantee
+                </Link>
+              </li>
+              <li>
+                <Link to="/vetting-process" className="hover:text-white transition-colors">
+                  Adoption & Vetting Process
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing-deposit" className="hover:text-white transition-colors">
+                  Pricing & Reservation Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/shipping" className="hover:text-white transition-colors">
+                  In-Cabin Flight Nanny & Delivery
+                </Link>
+              </li>
+              <li>
+                <Link to="/care-guide" className="hover:text-white transition-colors">
+                  New Kitten Care Guide
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Veterinary Commitment Card */}
+          <div className="lg:col-span-3">
+            <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-5 space-y-4">
+              <div className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-xl bg-[#9e5a3c]/20 text-[#e8b496] flex items-center justify-center">
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-white">Every Kitten Includes</p>
+                  <p className="text-[11px] text-white/60">Standard Veterinary Protocol</p>
+                </div>
+              </div>
+              <ul className="space-y-2 text-xs text-white/75">
+                <li className="flex items-center gap-2">
+                  <Stethoscope size={13} className="text-[#8fc4a6] shrink-0" />
+                  Licensed Veterinarian Health Certificate
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck size={13} className="text-[#8fc4a6] shrink-0" />
+                  Age-Appropriate FVRCP Vaccinations
+                </li>
+                <li className="flex items-center gap-2">
+                  <Plane size={13} className="text-[#8fc4a6] shrink-0" />
+                  Microchip ID & Transition Starter Kit
+                </li>
+              </ul>
+              <Link
+                to="/contact"
+                className="block w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-center text-xs font-semibold text-white transition-colors"
+              >
+                Ask Our Breeder a Question
+              </Link>
             </div>
           </div>
+        </div>
 
-          <div className="flex items-center gap-3 bg-zinc-50 px-6 py-3 rounded-full border border-zinc-100 shadow-sm">
-            <ShieldCheck size={16} className="text-green-600" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
-              Licensed & TICA Certified Breeder
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-2 text-zinc-400 text-[10px] font-black uppercase tracking-widest">
-            Made with <Heart size={12} className="text-red-400 fill-red-400" /> for the breed
+        {/* Bottom Legal & Admin Row */}
+        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
+          <p>© {new Date().getFullYear()} MunchkinKittie ({catteryLocation}). All rights reserved.</p>
+          <div className="flex flex-wrap items-center gap-5">
+            <Link to="/terms-policy" className="hover:text-white/80 transition-colors">
+              Privacy & Adoption Terms
+            </Link>
+            <Link to="/reviews" className="hover:text-white/80 transition-colors">
+              Share Your Story
+            </Link>
+            <Link to="/admin-only-login" className="hover:text-white/80 transition-colors">
+              Cattery Portal
+            </Link>
           </div>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

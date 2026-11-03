@@ -17,27 +17,37 @@ export const getSettings = async (req, res) => {
   }
 };
 
-// UPDATE location (admin only)
+// UPDATE location & settings (admin only)
 export const updateLocation = async (req, res) => {
   try {
-    const { mainLocation } = req.body;
-
-    if (!mainLocation) {
-      return res.status(400).json({ error: "Location is required" });
-    }
+    const { mainLocation, phoneNumber, adminTestEmail, autoSendStatusEmails } = req.body;
 
     let settings = await Settings.findOne();
 
     if (!settings) {
-      settings = await Settings.create({ mainLocation });
-    } else {
-      settings.mainLocation = mainLocation.trim();
-      await settings.save();
+      settings = await Settings.create({});
     }
+
+    if (mainLocation !== undefined) {
+      settings.mainLocation = String(mainLocation).trim();
+    }
+    if (phoneNumber !== undefined) {
+      settings.phoneNumber = String(phoneNumber).trim();
+    }
+    if (adminTestEmail !== undefined) {
+      settings.adminTestEmail = String(adminTestEmail).trim();
+    }
+    if (typeof autoSendStatusEmails === "boolean") {
+      settings.autoSendStatusEmails = autoSendStatusEmails;
+    }
+
+    await settings.save();
 
     res.json(settings);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to update location" });
+    console.error("🔥 UPDATE SETTINGS ERROR:", error);
+    res.status(500).json({ error: "Failed to update settings" });
   }
 };
+
+export const updateSettings = updateLocation;

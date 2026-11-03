@@ -1,22 +1,16 @@
-// models/Kitten.js
 import mongoose from "mongoose";
 
-const medicalSchema = new mongoose.Schema({
-  event: String,
-  status: String,
-  week: String,
-});
-
-const lineageSchema = new mongoose.Schema({
-  relation: String, // Dam / Sire
-  name: String,
-  title: String,
-});
-
-const specSchema = new mongoose.Schema({
-  label: String,
-  value: String,
-});
+const imageMetaSchema = new mongoose.Schema(
+  {
+    url: { type: String, required: true },
+    publicId: { type: String, default: "" },
+    caption: { type: String, default: "" },
+    isPrimary: { type: Boolean, default: false },
+    order: { type: Number, default: 0 },
+    qualityNote: { type: String, default: "" },
+  },
+  { _id: false }
+);
 
 const kittenSchema = new mongoose.Schema(
   {
@@ -26,72 +20,158 @@ const kittenSchema = new mongoose.Schema(
       trim: true,
     },
 
-    registryId: {
+    breed: {
       type: String,
-      unique: true,
+      required: true,
       trim: true,
     },
 
-    breed: {
-      type: String,
-      default: "Munchkin",
-    },
-
-    // 🔥 NEW: GENDER (for filtering)
     gender: {
       type: String,
-      enum: ["Male", "Female"],
+      enum: ["Male", "Female", "Unknown"],
+      required: true,
     },
 
-    // 🔥 NEW: AGE (in weeks for logic)
     ageWeeks: {
       type: Number,
+      required: true,
+      min: 0,
     },
 
-    // 🔥 NEW: COAT TYPE
+    dob: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     coat: {
       type: String,
-      enum: ["Shorthair", "Longhair", "Standard"],
-      default: "Standard",
+      required: true,
+      trim: true,
     },
 
     status: {
       type: String,
-      enum: ["Available", "Reserved", "Adopted"],
+      enum: ["Draft", "Available", "Reserved", "Adopted", "Unavailable"],
       default: "Available",
     },
 
     price: {
       type: Number,
       required: true,
+      min: 0,
+    },
+
+    Shipping: {
+      type: Number,
+      default: 0,
+    },
+
+    trait: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    shortDescription: {
+      type: String,
+      default: "",
+      trim: true,
     },
 
     description: {
       type: String,
+      required: true,
+    },
+
+    primaryImage: {
+      type: String,
+      default: "",
+    },
+
+    // 📸 Maximum 10 images per kitten listing
+    images: {
+      type: [String],
+      required: true,
+      validate: [
+        {
+          validator: function (arr) {
+            return Array.isArray(arr) && arr.length >= 1;
+          },
+          message: "At least 1 image is required",
+        },
+        {
+          validator: function (arr) {
+            return Array.isArray(arr) && arr.length <= 10;
+          },
+          message: "Maximum 10 photographs allowed per kitten listing",
+        },
+      ],
+    },
+
+    imageMetadata: {
+      type: [imageMetaSchema],
+      default: [],
+    },
+
+    // 🧬 Physical Specifications
+    specs: {
+      coatType: { type: String, default: "" },
+      eyeColor: { type: String, default: "" },
+      weight: { type: String, default: "" },
+      hypoallergenic: { type: String, default: "Low-Shedding Standard" },
+      legType: { type: String, default: "" },
+      pattern: { type: String, default: "" },
+    },
+
+    // 🏥 Medical & Health Guarantee
+    medical: {
+      vaccinated: { type: Boolean, default: true },
+      dewormed: { type: Boolean, default: true },
+      healthGuarantee: { type: String, default: "1-Year Genetic Guarantee" },
+      vetChecked: { type: Boolean, default: true },
+      microchipped: { type: Boolean, default: true },
+      vetNotes: { type: String, default: "" },
+    },
+
+    // 👑 Lineage (Parents)
+    lineage: {
+      sire: { type: String, default: "" },
+      dam: { type: String, default: "" },
+      registry: { type: String, default: "" },
+    },
+
+    // 🔍 SEO Metadata
+    seoTitle: {
+      type: String,
+      default: "",
       trim: true,
     },
 
-    // 🔥 NEW: highlight tag (UI badge like "TICA Reg", "Champion Blood")
-    trait: {
+    seoDescription: {
       type: String,
+      default: "",
+      trim: true,
     },
 
-    specs: [specSchema],
-    medical: [medicalSchema],
-    lineage: [lineageSchema],
-
-    images: [String],
-
-    // 🔥 NEW: ordering priority (featured kittens first)
-    isFeatured: {
-      type: Boolean,
-      default: false,
+    // 🤖 AI Provenance & Human-in-the-Loop Audit Metadata
+    aiMetadata: {
+      generatedByAi: { type: Boolean, default: false },
+      modelUsed: { type: String, default: "" },
+      fallbackUsed: { type: Boolean, default: false },
+      generatedAt: { type: Date },
+      adminApprovedAt: { type: Date },
+      rawAdminDescription: { type: String, default: "" },
+      fieldSources: { type: mongoose.Schema.Types.Mixed, default: {} },
+      requiresConfirmation: { type: [String], default: [] },
+      visualObservations: { type: mongoose.Schema.Types.Mixed, default: {} },
+      imageRecommendations: { type: mongoose.Schema.Types.Mixed, default: {} },
     },
-
   },
   { timestamps: true }
 );
 
-const Kitten = mongoose.model("Kitten", kittenSchema);
+kittenSchema.index({ status: 1, createdAt: -1 });
+kittenSchema.index({ breed: 1, gender: 1 });
 
-export default Kitten;
+export default mongoose.model("Kitten", kittenSchema);

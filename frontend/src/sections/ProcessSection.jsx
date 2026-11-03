@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // ✅ added
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   MessageCircle, 
@@ -11,121 +11,190 @@ import {
   Award, 
   Microscope, 
   Leaf, 
-  Camera 
+  Camera,
+  ArrowRight,
+  CheckCircle2,
+  Plane
 } from 'lucide-react';
 
 const ProcessSection = () => {
   const steps = [
-    { title: "Personal Inquiry", icon: <MessageCircle size={20} />, id: 1 },
-    { title: "Matching & Reservation", icon: <Heart size={20} />, id: 2 },
-    { title: "Growth & Health Updates", icon: <Camera size={20} />, id: 3 },
-    { title: "Final Health Clearance", icon: <Stethoscope size={20} />, id: 4 },
-    { title: "Welcome Home", icon: <Home size={20} />, id: 5 },
+    { 
+      id: "01", 
+      title: "Roster Match & Inquiry", 
+      desc: "Select your desired companion or reserve priority selection on an upcoming planned litter.",
+      icon: MessageCircle 
+    },
+    { 
+      id: "02", 
+      title: "Applicant Screening", 
+      desc: "Structured qualification to ensure lifelong health, safety, and household compatibility.",
+      icon: ShieldCheck 
+    },
+    { 
+      id: "03", 
+      title: "Growth & Video Updates", 
+      desc: "Weekly high-definition photo and video progress check-ins as your companion develops.",
+      icon: Camera 
+    },
+    { 
+      id: "04", 
+      title: "Veterinary Clearance", 
+      desc: "Final 10-point examination, core vaccinations, deworming, microchip, and DVM health certificate.",
+      icon: Stethoscope 
+    },
+    { 
+      id: "05", 
+      title: "White-Glove Homecoming", 
+      desc: "Personalized in-cabin flight nanny delivery or direct boutique nursery hand-off to your arms.",
+      icon: Plane 
+    },
   ];
 
   const standards = [
-    { title: "DNA Tested", icon: <Microscope />, desc: "All parents screened for genetic health." },
-    { title: "TICA Registered", icon: <Award />, desc: "Adhering to strict pedigree standards." },
-    { title: "Home Raised", icon: <Home />, desc: "Socialized in a loving family environment." },
-    { title: "Health Guarantee", icon: <ShieldCheck />, desc: "Comprehensive 2-year protection plan." },
-    { title: "Natural Diet", icon: <Leaf />, desc: "Premium nutrition for optimal development." },
+    { title: "DNA Tested", icon: Microscope, desc: "Parent lines 100% negative for HCM, PKD & PRA." },
+    { title: "TICA Registered", icon: Award, desc: "Certified purebred Munchkin pedigrees and lineage papers." },
+    { title: "Home Socialized", icon: Home, desc: "Raised underfoot with children, sensory play, and household sounds." },
+    { title: "10-Year Warranty", icon: ShieldCheck, desc: "Comprehensive congenital and genetic health protection plan." },
+    { title: "Holistic Nutrition", icon: Leaf, desc: "Species-appropriate diet, supplements, and probiotic care." },
   ];
 
   return (
-    <section className="bg-white py-24 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="bg-[#fafaf8] py-16 md:py-24 overflow-hidden border-b border-[#e2e6df]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* --- PART 1: THE ADOPTION JOURNEY --- */}
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-black text-zinc-950 tracking-tighter mb-4">The Adoption Journey</h2>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] md:text-xs">Five steps to bringing your Munchkin soulmate home</p>
-        </div>
-
-        <div className="relative mb-32 px-4 md:px-0">
-          <div className="hidden lg:block absolute top-[28px] left-0 w-full h-[1px] bg-zinc-200 z-0" />
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-y-12 gap-x-8 relative z-10">
-            {steps.map((step) => (
-              <div key={step.id} className="flex flex-col items-center text-center group">
-                <div className="w-14 h-14 rounded-full bg-white border-2 border-zinc-100 flex items-center justify-center mb-6 group-hover:border-green-600 group-hover:text-green-600 transition-all shadow-sm relative">
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-600 text-white rounded-full text-[10px] font-black flex items-center justify-center border-2 border-white">
-                    {step.id}
-                  </div>
-                  {step.icon}
-                </div>
-                <h3 className="text-sm font-black text-zinc-900 leading-tight mb-2">{step.title}</h3>
-                <div className="h-1 w-0 group-hover:w-8 bg-green-600 transition-all duration-300 rounded-full" />
-              </div>
-            ))}
+        {/* --- SECTION HEADER --- */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#eef3ee] border border-[#d2ded5] text-[#0f2d25] mb-3 text-[11px] font-semibold tracking-wide">
+              <Sparkles size={12} className="text-[#c5a059]" />
+              <span>Structured Adoption Protocol</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-bold text-[#0a1412] tracking-tight leading-[1.05]">
+              The 5-step <br />
+              <span className="text-[#0f2d25] italic font-serif">
+                homecoming journey.
+              </span>
+            </h2>
           </div>
+          <p className="text-[#5e6d67] text-xs sm:text-sm font-normal max-w-md leading-relaxed">
+            Our transparent, milestone-driven placement protocol ensures your companion arrives healthy, emotionally secure, and perfectly prepared for your family.
+          </p>
         </div>
 
-        {/* --- PART 2: THE BREEDER'S PROMISE --- */}
-        <div className="grid lg:grid-cols-2 gap-12 md:gap-20 items-center border-t border-zinc-100 pt-24 md:pt-32">
-          
-          <div className="max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-zinc-500 mb-8 border border-zinc-200">
-              <Sparkles size={14} className="text-green-600" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Ethical Breeding Excellence</span>
+        {/* --- STEP-BY-STEP CARDS (Stripe Layout) --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-16">
+          {steps.map((step) => {
+            const Icon = step.icon;
+            return (
+              <div 
+                key={step.id} 
+                className="bg-white rounded-2xl p-5 flex flex-col justify-between border border-[#e2e6df] hover:border-[#0f2d25]/50 hover:shadow-sm transition-all duration-300 group"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xl font-bold text-[#0f2d25] font-mono">
+                      {step.id}
+                    </span>
+                    <div className="w-8 h-8 rounded-lg bg-[#eef3ee] flex items-center justify-center text-[#0f2d25] group-hover:bg-[#0f2d25] group-hover:text-white transition-colors">
+                      <Icon size={16} />
+                    </div>
+                  </div>
+                  <h3 className="text-sm font-bold text-[#0a1412] mb-1.5 leading-snug">
+                    {step.title}
+                  </h3>
+                  <p className="text-xs text-[#5e6d67] leading-relaxed">
+                    {step.desc}
+                  </p>
+                </div>
+                <div className="mt-5 pt-3 border-t border-[#f4f5f0] flex items-center justify-between text-[11px] font-semibold text-[#7a8883] group-hover:text-[#0f2d25] transition-colors">
+                  <span>Phase {step.id}</span>
+                  <CheckCircle2 size={13} className="text-[#c5a059]" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* --- BREEDER'S PLEDGE ASYMMETRIC EDITORIAL PANEL --- */}
+        <div className="grid lg:grid-cols-12 gap-8 items-center bg-[#071511] rounded-3xl p-6 sm:p-10 lg:p-12 text-white relative overflow-hidden border border-[#163e32] shadow-xl mb-12">
+          {/* Subtle light glow */}
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#0f2d25] rounded-full blur-[120px] pointer-events-none opacity-40" />
+
+          <div className="lg:col-span-7 z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#c5a059] mb-4 text-[10px] font-bold uppercase tracking-wider border border-white/10">
+              <Award size={12} />
+              <span>Championship Ethical Breeding Standards</span>
             </div>
 
-            <h2 className="text-4xl md:text-6xl font-black text-zinc-950 tracking-tighter leading-[0.85] mb-8">
-              Raised with love, <br />
-              <span className="text-zinc-300">not in a kennel.</span>
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight leading-tight mb-4">
+              Raised with family devotion, <br />
+              <span className="text-[#c5a059] font-serif italic">
+                never in cages or kennels.
+              </span>
             </h2>
 
-            <p className="text-zinc-500 text-lg font-medium mb-10 leading-relaxed">
-              Every kitten in my home is treated as a family member from day one. I focus on quality over quantity, ensuring each Munchkin is healthy, confident, and perfectly socialized for their forever home.
+            <p className="text-[#a5b5ae] text-xs sm:text-sm font-normal leading-relaxed mb-6 max-w-xl">
+              Every Munchkin in our nursery is socialized underfoot with our family from day one. We adhere to the strictest TICA genetic protocols, prioritizing structural soundness, emotional confidence, and affectionate temperament above all else.
             </p>
 
-            <div className="flex flex-wrap gap-4">
-
-              {/* ✅ VIEW PROCESS */}
+            <div className="flex flex-wrap gap-3.5">
               <Link
                 to="/vetting-process"
-                className="px-8 py-4 rounded-full bg-zinc-950 text-white font-black text-xs hover:bg-green-600 transition-all uppercase tracking-widest shadow-xl shadow-zinc-200 active:scale-95"
+                className="px-6 py-3 rounded-full bg-[#c5a059] hover:bg-[#d4af37] text-[#071511] font-semibold text-xs tracking-wide transition-all shadow-sm active:scale-95 inline-flex items-center gap-2"
               >
-                View My Process
+                <span>Full Vetting Protocols</span>
+                <ArrowRight size={13} />
               </Link>
 
-              {/* ✅ CONTACT */}
               <Link
-                to="/contact"
-                className="px-8 py-4 rounded-full border-2 border-zinc-200 text-zinc-900 font-black text-xs hover:bg-zinc-50 transition-all uppercase tracking-widest active:scale-95"
+                to="/health"
+                className="px-6 py-3 rounded-full bg-white/10 hover:bg-white/15 text-white font-semibold text-xs tracking-wide border border-white/20 transition-all active:scale-95 inline-flex items-center gap-2"
               >
-                Contact Me
+                <span>10-Year Health Warranty</span>
               </Link>
-
             </div>
           </div>
 
-          <div className="relative rounded-[48px] overflow-hidden group shadow-2xl">
+          <div className="lg:col-span-5 z-10 relative">
+            <div className="relative rounded-2xl overflow-hidden border border-[#163e32] shadow-lg group">
               <img 
-                src="https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&q=80&w=1200" 
-                alt="Breeder holding Munchkin"
-                className="w-full h-[500px] object-cover transition-transform duration-[2s] group-hover:scale-110"
+                src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&q=80&w=1200" 
+                alt="Affectionate pedigree companion"
+                className="w-full h-[320px] sm:h-[360px] object-cover group-hover:scale-103 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-              <div className="absolute bottom-10 left-10 text-white">
-                <p className="text-xs font-black uppercase tracking-[0.2em] opacity-70 mb-2">My Philosophy</p>
-                <p className="text-2xl font-black italic">"Health first, always."</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#071511]/90 via-transparent to-transparent" />
+              <div className="absolute bottom-5 left-5 right-5 text-white">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#c5a059] block mb-1">
+                  Breeder's Credo
+                </span>
+                <p className="text-base font-bold italic">
+                  "Health, structural soundness & affectionate temperament first, always."
+                </p>
               </div>
+            </div>
           </div>
         </div>
 
-        {/* --- PART 3: THE FIVE PILLARS STRIP --- */}
-        <div className="mt-24 md:mt-32 bg-zinc-50 rounded-[48px] p-8 md:p-16 border border-zinc-100">
-          <p className="text-center text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-12">What sets my standards apart</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10">
-            {standards.map((item) => (
-              <div key={item.title} className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-zinc-900 mb-6 shadow-sm border border-zinc-100 group-hover:scale-110 transition-transform">
-                  {React.cloneElement(item.icon, { size: 20, strokeWidth: 2.5 })}
+        {/* --- FIVE STANDARDS STRIP --- */}
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e6df] shadow-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+            {standards.map((s, idx) => {
+              const Icon = s.icon;
+              return (
+                <div key={idx} className="flex flex-col">
+                  <div className="w-9 h-9 rounded-lg bg-[#eef3ee] flex items-center justify-center text-[#0f2d25] mb-2.5">
+                    <Icon size={18} />
+                  </div>
+                  <h4 className="text-xs font-bold text-[#0a1412] mb-1">
+                    {s.title}
+                  </h4>
+                  <p className="text-[11px] text-[#5e6d67] leading-relaxed">
+                    {s.desc}
+                  </p>
                 </div>
-                <p className="text-[11px] font-black text-zinc-900 uppercase tracking-widest mb-2">{item.title}</p>
-                <p className="text-[10px] font-bold text-zinc-400 leading-tight max-w-[140px] uppercase tracking-tighter">{item.desc}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
