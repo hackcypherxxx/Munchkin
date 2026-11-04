@@ -14,7 +14,7 @@ import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 export default function ProcessSection() {
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
 
   const steps = [
@@ -36,7 +36,7 @@ export default function ProcessSection() {
       num: '03',
       title: 'Personal Breeder Consultation',
       description:
-        `We review your application within 24 hours, answer your questions by email or direct phone${catteryPhone ? ` (${catteryPhone})` : ''}, and share additional photos or updates directly from our ${catteryLocation} nursery.`,
+        `We review your application within 24 hours, answer your questions by email or direct phone${catteryPhone ? ` (${catteryPhone})` : ''}, and share additional photos or updates directly from our${catteryLocation ? ` ${catteryLocation}` : ''} nursery.`,
       icon: MessageSquareHeart,
     },
     {
@@ -48,9 +48,9 @@ export default function ProcessSection() {
     },
     {
       num: '05',
-      title: `${catteryLocation} Pickup or Flight Nanny Delivery`,
+      title: catteryLocation ? `${catteryLocation} Pickup or Flight Nanny Delivery` : 'Local Pickup or Flight Nanny Delivery',
       description:
-        `Pick up your kitten in person at our ${catteryLocation} home nursery for free, or coordinate safe in-cabin Flight Nanny / VIP ground delivery right to your nearest airport or door.`,
+        `Pick up your kitten in person at our${catteryLocation ? ` ${catteryLocation}` : ''} home nursery for free, or coordinate safe in-cabin Flight Nanny / VIP ground delivery right to your nearest airport or door.`,
       icon: Plane,
     },
   ];
@@ -68,7 +68,7 @@ export default function ProcessSection() {
               A thoughtful, transparent path to bringing your kitten home.
             </h2>
             <p className="text-base text-[#575049] leading-relaxed">
-              Whether you are visiting us locally in {catteryLocation} or welcoming your kitten via
+              Whether you are visiting us locally{catteryLocation ? ` in ${catteryLocation}` : ''} or welcoming your kitten via
               our in-cabin Flight Nanny courier, we guide you personally through every step.
             </p>
 

@@ -18,14 +18,14 @@ import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 export default function AboutBreeder() {
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
 
   return (
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
-        title={`About Our ${catteryLocation} Home Cattery`}
-        description={`Learn how MunchkinKittie raises affectionate, well-socialized Munchkin kittens indoors in our ${catteryLocation} family home.`}
+        title={catteryLocation ? `About Our ${catteryLocation} Home Cattery` : 'About Our Home Cattery'}
+        description={`Learn how MunchkinKittie raises affectionate, well-socialized Munchkin kittens indoors${catteryLocation ? ` in our ${catteryLocation} family home` : ' in our family home'}.`}
       />
 
       {/* Editorial Hero */}
@@ -33,13 +33,13 @@ export default function AboutBreeder() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7 space-y-5">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#181615]/10 text-xs font-semibold text-[#9e5a3c]">
-              <MapPin size={13} /> Home-Based Cattery in {catteryLocation}
+              <MapPin size={13} /> {catteryLocation ? `Home-Based Cattery in ${catteryLocation}` : 'Home-Based Cattery'}
             </span>
             <h1 className="font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
               Raised underfoot in our family home—never in cages.
             </h1>
             <p className="text-base sm:text-lg text-[#575049] leading-relaxed max-w-2xl">
-              At MunchkinKittie in {catteryLocation}, our philosophy is simple: healthy, confident
+              At MunchkinKittie{catteryLocation ? ` in ${catteryLocation}` : ''}, our philosophy is simple: healthy, confident
               kittens come from calm indoor homes where mothers and babies receive unhurried daily
               affection, attentive nutrition, and thorough veterinary care.
             </p>
@@ -63,7 +63,7 @@ export default function AboutBreeder() {
             <div className="aspect-[4/4.3] rounded-[28px] overflow-hidden bg-white border border-[#181615]/10 editorial-shadow">
               <img
                 src={CATTERY_PHOTOS.editorialCuddle}
-                alt={`Munchkin kitten raised in ${catteryLocation}`}
+                alt={`Munchkin kitten raised indoors${catteryLocation ? ` in ${catteryLocation}` : ''}`}
                 className="h-full w-full object-cover"
               />
             </div>
@@ -82,7 +82,7 @@ export default function AboutBreeder() {
               Indoor Family Upbringing
             </h2>
             <p className="text-sm text-[#575049] leading-relaxed">
-              Our kittens grow up inside our {catteryLocation} home alongside everyday household
+              Our kittens grow up inside our{catteryLocation ? ` ${catteryLocation}` : ''} home alongside everyday household
               sights and sounds. By the time they join your family, they are confident, affectionate,
               litter-box trained, and accustomed to gentle handling.
             </p>
@@ -144,7 +144,7 @@ export default function AboutBreeder() {
               </li>
               <li className="flex items-center gap-2.5">
                 <CheckCircle2 size={16} className="text-[#8fc4a6] shrink-0" />
-                <span>Free in-person pickup in {catteryLocation} or safe in-cabin Flight Nanny delivery</span>
+                <span>{catteryLocation ? `Free in-person pickup in ${catteryLocation}` : 'Free in-person pickup'} or safe in-cabin Flight Nanny delivery</span>
               </li>
             </ul>
             <div className="pt-2 flex flex-wrap items-center gap-3">

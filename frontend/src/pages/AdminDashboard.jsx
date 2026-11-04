@@ -858,8 +858,8 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-    if (activeSettings?.mainLocation) {
-      setLocationInput(activeSettings.mainLocation);
+    if (activeSettings?.mainLocation !== undefined) {
+      setLocationInput(activeSettings.mainLocation || "");
     }
     if (activeSettings?.phoneNumber !== undefined) {
       setPhoneInput(activeSettings.phoneNumber || "");
@@ -3193,7 +3193,7 @@ export default function AdminDashboard() {
                     <div>
                       <div className="flex items-center justify-between">
                         <strong className="text-sm text-[#181615]">
-                          {r.name} ({r.location || "US"})
+                          {r.name}{r.location ? ` (${r.location})` : ""}
                         </strong>
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${

@@ -21,7 +21,7 @@ export default function ContactUs() {
   const { loading, success, error, lastEnquiryReference } = useSelector((state) => state.contact);
 
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
   const catteryEmail = activeSettings?.contactEmail || 'info@munchkinkittie.com';
 
@@ -58,8 +58,8 @@ export default function ContactUs() {
   return (
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
-        title={`Contact Our ${catteryLocation} Cattery`}
-        description={`Reach out directly to MunchkinKittie in ${catteryLocation} with questions about available kittens, upcoming litters, or Flight Nanny delivery.`}
+        title={catteryLocation ? `Contact Our ${catteryLocation} Cattery` : 'Contact Our Cattery'}
+        description={`Reach out directly to MunchkinKittie${catteryLocation ? ` in ${catteryLocation}` : ''} with questions about available kittens, upcoming litters, or Flight Nanny delivery.`}
       />
 
       <section className="bg-[#f3efea] border-b border-[#181615]/10 py-14 sm:py-20">
@@ -69,7 +69,7 @@ export default function ContactUs() {
               <MessageSquare size={13} /> Direct Breeder Communication
             </span>
             <h1 className="font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
-              Get in touch with our {catteryLocation} nursery.
+              Get in touch with our{catteryLocation ? ` ${catteryLocation}` : ''} nursery.
             </h1>
             <p className="text-base sm:text-lg text-[#575049] leading-relaxed">
               Have a question about a specific kitten, upcoming litter dates, or Flight Nanny
@@ -125,19 +125,21 @@ export default function ContactUs() {
                   </div>
                 </a>
 
-                <div className="flex items-start gap-4 p-4 rounded-2xl bg-[#faf8f5] border border-[#181615]/8">
-                  <div className="h-10 w-10 rounded-xl bg-[#181615] text-[#e8b496] flex items-center justify-center shrink-0">
-                    <MapPin size={17} />
+                {catteryLocation && (
+                  <div className="flex items-start gap-4 p-4 rounded-2xl bg-[#faf8f5] border border-[#181615]/8">
+                    <div className="h-10 w-10 rounded-xl bg-[#181615] text-[#e8b496] flex items-center justify-center shrink-0">
+                      <MapPin size={17} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8a8075] block">
+                        Cattery Location
+                      </span>
+                      <span className="text-sm font-semibold text-[#181615]">
+                        {catteryLocation} (By Appointment & Nationwide Delivery)
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8a8075] block">
-                      Cattery Location
-                    </span>
-                    <span className="text-sm font-semibold text-[#181615]">
-                      {catteryLocation} (By Appointment & Nationwide Delivery)
-                    </span>
-                  </div>
-                </div>
+                )}
 
                 <div className="flex items-start gap-4 p-4 rounded-2xl bg-[#faf8f5] border border-[#181615]/8">
                   <div className="h-10 w-10 rounded-xl bg-[#181615] text-[#e8b496] flex items-center justify-center shrink-0">
@@ -247,7 +249,7 @@ export default function ContactUs() {
                       <option value="New Kitten Interest">Available Kitten Question</option>
                       <option value="Upcoming Litter Waitlist">Upcoming Litter Waitlist</option>
                       <option value="Shipping & Delivery">
-                        Flight Nanny / {catteryLocation} Pickup Question
+                        {catteryLocation ? `Flight Nanny / ${catteryLocation} Pickup Question` : 'Flight Nanny / Local Pickup Question'}
                       </option>
                       <option value="General Inquiry">General Question</option>
                     </select>

@@ -4,7 +4,7 @@ const settingsSchema = new mongoose.Schema(
   {
     mainLocation: {
       type: String,
-      default: "Owego, NY",
+      default: "",
       trim: true,
     },
 

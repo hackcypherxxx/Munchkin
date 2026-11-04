@@ -39,7 +39,7 @@ export default function Navbar() {
   const { kittens } = useSelector((state) => state.kitten);
 
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
 
   const availableCount = Array.isArray(kittens)
@@ -97,11 +97,15 @@ export default function Navbar() {
       <div className="bg-[#181615] text-[#f3efea] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between text-[11px] tracking-wide">
           <div className="flex items-center gap-4 overflow-hidden">
-            <span className="inline-flex items-center gap-1.5 font-medium text-[#e8b496]">
-              <MapPin size={12} />
-              Home Cattery in {catteryLocation}
-            </span>
-            <span className="hidden md:inline text-white/25">|</span>
+            {catteryLocation && (
+              <>
+                <span className="inline-flex items-center gap-1.5 font-medium text-[#e8b496]">
+                  <MapPin size={12} />
+                  Home Cattery in {catteryLocation}
+                </span>
+                <span className="hidden md:inline text-white/25">|</span>
+              </>
+            )}
             <span className="hidden md:inline-flex items-center gap-1.5 text-white/80">
               <ShieldCheck size={12} className="text-[#8fc4a6]" />
               Vet-Examined · 72-Hr Health & 2-Year Genetic Guarantee
@@ -344,7 +348,7 @@ export default function Navbar() {
                           About Our Cattery
                         </p>
                         <p className="text-xs text-[#575049] mt-0.5">
-                          Our {catteryLocation} home upbringing & ethical breeding philosophy.
+                          Our {catteryLocation ? `${catteryLocation} ` : ''}home upbringing & ethical breeding philosophy.
                         </p>
                       </div>
                     </Link>
@@ -395,7 +399,7 @@ export default function Navbar() {
                           Delivery & Flight Nanny
                         </p>
                         <p className="text-xs text-[#575049] mt-0.5">
-                          In-cabin courier, VIP ground transport, or {catteryLocation} pickup.
+                          In-cabin courier, VIP ground transport, or {catteryLocation ? `${catteryLocation} ` : 'local '}pickup.
                         </p>
                       </div>
                     </Link>

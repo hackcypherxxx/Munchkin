@@ -11,7 +11,7 @@ export default function UpcomingLitters() {
   const { upcomingList, loading } = useSelector((state) => state.upcoming);
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
 
   useEffect(() => {
     dispatch(getUpcoming());
@@ -23,7 +23,7 @@ export default function UpcomingLitters() {
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
         title="Upcoming Munchkin Litters & Priority Waitlist"
-        description={`View confirmed upcoming Munchkin litters in ${catteryLocation} and join our priority waitlist for early selection.`}
+        description={`View confirmed upcoming Munchkin litters${catteryLocation ? ` in ${catteryLocation}` : ''} and join our priority waitlist for early selection.`}
       />
 
       {/* Header */}
@@ -31,7 +31,7 @@ export default function UpcomingLitters() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl space-y-4">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#181615]/10 text-xs font-semibold text-[#9e5a3c]">
-              <Calendar size={13} /> Planned Pairings · {catteryLocation}
+              <Calendar size={13} /> {catteryLocation ? `Planned Pairings · ${catteryLocation}` : 'Planned Pairings'}
             </span>
             <h1 className="font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
               Upcoming Litters & Waitlist
@@ -139,14 +139,16 @@ export default function UpcomingLitters() {
                             {litter.expectedCount || '4 - 6 Kittens'}
                           </p>
                         </div>
-                        <div className="col-span-2 sm:col-span-1 rounded-2xl bg-[#faf8f5] border border-[#181615]/8 p-4">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#8a8075]">
-                            Nursery Location
-                          </p>
-                          <p className="mt-1 text-sm font-semibold text-[#181615]">
-                            {catteryLocation}
-                          </p>
-                        </div>
+                        {catteryLocation && (
+                          <div className="col-span-2 sm:col-span-1 rounded-2xl bg-[#faf8f5] border border-[#181615]/8 p-4">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#8a8075]">
+                              Nursery Location
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-[#181615]">
+                              {catteryLocation}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 

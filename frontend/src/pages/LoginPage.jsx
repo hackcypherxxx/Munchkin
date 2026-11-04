@@ -13,7 +13,7 @@ export default function LoginPage() {
   const { admin, token, loading, error } = useSelector((state) => state.auth);
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -62,7 +62,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 space-y-4 max-w-md">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[#e8b496] text-xs font-semibold">
-            <ShieldCheck size={14} /> {catteryLocation} Operations
+            <ShieldCheck size={14} /> {catteryLocation ? `${catteryLocation} Operations` : 'Breeder Operations'}
           </span>
           <h2 className="font-serif text-4xl font-medium leading-tight">
             Manage available kittens, adoption applications, and family reviews in one place.

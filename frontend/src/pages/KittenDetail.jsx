@@ -29,7 +29,7 @@ export default function KittenDetail() {
   const { kitten: selectedKitten, kittens, loading } = useSelector((state) => state.kitten);
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const defaultLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const defaultLocation = activeSettings?.mainLocation?.trim() || '';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
 
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
@@ -114,7 +114,7 @@ export default function KittenDetail() {
   }
 
   const isAvailable = kitten.status === 'Available';
-  const catteryLocation = kitten.location || defaultLocation;
+  const catteryLocation = (kitten.location || defaultLocation || '').trim();
 
   const biologicalSpecs = [
     { label: 'Gender', value: kitten.gender || 'Munchkin' },
@@ -124,7 +124,7 @@ export default function KittenDetail() {
       ? presentation.specs.all
       : [
           { label: 'Litter Box Trained', value: 'Yes (100%)' },
-          { label: 'Upbringing', value: `Indoor Family Home (${catteryLocation})` },
+          { label: 'Upbringing', value: catteryLocation ? `Indoor Family Home (${catteryLocation})` : 'Indoor Family Home' },
         ]),
   ];
 
@@ -433,10 +433,12 @@ export default function KittenDetail() {
               <div className="flex items-start justify-between gap-4 border-b border-[#181615]/8 pb-5">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#9e5a3c]">
-                      <MapPin size={13} />
-                      {catteryLocation}
-                    </span>
+                    {catteryLocation && (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#9e5a3c]">
+                        <MapPin size={13} />
+                        {catteryLocation}
+                      </span>
+                    )}
                     {presentation.badgeLabel && (
                       <span className="px-2.5 py-0.5 rounded-full bg-[#f3efea] text-[11px] font-medium text-[#575049]">
                         {presentation.badgeLabel}
@@ -518,7 +520,7 @@ export default function KittenDetail() {
                   </li>
                   <li className="flex items-center gap-2.5">
                     <Plane size={16} className="text-[#9e5a3c] shrink-0" />
-                    <span>Free {catteryLocation} Pickup or Nationwide Flight Nanny Delivery</span>
+                    <span>{catteryLocation ? `Free ${catteryLocation} Pickup` : 'Free Local Pickup'} or Nationwide Flight Nanny Delivery</span>
                   </li>
                 </ul>
               </div>

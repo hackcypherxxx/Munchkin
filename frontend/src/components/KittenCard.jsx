@@ -13,7 +13,7 @@ export default function KittenCard({ kitten, priority = false }) {
 
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = kitten.location || activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = (kitten.location || activeSettings?.mainLocation || '').trim();
 
   const {
     ageLabel,
@@ -38,7 +38,7 @@ export default function KittenCard({ kitten, priority = false }) {
       <div className="relative aspect-[4/4.7] w-full overflow-hidden bg-[#f3efea]">
         <img
           src={primaryImage}
-          alt={`${kitten.name} — ${kitten.gender || ''} Munchkin kitten in ${catteryLocation}`}
+          alt={`${kitten.name} — ${kitten.gender || ''} Munchkin kitten${catteryLocation ? ` in ${catteryLocation}` : ''}`}
           className={`h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.04] ${
             secondaryImage ? 'group-hover:opacity-0' : ''
           }`}
@@ -94,10 +94,12 @@ export default function KittenCard({ kitten, priority = false }) {
 
         {/* Bottom Overlay inside photo: Registry ID + Location */}
         <div className="absolute bottom-3 inset-x-3.5 flex items-center justify-between text-white/95 text-[11px] font-medium">
-          <span className="inline-flex items-center gap-1 bg-[#181615]/55 backdrop-blur-md px-2.5 py-1 rounded-full">
-            <MapPin size={11} className="text-[#e8b496]" />
-            {catteryLocation}
-          </span>
+          {catteryLocation ? (
+            <span className="inline-flex items-center gap-1 bg-[#181615]/55 backdrop-blur-md px-2.5 py-1 rounded-full">
+              <MapPin size={11} className="text-[#e8b496]" />
+              {catteryLocation}
+            </span>
+          ) : <span />}
           {kitten.registryId && (
             <span className="font-mono text-[10px] tracking-wider bg-[#181615]/55 backdrop-blur-md px-2.5 py-1 rounded-full">
               {kitten.registryId}

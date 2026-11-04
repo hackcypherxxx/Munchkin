@@ -10,7 +10,7 @@ export default function FeaturedDiscovery() {
   const { kittens, loading, error } = useSelector((state) => state.kitten);
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
   const [activeFilter, setActiveFilter] = useState('all');
 
   const filteredKittens = useMemo(() => {
@@ -135,7 +135,7 @@ export default function FeaturedDiscovery() {
           <p className="text-sm text-[#575049]">
             Showing <span className="font-semibold text-[#181615]">{displayedKittens.length}</span>{' '}
             of <span className="font-semibold text-[#181615]">{kittens?.length || 0}</span> kittens
-            in our {catteryLocation} nursery.
+            {catteryLocation ? ` in our ${catteryLocation} nursery.` : ' in our nursery.'}
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link

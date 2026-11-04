@@ -32,7 +32,7 @@ export default function AdoptionApplication() {
   const { settings } = useSelector((state) => state.settings);
 
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
 
   const preSelectedId = searchParams.get('id');
   const preSelectedType = searchParams.get('type') || 'kitten';
@@ -133,7 +133,7 @@ export default function AdoptionApplication() {
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
         title={preSelectedName ? `Adopt ${preSelectedName} — Application` : 'Adoption Application'}
-        description={`Submit your MunchkinKittie adoption application. Reviewed personally within 24 hours by our ${catteryLocation} cattery team.`}
+        description={`Submit your MunchkinKittie adoption application. Reviewed personally within 24 hours by our${catteryLocation ? ` ${catteryLocation}` : ''} cattery team.`}
       />
 
       {/* Editorial Header */}
@@ -141,7 +141,7 @@ export default function AdoptionApplication() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#181615]/10 text-xs font-semibold text-[#263b30]">
-              <ShieldCheck size={13} /> {catteryLocation} Home Cattery Placement
+              <ShieldCheck size={13} /> {catteryLocation ? `${catteryLocation} Home Cattery Placement` : 'Home Cattery Placement'}
             </span>
             <h1 className="mt-4 font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
               {preSelectedName ? `Application for ${preSelectedName}` : 'Kitten Adoption Application'}
@@ -170,8 +170,7 @@ export default function AdoptionApplication() {
             )}
             <p className="text-sm sm:text-base text-[#575049] leading-relaxed">
               Thank you, <strong className="text-[#181615]">{formData.fullName}</strong>. Your
-              application{preSelectedName ? ` for ${preSelectedName}` : ''} has been logged with our{' '}
-              {catteryLocation} nursery. A confirmation email with your reference has been dispatched to{' '}
+              application{preSelectedName ? ` for ${preSelectedName}` : ''} has been logged with our{catteryLocation ? ` ${catteryLocation}` : ''} nursery. A confirmation email with your reference has been dispatched to{' '}
               <strong className="text-[#181615]">{formData.email}</strong>, and our placement specialist will review your profile within 24 hours.
             </p>
             <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
@@ -533,7 +532,7 @@ export default function AdoptionApplication() {
                           required
                           value={formData.paymentMethodOther}
                           onChange={handleChange}
-                          placeholder={`e.g., Cash on ${catteryLocation} local pickup`}
+                          placeholder={catteryLocation ? `e.g., Cash on ${catteryLocation} local pickup` : 'e.g., Cash on local pickup'}
                           className="w-full px-4 py-3 rounded-xl bg-[#faf8f5] border border-[#181615]/15 text-sm text-[#181615]"
                         />
                       </div>
@@ -605,7 +604,7 @@ export default function AdoptionApplication() {
                     24-Hour Personal Review
                   </h3>
                   <p className="text-xs text-white/75 leading-relaxed">
-                    Once you submit this form, our {catteryLocation} cattery team reviews your home
+                    Once you submit this form, our{catteryLocation ? ` ${catteryLocation}` : ''} cattery team reviews your home
                     details and replies directly by email or phone to coordinate your reservation.
                   </p>
                 </div>
@@ -626,7 +625,7 @@ export default function AdoptionApplication() {
                   </li>
                   <li className="flex items-start gap-2.5">
                     <Plane size={15} className="text-[#9e5a3c] shrink-0 mt-0.5" />
-                    <span>Free {catteryLocation} Pickup or Nationwide Flight Nanny Delivery</span>
+                    <span>{catteryLocation ? `Free ${catteryLocation} Pickup` : 'Free Local Pickup'} or Nationwide Flight Nanny Delivery</span>
                   </li>
                 </ul>
               </div>

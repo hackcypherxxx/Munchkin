@@ -20,7 +20,7 @@ export default function AvailableKittens() {
   const { kittens, loading, error } = useSelector((state) => state.kitten);
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -99,7 +99,7 @@ export default function AvailableKittens() {
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
         title="Available Munchkin Kittens"
-        description={`Browse available home-raised Munchkin kittens in ${catteryLocation}. Filter by gender, coat length, and availability. Click any card for multi-photo profiles.`}
+        description={`Browse available home-raised Munchkin kittens${catteryLocation ? ` in ${catteryLocation}` : ''}. Filter by gender, coat length, and availability. Click any card for multi-photo profiles.`}
       />
 
       {/* Page Header */}
@@ -109,13 +109,13 @@ export default function AvailableKittens() {
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#181615]/10 text-xs font-semibold text-[#263b30]">
                 <span className="h-2 w-2 rounded-full bg-[#2e7d52] animate-pulse" />
-                {availableCount} Available for Reservation · {catteryLocation}
+                {availableCount} Available for Reservation{catteryLocation ? ` · ${catteryLocation}` : ''}
               </div>
               <h1 className="mt-4 font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
                 Available Munchkin Kittens
               </h1>
               <p className="mt-3 text-base sm:text-lg text-[#575049] leading-relaxed">
-                Each kitten below is raised indoors with our family in {catteryLocation}, examined
+                Each kitten below is raised indoors with our family{catteryLocation ? ` in ${catteryLocation}` : ''}, examined
                 by a licensed veterinarian, vaccinated, and microchipped. Click anywhere on a card
                 to view all photos and details.
               </p>
@@ -142,7 +142,7 @@ export default function AvailableKittens() {
                   Transport
                 </p>
                 <p className="mt-0.5 text-sm font-semibold text-[#181615]">
-                  {catteryLocation} Pickup / Courier
+                  {catteryLocation ? `${catteryLocation} Pickup / Courier` : 'Local Pickup / Courier'}
                 </p>
               </div>
             </div>

@@ -117,10 +117,12 @@ export default function Reviews() {
                 <div className="px-6 py-4 bg-[#faf8f5] border-t border-[#181615]/8 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-[#181615]">{review.name}</p>
-                    <p className="text-xs text-[#575049] inline-flex items-center gap-1 mt-0.5">
-                      <MapPin size={11} className="text-[#9e5a3c]" />
-                      {review.location || 'United States'}
-                    </p>
+                    {review.location && (
+                      <p className="text-xs text-[#575049] inline-flex items-center gap-1 mt-0.5">
+                        <MapPin size={11} className="text-[#9e5a3c]" />
+                        {review.location}
+                      </p>
+                    )}
                   </div>
                   <span className="text-[11px] font-mono text-[#8a8075]">
                     {review.date ||

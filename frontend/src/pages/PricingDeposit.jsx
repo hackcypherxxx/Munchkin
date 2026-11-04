@@ -17,14 +17,14 @@ export default function PricingDeposit() {
   const { kittens } = useSelector((state) => state.kitten);
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
 
   return (
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
         title="Pricing & Reservation Policy ($350–$500)"
-        description={`Transparent adoption fees ($350–$500) for home-raised Munchkin kittens in ${catteryLocation}. Learn what is included with every adoption.`}
+        description={`Transparent adoption fees ($350–$500) for home-raised Munchkin kittens${catteryLocation ? ` in ${catteryLocation}` : ''}. Learn what is included with every adoption.`}
       />
 
       {/* Editorial Hero */}
@@ -89,7 +89,7 @@ export default function PricingDeposit() {
                   'Registered Microchip Identification',
                   '72-Hour General Health Guarantee',
                   '2-Year Congenital & Hereditary Warranty',
-                  `Free Local Pickup in ${catteryLocation}`,
+                  catteryLocation ? `Free Local Pickup in ${catteryLocation}` : 'Free Local Pickup',
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-[#181615]">
                     <CheckCircle2 size={16} className="text-[#263b30] shrink-0 mt-0.5" />
@@ -124,7 +124,7 @@ export default function PricingDeposit() {
               </h2>
               <p className="text-sm text-white/75 leading-relaxed">
                 We never take blind automated checkout payments before reviewing your home
-                application. Once your application is approved by our {catteryLocation} team, we
+                application. Once your application is approved by our{catteryLocation ? ` ${catteryLocation}` : ''} team, we
                 coordinate your reservation directly.
               </p>
 
@@ -141,7 +141,7 @@ export default function PricingDeposit() {
                     'Chime',
                     'PayPal',
                     'Bank Transfer',
-                    `Cash on ${catteryLocation} Pickup`,
+                    catteryLocation ? `Cash on ${catteryLocation} Pickup` : 'Cash on Local Pickup',
                   ].map((m) => (
                     <span
                       key={m}

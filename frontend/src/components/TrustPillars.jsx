@@ -19,7 +19,7 @@ const getBreedTabs = (location) => [
     eyebrow: 'People-Oriented Companions',
     title: 'Playful, curious, and deeply devoted to indoor family life.',
     description:
-      `Munchkin kittens are cherished for their outgoing, gentle nature. Raised directly in our living spaces in ${location}, our kittens are accustomed to normal household sounds, gentle handling, and interactive play from their earliest weeks.`,
+      `Munchkin kittens are cherished for their outgoing, gentle nature. Raised directly in our living spaces${location ? ` in ${location}` : ''}, our kittens are accustomed to normal household sounds, gentle handling, and interactive play from their earliest weeks.`,
     highlights: [
       'Raised underfoot in a calm indoor family environment',
       'Confident, socialized disposition with adults and children',
@@ -64,7 +64,7 @@ const getBreedTabs = (location) => [
     eyebrow: 'Documented Medical Care',
     title: 'Complete vaccination, deworming, and microchip records included.',
     description:
-      `Before leaving our ${location} nursery, every kitten completes a thorough physical examination with a licensed veterinarian. Families receive the signed health certificate, vaccination log, and our written 72-hour general & 2-year genetic guarantee.`,
+      `Before leaving our${location ? ` ${location}` : ''} nursery, every kitten completes a thorough physical examination with a licensed veterinarian. Families receive the signed health certificate, vaccination log, and our written 72-hour general & 2-year genetic guarantee.`,
     highlights: [
       'Age-appropriate core FVRCP vaccination series',
       'Routine preventative deworming & fecal screening',
@@ -78,7 +78,7 @@ const getBreedTabs = (location) => [
 export default function TrustPillars() {
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
 
   const tabs = getBreedTabs(catteryLocation);
   const [activeTab, setActiveTab] = useState(tabs[0].id);
@@ -90,7 +90,7 @@ export default function TrustPillars() {
       <section className="py-20 sm:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
           <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#9e5a3c]">
-            <Home size={13} /> Our {catteryLocation} Home Nursery
+            <Home size={13} /> {catteryLocation ? `Our ${catteryLocation} Home Nursery` : 'Our Home Nursery'}
           </span>
           <h2 className="mt-4 font-serif text-3xl sm:text-5xl font-medium text-[#181615] tracking-tight leading-[1.12]">
             It’s not about high-volume breeding.{' '}
@@ -107,7 +107,7 @@ export default function TrustPillars() {
           <div className="lg:col-span-7 group relative rounded-[28px] overflow-hidden bg-[#181615] text-white min-h-[420px] flex flex-col justify-end p-7 sm:p-10">
             <img
               src={CATTERY_PHOTOS.editorialNursery}
-              alt={`Munchkin kitten raised indoors in ${catteryLocation}`}
+              alt={`Munchkin kitten raised indoors${catteryLocation ? ` in ${catteryLocation}` : ''}`}
               className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#181615] via-[#181615]/45 to-transparent" />

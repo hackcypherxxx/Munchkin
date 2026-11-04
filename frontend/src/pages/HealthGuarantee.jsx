@@ -16,7 +16,7 @@ import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 export default function HealthGuarantee() {
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
 
   return (
     <main className="min-h-screen bg-[#faf8f5] pb-24">
@@ -36,7 +36,7 @@ export default function HealthGuarantee() {
               Our Comprehensive Health Guarantee
             </h1>
             <p className="text-base sm:text-lg text-[#575049] leading-relaxed max-w-2xl">
-              Every kitten leaving our {catteryLocation} nursery is examined by a licensed veterinarian,
+              Every kitten leaving our{catteryLocation ? ` ${catteryLocation}` : ''} nursery is examined by a licensed veterinarian,
               vaccinated, dewormed, microchipped, and backed by our written 3-part health commitment.
             </p>
           </div>
@@ -44,7 +44,7 @@ export default function HealthGuarantee() {
             <div className="aspect-[16/11] rounded-[28px] overflow-hidden bg-white border border-[#181615]/10 editorial-shadow">
               <img
                 src={CATTERY_PHOTOS.editorialPortrait}
-                alt={`Healthy Munchkin kitten in ${catteryLocation}`}
+                alt={`Healthy Munchkin kitten${catteryLocation ? ` in ${catteryLocation}` : ''}`}
                 className="h-full w-full object-cover"
               />
             </div>

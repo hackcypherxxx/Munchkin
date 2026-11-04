@@ -11,7 +11,7 @@ export default function RetiredAdults() {
   const { retiredList, loading } = useSelector((state) => state.retired);
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
 
   useEffect(() => {
     dispatch(getRetired());
@@ -23,7 +23,7 @@ export default function RetiredAdults() {
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
         title="Retired Breeding Queens & Sires"
-        description={`Learn about our retired adult Munchkin cats in ${catteryLocation} and how to apply for a gentle adult companion.`}
+        description={`Learn about our retired adult Munchkin cats${catteryLocation ? ` in ${catteryLocation}` : ''} and how to apply for a gentle adult companion.`}
       />
 
       {/* Editorial Header */}
@@ -31,13 +31,13 @@ export default function RetiredAdults() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl space-y-4">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#181615]/10 text-xs font-semibold text-[#9e5a3c]">
-              <Heart size={13} /> Gentle Adult Companions · {catteryLocation}
+              <Heart size={13} /> {catteryLocation ? `Gentle Adult Companions · ${catteryLocation}` : 'Gentle Adult Companions'}
             </span>
             <h1 className="font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
               Retired Breeding Adults
             </h1>
             <p className="text-base sm:text-lg text-[#575049] leading-relaxed">
-              To ensure every parent cat in our {catteryLocation} home enjoys a peaceful life as a
+              To ensure every parent cat in our{catteryLocation ? ` ${catteryLocation}` : ''} home enjoys a peaceful life as a
               cherished pet, we retire our breeding queens and sires at a young adult age (typically
               2–4 years old), spayed or neutered and up to date on all veterinary care.
             </p>
@@ -89,7 +89,7 @@ export default function RetiredAdults() {
             <div className="lg:col-span-5 h-full min-h-[280px] bg-[#f3efea]">
               <img
                 src={CATTERY_PHOTOS.editorialWhite}
-                alt={`Munchkin cat in ${catteryLocation}`}
+                alt={`Munchkin cat${catteryLocation ? ` in ${catteryLocation}` : ''}`}
                 className="h-full w-full object-cover max-h-[380px]"
               />
             </div>

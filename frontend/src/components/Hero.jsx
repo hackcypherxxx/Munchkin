@@ -17,7 +17,7 @@ export default function Hero() {
   const { stats } = useSelector((state) => state.review);
 
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
 
   const availableKittens = Array.isArray(kittens)
     ? kittens.filter((k) => k.status === 'Available')
@@ -34,7 +34,7 @@ export default function Hero() {
             subtitle: `${k.gender} · ${pres.ageLabel} · ${pres.specs.color || k.coat}`,
             price: `$${k.price}`,
             status: k.status,
-            location: k.location || catteryLocation,
+            location: (k.location || catteryLocation || '').trim(),
             image: pres.primaryImage,
             link: `/kitten/${k._id}`,
           };
@@ -109,11 +109,15 @@ export default function Hero() {
                   ? `${availableKittens.length} Kittens Ready for Reservation`
                   : 'Current Litter Open for Reservation'}
               </span>
-              <span className="text-[#181615]/20">·</span>
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-[#575049]">
-                <MapPin size={12} className="text-[#9e5a3c]" />
-                {catteryLocation}
-              </span>
+              {catteryLocation && (
+                <>
+                  <span className="text-[#181615]/20">·</span>
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-[#575049]">
+                    <MapPin size={12} className="text-[#9e5a3c]" />
+                    {catteryLocation}
+                  </span>
+                </>
+              )}
             </div>
 
             {/* Editorial Headline */}
@@ -126,7 +130,7 @@ export default function Hero() {
                 for yours.
               </h1>
               <p className="text-base sm:text-lg text-[#575049] leading-relaxed max-w-2xl">
-                Every MunchkinKittie kitten grows up underfoot in our {catteryLocation} family
+                Every MunchkinKittie kitten grows up underfoot in our {catteryLocation ? `${catteryLocation} ` : ''}family
                 nursery with daily gentle handling, licensed veterinary examinations, age-appropriate
                 vaccinations, and a written health guarantee.
               </p>
@@ -202,7 +206,7 @@ export default function Hero() {
               >
                 <img
                   src={currentSlide.image}
-                  alt={`${currentSlide.name} — Munchkin kitten in ${currentSlide.location}`}
+                  alt={`${currentSlide.name} — Munchkin kitten${currentSlide.location ? ` in ${currentSlide.location}` : ''}`}
                   className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#181615]/80 via-[#181615]/15 to-transparent" />
@@ -222,9 +226,11 @@ export default function Hero() {
                 {/* Bottom Kitten Info Glass Card */}
                 <div className="absolute bottom-4 inset-x-4 p-4 sm:p-5 rounded-2xl bg-[#181615]/75 backdrop-blur-md border border-white/15 text-white flex items-end justify-between gap-4">
                   <div>
-                    <p className="text-[11px] font-medium text-[#e8b496] uppercase tracking-wider">
-                      {currentSlide.location}
-                    </p>
+                    {currentSlide.location && (
+                      <p className="text-[11px] font-medium text-[#e8b496] uppercase tracking-wider">
+                        {currentSlide.location}
+                      </p>
+                    )}
                     <h2 className="font-serif text-2xl sm:text-3xl font-semibold leading-tight mt-0.5">
                       {currentSlide.name}
                     </h2>

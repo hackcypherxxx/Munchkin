@@ -15,7 +15,7 @@ import {
 export default function Footer() {
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
   const catteryEmail = activeSettings?.contactEmail || 'info@munchkinkittie.com';
 
@@ -26,7 +26,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
           <div className="max-w-2xl">
             <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#e8b496]">
-              <Heart size={12} /> Hand-Raised in {catteryLocation}
+              <Heart size={12} /> {catteryLocation ? `Hand-Raised in ${catteryLocation}` : 'Hand-Raised With Care'}
             </span>
             <h2 className="mt-3 font-serif text-3xl sm:text-4xl lg:text-5xl font-medium text-white tracking-tight leading-[1.1]">
               Ready to welcome a gentle Munchkin companion into your home?
@@ -66,15 +66,17 @@ export default function Footer() {
             </Link>
 
             <p className="text-sm text-white/70 leading-relaxed max-w-sm">
-              A dedicated home-based Munchkin cattery in {catteryLocation} focused on sound
+              A dedicated home-based Munchkin cattery{catteryLocation ? ` in ${catteryLocation}` : ''} focused on sound
               conformation, veterinary-verified health, and affectionate indoor socialization.
             </p>
 
             <div className="space-y-2.5 pt-1 text-xs text-white/75">
-              <div className="flex items-center gap-2.5">
-                <MapPin size={14} className="text-[#e8b496] shrink-0" />
-                <span>Cattery Location: {catteryLocation} (Local Pickup & Nationwide Delivery)</span>
-              </div>
+              {catteryLocation && (
+                <div className="flex items-center gap-2.5">
+                  <MapPin size={14} className="text-[#e8b496] shrink-0" />
+                  <span>Cattery Location: {catteryLocation} (Local Pickup & Nationwide Delivery)</span>
+                </div>
+              )}
               {catteryPhone && (
                 <div className="flex items-center gap-2.5">
                   <Phone size={14} className="text-[#e8b496] shrink-0" />
@@ -209,7 +211,7 @@ export default function Footer() {
 
         {/* Bottom Legal & Admin Row */}
         <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
-          <p>© {new Date().getFullYear()} MunchkinKittie ({catteryLocation}). All rights reserved.</p>
+          <p>© {new Date().getFullYear()} MunchkinKittie{catteryLocation ? ` (${catteryLocation})` : ''}. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-5">
             <Link to="/terms-policy" className="hover:text-white/80 transition-colors">
               Privacy & Adoption Terms

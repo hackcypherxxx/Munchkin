@@ -17,14 +17,14 @@ import { CATTERY_PHOTOS } from '../utils/kittenFormatters';
 export default function ShippingDelivery() {
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
   const catteryPhone = activeSettings?.phoneNumber || '+1 (607) 223-4177';
 
   return (
     <main className="min-h-screen bg-[#faf8f5] pb-24">
       <PageMeta
         title="Delivery & Flight Nanny Options"
-        description={`Pick up your kitten in ${catteryLocation} for free, or choose safe in-cabin Flight Nanny or VIP ground transport anywhere in the United States.`}
+        description={`Pick up your kitten${catteryLocation ? ` in ${catteryLocation}` : ''} for free, or choose safe in-cabin Flight Nanny or VIP ground transport anywhere in the United States.`}
       />
 
       {/* Editorial Hero */}
@@ -35,10 +35,10 @@ export default function ShippingDelivery() {
               <Plane size={13} /> Never Shipped in Cargo · Hand-Delivered Care
             </span>
             <h1 className="font-serif text-4xl sm:text-6xl font-medium text-[#181615] tracking-tight leading-[1.05]">
-              Safe Delivery & {catteryLocation} Pickup
+              Safe Delivery & {catteryLocation ? `${catteryLocation} Pickup` : 'Local Pickup'}
             </h1>
             <p className="text-base sm:text-lg text-[#575049] leading-relaxed max-w-2xl">
-              Whether you live nearby in {catteryLocation} or across the country, we make bringing your
+              Whether you live nearby{catteryLocation ? ` in ${catteryLocation}` : ''} or across the country, we make bringing your
               kitten home calm, safe, and personal. Kittens never travel unattended in cargo.
             </p>
           </div>
@@ -67,16 +67,16 @@ export default function ShippingDelivery() {
                 <span className="font-mono text-lg font-semibold text-[#263b30]">Free</span>
               </div>
               <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#181615]">
-                In-Person Pickup ({catteryLocation})
+                In-Person Pickup{catteryLocation ? ` (${catteryLocation})` : ''}
               </h2>
               <p className="text-sm text-[#575049] leading-relaxed">
-                Approved families are welcome to schedule an appointment at our {catteryLocation}{' '}
+                Approved families are welcome to schedule an appointment at our{catteryLocation ? ` ${catteryLocation}` : ''}{' '}
                 nursery to meet and pick up their kitten in person at no extra charge.
               </p>
               <ul className="space-y-2 text-xs text-[#181615] pt-2">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-[#263b30] shrink-0" />
-                  <span>Direct handover at our {catteryLocation} nursery</span>
+                  <span>Direct handover at our{catteryLocation ? ` ${catteryLocation}` : ''} nursery</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-[#263b30] shrink-0" />

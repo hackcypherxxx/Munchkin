@@ -22,7 +22,7 @@ const getVettingSteps = (location) => [
   {
     step: '02',
     title: '24-Hour Breeder Review & Conversation',
-    desc: `Our ${location} cattery team reviews your application within 24 hours and connects with you directly to answer questions and confirm compatibility.`,
+    desc: `Our${location ? ` ${location}` : ''} cattery team reviews your application within 24 hours and connects with you directly to answer questions and confirm compatibility.`,
     icon: MessageSquareHeart,
   },
   {
@@ -34,7 +34,7 @@ const getVettingSteps = (location) => [
   {
     step: '04',
     title: 'Reservation & Final Veterinary Clearance',
-    desc: `Once approved, your kitten is reserved in your name, completes their final pre-departure vet check, and is prepared for ${location} pickup or Flight Nanny delivery.`,
+    desc: `Once approved, your kitten is reserved in your name, completes their final pre-departure vet check, and is prepared for${location ? ` ${location}` : ' local'} pickup or Flight Nanny delivery.`,
     icon: ShieldCheck,
   },
 ];
@@ -42,7 +42,7 @@ const getVettingSteps = (location) => [
 export default function VettingProcess() {
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
   const vettingSteps = getVettingSteps(catteryLocation);
 
   return (
@@ -62,7 +62,7 @@ export default function VettingProcess() {
               Our Adoption & Vetting Process
             </h1>
             <p className="text-base sm:text-lg text-[#575049] leading-relaxed max-w-2xl">
-              Because we raise every kitten in our {catteryLocation} home, we take care to ensure each
+              Because we raise every kitten in our{catteryLocation ? ` ${catteryLocation}` : ''} home, we take care to ensure each
               companion joins a prepared, affectionate indoor household.
             </p>
             <div className="pt-2">
@@ -79,7 +79,7 @@ export default function VettingProcess() {
             <div className="aspect-[16/11] rounded-[28px] overflow-hidden bg-white border border-[#181615]/10 editorial-shadow">
               <img
                 src={CATTERY_PHOTOS.editorialNursery}
-                alt={`Munchkin kitten in ${catteryLocation} nursery`}
+                alt={`Munchkin kitten in nursery${catteryLocation ? ` (${catteryLocation})` : ''}`}
                 className="h-full w-full object-cover"
               />
             </div>

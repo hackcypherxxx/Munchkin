@@ -60,7 +60,7 @@ const CARE_SECTIONS = [
 export default function CareGuide() {
   const { settings } = useSelector((state) => state.settings);
   const activeSettings = Array.isArray(settings) ? settings[0] : settings;
-  const catteryLocation = activeSettings?.mainLocation || 'Owego, NY';
+  const catteryLocation = activeSettings?.mainLocation?.trim() || '';
 
   return (
     <main className="min-h-screen bg-[#faf8f5] pb-24">
@@ -132,7 +132,7 @@ export default function CareGuide() {
               Ready to meet our current kittens?
             </h2>
             <p className="mt-1 text-sm text-white/75">
-              All kittens leave our {catteryLocation} nursery litter-trained, socialized, and vet-certified.
+              All kittens leave our{catteryLocation ? ` ${catteryLocation}` : ''} nursery litter-trained, socialized, and vet-certified.
             </p>
           </div>
           <Link
